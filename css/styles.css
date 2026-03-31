@@ -1,0 +1,773 @@
+/* =============================================
+   VARIABLES Y RESET GLOBAL
+   Define los colores de marca y elimina estilos
+   predeterminados del navegador
+============================================= */
+:root {
+  --azul-oscuro:  #1a1a2e;
+  --morado:       #6C63FF;
+  --blanco:       #ffffff;
+  --morado-claro: #8f88ff;
+  --gris-suave:   #f4f4f8;
+  --texto-gris:   #555;
+}
+
+*, *::before, *::after {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  font-family: 'Segoe UI', Arial, sans-serif;
+  background-color: var(--blanco);
+  color: var(--azul-oscuro);
+  line-height: 1.6;
+}
+
+/* =============================================
+   HEADER Y NAVEGACIÓN
+   Barra superior fija con logo y menú de links
+============================================= */
+header {
+  background-color: var(--azul-oscuro);
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  box-shadow: 0 2px 12px rgba(0,0,0,0.3);
+}
+
+nav {
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 0 1.5rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  height: 68px;
+}
+
+/* Logo en texto con acento de color morado */
+.logo {
+  font-size: 1.6rem;
+  font-weight: 800;
+  color: var(--blanco);
+  letter-spacing: -0.5px;
+  text-decoration: none;
+}
+
+.logo span {
+  color: var(--morado);
+}
+
+/* Lista de enlaces del menú */
+.nav-links {
+  list-style: none;
+  display: flex;
+  gap: 2rem;
+}
+
+.nav-links a {
+  color: var(--blanco);
+  text-decoration: none;
+  font-size: 0.95rem;
+  font-weight: 500;
+  opacity: 0.85;
+  transition: opacity 0.2s, color 0.2s;
+}
+
+.nav-links a:hover,
+.nav-links a.activo {
+  opacity: 1;
+  color: var(--morado-claro);
+}
+
+/* Botón hamburguesa para móvil (oculto por defecto) */
+.menu-toggle {
+  display: none;
+  flex-direction: column;
+  gap: 5px;
+  cursor: pointer;
+  background: none;
+  border: none;
+  padding: 4px;
+}
+
+.menu-toggle span {
+  display: block;
+  width: 25px;
+  height: 2px;
+  background: var(--blanco);
+  border-radius: 2px;
+  transition: all 0.3s;
+}
+
+/* =============================================
+   SECCIÓN HERO — PÁGINA PRINCIPAL
+   Bloque grande de bienvenida con CTA
+============================================= */
+#inicio {
+  background: linear-gradient(135deg, var(--azul-oscuro) 0%, #16213e 60%, #0f3460 100%);
+  color: var(--blanco);
+  text-align: center;
+  padding: 7rem 1.5rem 6rem;
+  position: relative;
+  overflow: hidden;
+}
+
+/* Círculo decorativo de fondo */
+#inicio::before {
+  content: '';
+  position: absolute;
+  width: 600px;
+  height: 600px;
+  border-radius: 50%;
+  background: rgba(108, 99, 255, 0.08);
+  top: -150px;
+  right: -150px;
+  pointer-events: none;
+}
+
+.hero-content {
+  max-width: 740px;
+  margin: 0 auto;
+  position: relative;
+}
+
+/* Etiqueta pequeña sobre el título */
+.hero-badge {
+  display: inline-block;
+  background: rgba(108, 99, 255, 0.2);
+  border: 1px solid var(--morado);
+  color: var(--morado-claro);
+  border-radius: 50px;
+  padding: 0.3rem 1rem;
+  font-size: 0.82rem;
+  font-weight: 600;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  margin-bottom: 1.5rem;
+}
+
+#inicio h1 {
+  font-size: clamp(2rem, 5vw, 3.2rem);
+  font-weight: 800;
+  line-height: 1.2;
+  margin-bottom: 1.2rem;
+}
+
+#inicio h1 em {
+  font-style: normal;
+  color: var(--morado-claro);
+}
+
+#inicio p {
+  font-size: clamp(1rem, 2.5vw, 1.2rem);
+  opacity: 0.8;
+  margin-bottom: 2.5rem;
+  max-width: 520px;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+/* =============================================
+   HERO DE PÁGINAS INTERNAS
+   Banner compacto para páginas como Servicios
+   y Nosotros (sin la altura del hero principal)
+============================================= */
+.page-hero {
+  background: linear-gradient(135deg, var(--azul-oscuro) 0%, #16213e 60%, #0f3460 100%);
+  color: var(--blanco);
+  text-align: center;
+  padding: 5rem 1.5rem 4rem;
+  position: relative;
+  overflow: hidden;
+}
+
+.page-hero::before {
+  content: '';
+  position: absolute;
+  width: 400px;
+  height: 400px;
+  border-radius: 50%;
+  background: rgba(108, 99, 255, 0.08);
+  top: -100px;
+  right: -80px;
+  pointer-events: none;
+}
+
+.page-hero h1 {
+  font-size: clamp(1.8rem, 4vw, 2.8rem);
+  font-weight: 800;
+  margin-bottom: 0.8rem;
+  position: relative;
+}
+
+.page-hero p {
+  font-size: 1.05rem;
+  opacity: 0.75;
+  max-width: 500px;
+  margin: 0 auto;
+  position: relative;
+}
+
+/* =============================================
+   BOTONES REUTILIZABLES
+   Estilos compartidos para todos los botones
+============================================= */
+
+/* Botón principal con degradado (CTA hero) */
+.btn-primary {
+  display: inline-block;
+  background: linear-gradient(135deg, #6C63FF, #4facfe);
+  color: var(--blanco);
+  padding: 0.9rem 2.4rem;
+  border-radius: 50px;
+  text-decoration: none;
+  font-weight: 700;
+  font-size: 1rem;
+  transition: opacity 0.25s, transform 0.2s, box-shadow 0.2s;
+  box-shadow: 0 4px 20px rgba(108, 99, 255, 0.4);
+}
+
+.btn-primary:hover {
+  opacity: 0.9;
+  transform: translateY(-2px);
+  box-shadow: 0 8px 28px rgba(108, 99, 255, 0.5);
+}
+
+/* Botón secundario con borde (para tarjetas de servicio) */
+.btn-secondary {
+  display: inline-block;
+  background: transparent;
+  color: var(--morado);
+  border: 2px solid var(--morado);
+  padding: 0.65rem 1.6rem;
+  border-radius: 50px;
+  text-decoration: none;
+  font-weight: 700;
+  font-size: 0.9rem;
+  transition: background 0.2s, color 0.2s, transform 0.2s;
+  margin-top: 1.2rem;
+}
+
+.btn-secondary:hover {
+  background: var(--morado);
+  color: var(--blanco);
+  transform: translateY(-2px);
+}
+
+/* =============================================
+   ENCABEZADO DE SECCIÓN REUTILIZABLE
+   Título centrado con línea decorativa morada
+============================================= */
+.section-header {
+  text-align: center;
+  margin-bottom: 3rem;
+}
+
+.section-header h2 {
+  font-size: clamp(1.6rem, 3.5vw, 2.2rem);
+  font-weight: 800;
+  color: var(--azul-oscuro);
+  margin-bottom: 0.6rem;
+}
+
+.section-header p {
+  color: var(--texto-gris);
+  font-size: 1rem;
+  max-width: 480px;
+  margin: 0 auto;
+}
+
+/* Línea decorativa bajo el título */
+.section-header h2::after {
+  content: '';
+  display: block;
+  width: 50px;
+  height: 4px;
+  background: var(--morado);
+  border-radius: 4px;
+  margin: 0.6rem auto 0;
+}
+
+/* =============================================
+   TARJETAS DE SERVICIOS
+   Grid de tarjetas con ícono, título y descripción
+============================================= */
+
+/* Contenedor en cuadrícula responsive */
+.cards-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(270px, 1fr));
+  gap: 1.8rem;
+  max-width: 1100px;
+  margin: 0 auto;
+}
+
+/* Tarjeta individual */
+.card {
+  background: var(--blanco);
+  border-radius: 16px;
+  padding: 2.2rem 1.8rem;
+  text-align: center;
+  box-shadow: 0 2px 16px rgba(26, 26, 46, 0.07);
+  transition: transform 0.25s, box-shadow 0.25s;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.card:hover {
+  transform: translateY(-6px);
+  box-shadow: 0 8px 32px rgba(108, 99, 255, 0.15);
+}
+
+/* Contenedor del ícono SVG */
+.card-icon {
+  width: 64px;
+  height: 64px;
+  background: rgba(108, 99, 255, 0.1);
+  border-radius: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto 1.2rem;
+}
+
+.card-icon svg {
+  width: 32px;
+  height: 32px;
+  stroke: var(--morado);
+  fill: none;
+  stroke-width: 1.8;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.card h3 {
+  font-size: 1.15rem;
+  font-weight: 700;
+  color: var(--azul-oscuro);
+  margin-bottom: 0.7rem;
+}
+
+.card p {
+  color: var(--texto-gris);
+  font-size: 0.93rem;
+  line-height: 1.7;
+  flex: 1;
+}
+
+/* Lista de características dentro de una tarjeta de servicio */
+.card-features {
+  list-style: none;
+  text-align: left;
+  margin: 1rem 0 0.5rem;
+  width: 100%;
+}
+
+.card-features li {
+  color: var(--texto-gris);
+  font-size: 0.88rem;
+  padding: 0.3rem 0;
+  padding-left: 1.4rem;
+  position: relative;
+}
+
+/* Checkmark morado antes de cada ítem */
+.card-features li::before {
+  content: '✓';
+  position: absolute;
+  left: 0;
+  color: var(--morado);
+  font-weight: 700;
+}
+
+/* =============================================
+   SECCIÓN DE SERVICIOS (HOME)
+   Fondo gris suave para contraste con el hero
+============================================= */
+#servicios {
+  padding: 5rem 1.5rem;
+  background: var(--gris-suave);
+}
+
+/* =============================================
+   SECCIÓN NOSOTROS (HOME)
+   Bloque breve de identidad en la página principal
+============================================= */
+#nosotros {
+  padding: 5rem 1.5rem;
+  background: #f0effe;
+}
+
+#nosotros .nosotros-texto {
+  max-width: 640px;
+  margin: 0 auto;
+  text-align: center;
+  color: var(--texto-gris);
+  font-size: 1rem;
+  line-height: 1.9;
+}
+
+/* =============================================
+   TARJETAS DE EQUIPO
+   Grid de personas con foto placeholder, nombre y cargo
+============================================= */
+.team-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 1.8rem;
+  max-width: 1000px;
+  margin: 0 auto;
+}
+
+/* Tarjeta individual de miembro del equipo */
+.team-card {
+  background: var(--blanco);
+  border-radius: 16px;
+  padding: 2rem 1.5rem;
+  text-align: center;
+  box-shadow: 0 2px 16px rgba(26, 26, 46, 0.07);
+  transition: transform 0.25s, box-shadow 0.25s;
+}
+
+.team-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 8px 28px rgba(108, 99, 255, 0.12);
+}
+
+/* Avatar circular con iniciales */
+.team-avatar {
+  width: 80px;
+  height: 80px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, var(--morado), #4facfe);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto 1rem;
+  font-size: 1.5rem;
+  font-weight: 800;
+  color: var(--blanco);
+}
+
+.team-card h3 {
+  font-size: 1.05rem;
+  font-weight: 700;
+  color: var(--azul-oscuro);
+  margin-bottom: 0.2rem;
+}
+
+/* Cargo/rol en color morado */
+.team-card .cargo {
+  font-size: 0.85rem;
+  color: var(--morado);
+  font-weight: 600;
+  margin-bottom: 0.8rem;
+}
+
+.team-card p {
+  font-size: 0.88rem;
+  color: var(--texto-gris);
+  line-height: 1.6;
+}
+
+/* =============================================
+   SECCIÓN HISTORIA DE LA EMPRESA
+   Timeline vertical para la página Nosotros
+============================================= */
+.historia-section {
+  padding: 5rem 1.5rem;
+  background: var(--gris-suave);
+}
+
+/* Contenedor del timeline centrado */
+.timeline {
+  max-width: 700px;
+  margin: 0 auto;
+  position: relative;
+  padding-left: 2rem;
+}
+
+/* Línea vertical izquierda del timeline */
+.timeline::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  width: 3px;
+  background: linear-gradient(to bottom, var(--morado), #4facfe);
+  border-radius: 3px;
+}
+
+/* Ítem individual del timeline */
+.timeline-item {
+  position: relative;
+  margin-bottom: 2.5rem;
+  padding-left: 1.5rem;
+}
+
+/* Punto circular en la línea del timeline */
+.timeline-item::before {
+  content: '';
+  position: absolute;
+  left: -2.4rem;
+  top: 0.4rem;
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  background: var(--morado);
+  border: 3px solid var(--blanco);
+  box-shadow: 0 0 0 2px var(--morado);
+}
+
+/* Año/fecha del evento */
+.timeline-year {
+  font-size: 0.8rem;
+  font-weight: 700;
+  color: var(--morado);
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  margin-bottom: 0.3rem;
+}
+
+.timeline-item h3 {
+  font-size: 1rem;
+  font-weight: 700;
+  color: var(--azul-oscuro);
+  margin-bottom: 0.4rem;
+}
+
+.timeline-item p {
+  font-size: 0.92rem;
+  color: var(--texto-gris);
+  line-height: 1.7;
+}
+
+/* =============================================
+   FORMULARIO DE CONTACTO
+   Campos centrados con validación visual
+============================================= */
+#contacto {
+  padding: 5rem 1.5rem;
+  background: var(--blanco);
+}
+
+/* Contenedor del formulario */
+.contact-form {
+  max-width: 580px;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  gap: 1.2rem;
+}
+
+/* Grupo de campo: etiqueta + input */
+.form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+}
+
+.form-group label {
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: var(--azul-oscuro);
+}
+
+.form-group input,
+.form-group textarea {
+  padding: 0.85rem 1rem;
+  border: 1.5px solid #ddd;
+  border-radius: 10px;
+  font-size: 0.95rem;
+  font-family: inherit;
+  color: var(--azul-oscuro);
+  transition: border-color 0.2s, box-shadow 0.2s;
+  outline: none;
+  background: var(--gris-suave);
+}
+
+.form-group input:focus,
+.form-group textarea:focus {
+  border-color: var(--morado);
+  box-shadow: 0 0 0 3px rgba(108, 99, 255, 0.12);
+  background: var(--blanco);
+}
+
+/* Estado de error: borde rojo cuando el campo está vacío al enviar */
+.form-group input.error,
+.form-group textarea.error {
+  border-color: #e74c3c;
+  box-shadow: 0 0 0 3px rgba(231, 76, 60, 0.1);
+}
+
+/* Mensaje de error debajo del campo */
+.error-msg {
+  font-size: 0.8rem;
+  color: #e74c3c;
+  display: none;
+}
+
+.error-msg.visible {
+  display: block;
+}
+
+.form-group textarea {
+  min-height: 140px;
+  resize: vertical;
+}
+
+/* Botón de envío del formulario */
+.btn-submit {
+  background: var(--morado);
+  color: var(--blanco);
+  border: none;
+  padding: 0.95rem;
+  border-radius: 50px;
+  font-size: 1rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: background 0.25s, transform 0.2s, box-shadow 0.2s;
+  box-shadow: 0 4px 16px rgba(108, 99, 255, 0.35);
+}
+
+.btn-submit:hover {
+  background: var(--morado-claro);
+  transform: translateY(-2px);
+}
+
+/* Mensaje de confirmación tras envío exitoso */
+.form-success {
+  display: none;
+  text-align: center;
+  padding: 1.5rem;
+  background: rgba(108, 99, 255, 0.08);
+  border: 1px solid var(--morado);
+  border-radius: 12px;
+  color: var(--morado);
+  font-weight: 600;
+}
+
+/* =============================================
+   FOOTER
+   Barra inferior con copyright y redes sociales
+============================================= */
+footer {
+  background-color: var(--azul-oscuro);
+  color: var(--blanco);
+  padding: 2.5rem 1.5rem;
+}
+
+.footer-inner {
+  max-width: 1100px;
+  margin: 0 auto;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1.2rem;
+}
+
+.footer-logo {
+  font-size: 1.3rem;
+  font-weight: 800;
+  color: var(--blanco);
+}
+
+.footer-logo span {
+  color: var(--morado);
+}
+
+.footer-copy {
+  font-size: 0.85rem;
+  opacity: 0.6;
+}
+
+/* Íconos de redes sociales en el footer */
+.social-links {
+  display: flex;
+  gap: 1rem;
+}
+
+.social-links a {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 38px;
+  height: 38px;
+  border-radius: 50%;
+  background: rgba(255,255,255,0.08);
+  transition: background 0.2s, transform 0.2s;
+}
+
+.social-links a:hover {
+  background: var(--morado);
+  transform: translateY(-2px);
+}
+
+.social-links svg {
+  width: 18px;
+  height: 18px;
+  fill: var(--blanco);
+}
+
+/* =============================================
+   RESPONSIVE — MÓVIL
+   Ajustes para pantallas menores a 768px
+============================================= */
+@media (max-width: 768px) {
+
+  /* Menú de navegación se convierte en desplegable */
+  .nav-links {
+    display: none;
+    flex-direction: column;
+    gap: 0;
+    position: absolute;
+    top: 68px;
+    left: 0;
+    right: 0;
+    background: var(--azul-oscuro);
+    padding: 0.5rem 0 1rem;
+    box-shadow: 0 8px 20px rgba(0,0,0,0.3);
+  }
+
+  .nav-links.open {
+    display: flex;
+  }
+
+  .nav-links a {
+    padding: 0.75rem 1.5rem;
+    display: block;
+    border-bottom: 1px solid rgba(255,255,255,0.06);
+  }
+
+  /* Botón hamburguesa visible en móvil */
+  .menu-toggle {
+    display: flex;
+  }
+
+  /* Las tarjetas se apilan verticalmente */
+  .cards-grid,
+  .team-grid {
+    grid-template-columns: 1fr;
+  }
+
+  /* Footer apilado y centrado en móvil */
+  .footer-inner {
+    flex-direction: column;
+    text-align: center;
+  }
+
+  /* Timeline ajustado para móvil */
+  .timeline {
+    padding-left: 1.5rem;
+  }
+}

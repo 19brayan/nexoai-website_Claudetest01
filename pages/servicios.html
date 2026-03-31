@@ -1,0 +1,316 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Servicios — NexoAI</title>
+
+  <!-- Los archivos CSS y JS están un nivel arriba (../), por eso el prefijo ../ -->
+  <link rel="stylesheet" href="../css/styles.css" />
+</head>
+
+<body>
+
+  <!-- =============================================
+       HEADER — Igual en todas las páginas del sitio
+  ============================================= -->
+  <header>
+    <nav>
+      <a href="../index.html" class="logo">Nexo<span>AI</span></a>
+
+      <ul class="nav-links" id="navLinks">
+        <li><a href="../index.html">Inicio</a></li>
+        <li><a href="servicios.html">Servicios</a></li>
+        <li><a href="nosotros.html">Nosotros</a></li>
+        <li><a href="../index.html#contacto">Contacto</a></li>
+      </ul>
+
+      <button class="menu-toggle" id="menuToggle" aria-label="Abrir menú">
+        <span></span>
+        <span></span>
+        <span></span>
+      </button>
+    </nav>
+  </header>
+
+  <!-- =============================================
+       HERO DE PÁGINA — Banner compacto de bienvenida
+       a la sección de servicios
+  ============================================= -->
+  <section class="page-hero">
+    <span class="hero-badge">✦ Lo que hacemos</span>
+    <h1>Nuestros Servicios</h1>
+    <p>Soluciones tecnológicas diseñadas a medida para hacer crecer tu negocio.</p>
+  </section>
+
+  <!-- =============================================
+       SERVICIO 1 — DESARROLLO WEB
+       Tarjeta expandida con características detalladas
+  ============================================= -->
+  <section id="desarrollo-web" style="padding: 5rem 1.5rem; background: var(--gris-suave);">
+    <div style="max-width: 1100px; margin: 0 auto;">
+
+      <div class="section-header">
+        <h2>Desarrollo Web</h2>
+        <p>Creamos experiencias digitales que convierten visitantes en clientes.</p>
+      </div>
+
+      <div class="cards-grid">
+
+        <!-- Tarjeta: Sitios Web Corporativos -->
+        <div class="card">
+          <div class="card-icon">
+            <!-- Ícono de monitor -->
+            <svg viewBox="0 0 24 24">
+              <rect x="2" y="3" width="20" height="14" rx="2"/>
+              <line x1="8" y1="21" x2="16" y2="21"/>
+              <line x1="12" y1="17" x2="12" y2="21"/>
+            </svg>
+          </div>
+          <h3>Sitios Web Corporativos</h3>
+          <p>Presencia digital profesional que refleja la identidad y los valores de tu empresa.</p>
+          <ul class="card-features">
+            <li>Diseño responsive para todos los dispositivos</li>
+            <li>Optimización de velocidad y rendimiento</li>
+            <li>Integración con Google Analytics</li>
+            <li>Panel de administración de contenido</li>
+          </ul>
+          <a href="../index.html#contacto" class="btn-secondary">Solicitar cotización</a>
+        </div>
+
+        <!-- Tarjeta: Aplicaciones Web -->
+        <div class="card">
+          <div class="card-icon">
+            <!-- Ícono de código / ventana -->
+            <svg viewBox="0 0 24 24">
+              <polyline points="16 18 22 12 16 6"/>
+              <polyline points="8 6 2 12 8 18"/>
+            </svg>
+          </div>
+          <h3>Aplicaciones Web</h3>
+          <p>Soluciones interactivas y funcionales que automatizan y potencian tus operaciones.</p>
+          <ul class="card-features">
+            <li>Interfaces modernas con JavaScript</li>
+            <li>Integración con APIs y servicios externos</li>
+            <li>Autenticación segura de usuarios</li>
+            <li>Escalable y de fácil mantenimiento</li>
+          </ul>
+          <a href="../index.html#contacto" class="btn-secondary">Solicitar cotización</a>
+        </div>
+
+        <!-- Tarjeta: E-commerce -->
+        <div class="card">
+          <div class="card-icon">
+            <!-- Ícono de tienda / carrito -->
+            <svg viewBox="0 0 24 24">
+              <circle cx="9" cy="21" r="1"/>
+              <circle cx="20" cy="21" r="1"/>
+              <path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/>
+            </svg>
+          </div>
+          <h3>Tiendas Online</h3>
+          <p>Plataformas de venta en línea seguras, atractivas y fáciles de gestionar.</p>
+          <ul class="card-features">
+            <li>Pasarelas de pago integradas</li>
+            <li>Gestión de inventario y pedidos</li>
+            <li>Catálogo de productos optimizado</li>
+            <li>Carrito y checkout sin fricción</li>
+          </ul>
+          <a href="../index.html#contacto" class="btn-secondary">Solicitar cotización</a>
+        </div>
+
+      </div>
+    </div>
+  </section>
+
+  <!-- =============================================
+       SERVICIO 2 — AUTOMATIZACIÓN CON IA
+  ============================================= -->
+  <section id="automatizacion-ia" style="padding: 5rem 1.5rem; background: #ffffff;">
+    <div style="max-width: 1100px; margin: 0 auto;">
+
+      <div class="section-header">
+        <h2>Automatización con IA</h2>
+        <p>Hacemos que la tecnología trabaje por ti, para que tú te enfoques en lo importante.</p>
+      </div>
+
+      <div class="cards-grid">
+
+        <!-- Tarjeta: Chatbots con IA -->
+        <div class="card">
+          <div class="card-icon">
+            <!-- Ícono de chat / burbuja -->
+            <svg viewBox="0 0 24 24">
+              <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
+            </svg>
+          </div>
+          <h3>Chatbots Inteligentes</h3>
+          <p>Asistentes virtuales que atienden a tus clientes 24/7 con respuestas precisas y naturales.</p>
+          <ul class="card-features">
+            <li>Integración con WhatsApp, web y redes</li>
+            <li>Comprensión del lenguaje natural (NLP)</li>
+            <li>Escalado automático de conversaciones</li>
+            <li>Reportes de interacciones en tiempo real</li>
+          </ul>
+          <a href="../index.html#contacto" class="btn-secondary">Solicitar cotización</a>
+        </div>
+
+        <!-- Tarjeta: Automatización de procesos -->
+        <div class="card">
+          <div class="card-icon">
+            <!-- Ícono de engranaje / proceso -->
+            <svg viewBox="0 0 24 24">
+              <circle cx="12" cy="12" r="3"/>
+              <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/>
+            </svg>
+          </div>
+          <h3>Automatización de Procesos</h3>
+          <p>Eliminamos las tareas manuales y repetitivas conectando tus herramientas y flujos de trabajo.</p>
+          <ul class="card-features">
+            <li>Integración con CRM, ERP y más</li>
+            <li>Automatización de emails y notificaciones</li>
+            <li>Generación automática de reportes</li>
+            <li>Workflows personalizados sin código</li>
+          </ul>
+          <a href="../index.html#contacto" class="btn-secondary">Solicitar cotización</a>
+        </div>
+
+        <!-- Tarjeta: Análisis de datos con IA -->
+        <div class="card">
+          <div class="card-icon">
+            <!-- Ícono de gráfico de barras -->
+            <svg viewBox="0 0 24 24">
+              <line x1="18" y1="20" x2="18" y2="10"/>
+              <line x1="12" y1="20" x2="12" y2="4"/>
+              <line x1="6" y1="20" x2="6" y2="14"/>
+            </svg>
+          </div>
+          <h3>Análisis de Datos con IA</h3>
+          <p>Convertimos tus datos en decisiones estratégicas a través de modelos predictivos e inteligencia artificial.</p>
+          <ul class="card-features">
+            <li>Dashboards interactivos en tiempo real</li>
+            <li>Modelos de predicción y clasificación</li>
+            <li>Segmentación automática de clientes</li>
+            <li>Alertas inteligentes basadas en patrones</li>
+          </ul>
+          <a href="../index.html#contacto" class="btn-secondary">Solicitar cotización</a>
+        </div>
+
+      </div>
+    </div>
+  </section>
+
+  <!-- =============================================
+       SERVICIO 3 — CONSULTORÍA TECNOLÓGICA
+  ============================================= -->
+  <section id="consultoria" style="padding: 5rem 1.5rem; background: var(--gris-suave);">
+    <div style="max-width: 1100px; margin: 0 auto;">
+
+      <div class="section-header">
+        <h2>Consultoría Tecnológica</h2>
+        <p>Te guiamos para tomar las decisiones tecnológicas correctas en el momento correcto.</p>
+      </div>
+
+      <div class="cards-grid">
+
+        <!-- Tarjeta: Auditoría Digital -->
+        <div class="card">
+          <div class="card-icon">
+            <!-- Ícono de lupa / búsqueda -->
+            <svg viewBox="0 0 24 24">
+              <circle cx="11" cy="11" r="8"/>
+              <line x1="21" y1="21" x2="16.65" y2="16.65"/>
+            </svg>
+          </div>
+          <h3>Auditoría Digital</h3>
+          <p>Analizamos el estado actual de tus sistemas y procesos para identificar oportunidades de mejora.</p>
+          <ul class="card-features">
+            <li>Diagnóstico completo de infraestructura</li>
+            <li>Análisis de seguridad y vulnerabilidades</li>
+            <li>Evaluación de rendimiento y costos</li>
+            <li>Informe ejecutivo con recomendaciones</li>
+          </ul>
+          <a href="../index.html#contacto" class="btn-secondary">Solicitar cotización</a>
+        </div>
+
+        <!-- Tarjeta: Estrategia Tecnológica -->
+        <div class="card">
+          <div class="card-icon">
+            <!-- Ícono de mapa / ruta estratégica -->
+            <svg viewBox="0 0 24 24">
+              <polygon points="3 11 22 2 13 21 11 13 3 11"/>
+            </svg>
+          </div>
+          <h3>Estrategia Tecnológica</h3>
+          <p>Diseñamos la hoja de ruta tecnológica que alinea tu inversión digital con tus objetivos de negocio.</p>
+          <ul class="card-features">
+            <li>Selección de tecnologías adecuadas</li>
+            <li>Planificación de proyectos y presupuesto</li>
+            <li>Estrategia de transformación digital</li>
+            <li>Acompañamiento en la implementación</li>
+          </ul>
+          <a href="../index.html#contacto" class="btn-secondary">Solicitar cotización</a>
+        </div>
+
+        <!-- Tarjeta: Capacitación de Equipos -->
+        <div class="card">
+          <div class="card-icon">
+            <!-- Ícono de personas / equipo -->
+            <svg viewBox="0 0 24 24">
+              <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/>
+              <circle cx="9" cy="7" r="4"/>
+              <path d="M23 21v-2a4 4 0 0 0-3-3.87"/>
+              <path d="M16 3.13a4 4 0 0 1 0 7.75"/>
+            </svg>
+          </div>
+          <h3>Capacitación de Equipos</h3>
+          <p>Preparamos a tu equipo para adoptar nuevas tecnologías con confianza y eficiencia.</p>
+          <ul class="card-features">
+            <li>Talleres prácticos personalizados</li>
+            <li>Formación en herramientas de IA</li>
+            <li>Metodologías ágiles y DevOps</li>
+            <li>Soporte post-capacitación incluido</li>
+          </ul>
+          <a href="../index.html#contacto" class="btn-secondary">Solicitar cotización</a>
+        </div>
+
+      </div>
+    </div>
+  </section>
+
+  <!-- =============================================
+       FOOTER — Copyright y redes sociales
+  ============================================= -->
+  <footer>
+    <div class="footer-inner">
+      <div class="footer-logo">Nexo<span>AI</span></div>
+      <p class="footer-copy">© 2026 NexoAI. Todos los derechos reservados.</p>
+      <div class="social-links">
+        <a href="#" aria-label="LinkedIn">
+          <svg viewBox="0 0 24 24">
+            <path d="M16 8a6 6 0 0 1 6 6v7h-4v-7a2 2 0 0 0-2-2 2 2 0 0 0-2 2v7h-4v-7a6 6 0 0 1 6-6z"/>
+            <rect x="2" y="9" width="4" height="12"/>
+            <circle cx="4" cy="4" r="2"/>
+          </svg>
+        </a>
+        <a href="#" aria-label="Twitter">
+          <svg viewBox="0 0 24 24">
+            <path d="M4 4l16 16M4 20L20 4"/>
+          </svg>
+        </a>
+        <a href="#" aria-label="Instagram">
+          <svg viewBox="0 0 24 24">
+            <rect x="2" y="2" width="20" height="20" rx="5" ry="5"/>
+            <circle cx="12" cy="12" r="4"/>
+            <circle cx="17.5" cy="6.5" r="1" fill="white" stroke="none"/>
+          </svg>
+        </a>
+      </div>
+    </div>
+  </footer>
+
+  <!-- Script principal: menú móvil y enlace activo -->
+  <script src="../js/main.js"></script>
+
+</body>
+</html>
