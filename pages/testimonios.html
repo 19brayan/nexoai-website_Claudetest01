@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Testimonios — NexoAI</title>
+
+  <!-- Hoja de estilos global; ../ sube un nivel desde pages/ -->
+  <link rel="stylesheet" href="../css/styles.css" />
+</head>
+
+<body>
+
+  <!-- =============================================
+       HEADER — Igual en todas las páginas del sitio
+  ============================================= -->
+  <header>
+    <nav>
+      <a href="../index.html" class="logo">Nexo<span>AI</span></a>
+
+      <!-- Menú de navegación con enlace activo en Testimonios -->
+      <ul class="nav-links" id="navLinks">
+        <li><a href="../index.html">Inicio</a></li>
+        <li><a href="servicios.html">Servicios</a></li>
+        <li><a href="nosotros.html">Nosotros</a></li>
+        <li><a href="blog.html">Blog</a></li>
+        <li><a href="testimonios.html" style="color: var(--morado-claro);">Testimonios</a></li>
+        <li><a href="../index.html#contacto">Contacto</a></li>
+      </ul>
+
+      <!-- Botón hamburguesa visible solo en móvil -->
+      <button class="menu-toggle" id="menuToggle" aria-label="Abrir menú">
+        <span></span>
+        <span></span>
+        <span></span>
+      </button>
+    </nav>
+  </header>
+
+  <!-- =============================================
+       HERO DE PÁGINA — Banner compacto de bienvenida
+  ============================================= -->
+  <section class="page-hero">
+    <span class="hero-badge">✦ Lo que dicen nuestros clientes</span>
+    <h1>Testimonios</h1>
+    <p>Empresas que confiaron en NexoAI y transformaron su negocio con tecnología.</p>
+  </section>
+
+  <!-- =============================================
+       TESTIMONIOS — Grid de 4 tarjetas con clientes
+       ficticios, calificación y texto de opinión
+  ============================================= -->
+  <section class="testimonios-section">
+    <div class="section-header">
+      <h2>Lo que dicen nuestros clientes</h2>
+      <p>Resultados reales de empresas que apostaron por la inteligencia artificial.</p>
+    </div>
+
+    <div class="testimonios-grid">
+
+      <!-- Testimonio 1: CEO de empresa retail -->
+      <div class="testimonio-card">
+        <span class="comillas">"</span>
+        <p class="texto">
+          NexoAI transformó completamente nuestra operación en línea. Implementaron un sistema de
+          recomendaciones con IA que aumentó nuestras ventas un 35% en tan solo tres meses.
+          El equipo es profesional, puntual y siempre disponible.
+        </p>
+        <div class="testimonio-autor">
+          <!-- Avatar con iniciales del cliente -->
+          <div class="testimonio-avatar">AM</div>
+          <div class="testimonio-info">
+            <strong>Alejandro Morales</strong>
+            <span>CEO — TiendaMax S.A.</span>
+          </div>
+          <!-- Calificación: 5 estrellas -->
+          <div class="estrellas">★★★★★</div>
+        </div>
+      </div>
+
+      <!-- Testimonio 2: Directora de operaciones -->
+      <div class="testimonio-card">
+        <span class="comillas">"</span>
+        <p class="texto">
+          Contratamos a NexoAI para automatizar nuestro proceso de facturación y seguimiento de
+          clientes. Lo que antes tomaba 2 días ahora se hace en minutos. La inversión se recuperó
+          en menos de 2 meses.
+        </p>
+        <div class="testimonio-autor">
+          <div class="testimonio-avatar">LV</div>
+          <div class="testimonio-info">
+            <strong>Laura Vásquez</strong>
+            <span>Directora de Operaciones — ContaFlex</span>
+          </div>
+          <!-- Calificación: 5 estrellas -->
+          <div class="estrellas">★★★★★</div>
+        </div>
+      </div>
+
+      <!-- Testimonio 3: Fundador de startup -->
+      <div class="testimonio-card">
+        <span class="comillas">"</span>
+        <p class="texto">
+          Como startup necesitábamos movernos rápido. NexoAI desarrolló nuestro MVP en tiempo récord
+          y con una calidad impresionante. Hoy tenemos más de 5,000 usuarios activos gracias a su
+          trabajo.
+        </p>
+        <div class="testimonio-autor">
+          <div class="testimonio-avatar">RC</div>
+          <div class="testimonio-info">
+            <strong>Roberto Castillo</strong>
+            <span>Fundador — HealthTrack App</span>
+          </div>
+          <!-- Calificación: 4 estrellas -->
+          <div class="estrellas">★★★★☆</div>
+        </div>
+      </div>
+
+      <!-- Testimonio 4: Gerente de marketing -->
+      <div class="testimonio-card">
+        <span class="comillas">"</span>
+        <p class="texto">
+          La consultoría tecnológica de NexoAI nos ayudó a elegir las herramientas correctas y
+          evitar errores costosos. Su enfoque estratégico y su conocimiento del mercado de IA
+          son realmente valiosos para cualquier empresa en crecimiento.
+        </p>
+        <div class="testimonio-autor">
+          <div class="testimonio-avatar">SP</div>
+          <div class="testimonio-info">
+            <strong>Sofía Pedraza</strong>
+            <span>Gerente de Marketing — LogiGroup</span>
+          </div>
+          <!-- Calificación: 5 estrellas -->
+          <div class="estrellas">★★★★★</div>
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- =============================================
+       CTA FINAL — Invitación a contactar
+  ============================================= -->
+  <section style="padding: 4rem 1.5rem; background: var(--gris-suave); text-align: center;">
+    <h2 style="font-size: 1.8rem; font-weight: 800; color: var(--azul-oscuro); margin-bottom: 0.8rem;">
+      ¿Listo para ser el próximo caso de éxito?
+    </h2>
+    <p style="color: var(--texto-gris); margin-bottom: 2rem; max-width: 480px; margin-left: auto; margin-right: auto;">
+      Conversemos sobre tu proyecto y te mostramos cómo la IA puede transformar tu negocio.
+    </p>
+    <a href="../index.html#contacto" class="btn-primary">Contáctanos ahora</a>
+  </section>
+
+  <!-- =============================================
+       FOOTER — Copyright y redes sociales
+  ============================================= -->
+  <footer>
+    <div class="footer-inner">
+
+      <div class="footer-logo">Nexo<span>AI</span></div>
+
+      <p class="footer-copy">© 2026 NexoAI. Todos los derechos reservados.</p>
+
+      <!-- Íconos de LinkedIn, Twitter/X e Instagram -->
+      <div class="social-links">
+
+        <a href="#" aria-label="LinkedIn">
+          <svg viewBox="0 0 24 24">
+            <path d="M16 8a6 6 0 0 1 6 6v7h-4v-7a2 2 0 0 0-2-2 2 2 0 0 0-2 2v7h-4v-7a6 6 0 0 1 6-6z"/>
+            <rect x="2" y="9" width="4" height="12"/>
+            <circle cx="4" cy="4" r="2"/>
+          </svg>
+        </a>
+
+        <a href="#" aria-label="Twitter">
+          <svg viewBox="0 0 24 24">
+            <path d="M4 4l16 16M4 20L20 4"/>
+          </svg>
+        </a>
+
+        <a href="#" aria-label="Instagram">
+          <svg viewBox="0 0 24 24">
+            <rect x="2" y="2" width="20" height="20" rx="5" ry="5"/>
+            <circle cx="12" cy="12" r="4"/>
+            <circle cx="17.5" cy="6.5" r="1" fill="white" stroke="none"/>
+          </svg>
+        </a>
+
+      </div>
+    </div>
+  </footer>
+
+  <!-- Script principal para menú móvil -->
+  <script src="../js/main.js"></script>
+
+</body>
+</html>
