@@ -6,3 +6,8 @@ node_modules/
 
 # Variables de entorno (contraseñas, claves API)
 .env
+
+# Base de datos SQLite — cada desarrollador crea la suya localmente
+db/nexoai.db
+db/nexoai.db-shm
+db/nexoai.db-wal

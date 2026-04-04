@@ -3,18 +3,22 @@
 // Levanta un servidor Express que:
 //   1. Sirve el sitio web estático (HTML, CSS, JS)
 //   2. Expone una API REST para el formulario de contacto
+//   3. Almacena los mensajes en una base de datos SQLite
 // =============================================
 
 const express = require('express'); // Framework para crear el servidor web
-const fs      = require('fs');      // Módulo nativo de Node para leer/escribir archivos
-const path    = require('path');    // Módulo nativo para construir rutas de archivos
+
+// Importa las funciones de acceso a la base de datos SQLite
+const {
+  guardarMensaje,
+  obtenerMensajes,
+  eliminarMensaje,
+  contarMensajes
+} = require('./db/database');
 
 // Inicialización de la aplicación Express
 const app  = express();
 const PORT = 3001; // Puerto donde correrá el servidor
-
-// Ruta al archivo JSON que almacena los mensajes de contacto
-const ARCHIVO_MENSAJES = path.join(__dirname, 'data', 'mensajes.json');
 
 // =============================================
 // MIDDLEWARE
@@ -24,35 +28,9 @@ const ARCHIVO_MENSAJES = path.join(__dirname, 'data', 'mensajes.json');
 // Permite que Express entienda el cuerpo de peticiones en formato JSON
 app.use(express.json());
 
-// Sirve todos los archivos estáticos del proyecto (HTML, CSS, JS, imágenes)
+// Sirve todos los archivos estáticos del proyecto (HTML, CSS, JS)
 // desde la carpeta raíz del proyecto
 app.use(express.static(__dirname));
-
-// =============================================
-// FUNCIONES AUXILIARES
-// Helpers para leer y escribir el archivo JSON
-// =============================================
-
-/**
- * Lee el archivo mensajes.json y devuelve el array de mensajes.
- * Si el archivo no existe o está vacío, devuelve un array vacío.
- */
-function leerMensajes() {
-  try {
-    const contenido = fs.readFileSync(ARCHIVO_MENSAJES, 'utf-8');
-    return JSON.parse(contenido);
-  } catch {
-    return [];
-  }
-}
-
-/**
- * Recibe un array de mensajes y lo guarda en mensajes.json
- * con formato legible (indentado con 2 espacios).
- */
-function guardarMensajes(mensajes) {
-  fs.writeFileSync(ARCHIVO_MENSAJES, JSON.stringify(mensajes, null, 2), 'utf-8');
-}
 
 // =============================================
 // RUTAS DE LA API
@@ -62,8 +40,8 @@ function guardarMensajes(mensajes) {
 /**
  * POST /api/contacto
  * Recibe: { nombre, email, mensaje } en el cuerpo de la petición
- * Guarda el mensaje en mensajes.json con fecha y hora
- * Responde con éxito o error
+ * Guarda el mensaje en la base de datos SQLite
+ * Responde con el mensaje guardado o un error de validación
  */
 app.post('/api/contacto', (req, res) => {
   const { nombre, email, mensaje } = req.body;
@@ -76,23 +54,16 @@ app.post('/api/contacto', (req, res) => {
     });
   }
 
-  // Construye el objeto del nuevo mensaje con timestamp
-  const nuevoMensaje = {
-    id:        Date.now(),               // ID único basado en timestamp
-    nombre:    nombre.trim(),
-    email:     email.trim().toLowerCase(),
-    mensaje:   mensaje.trim(),
-    fecha:     new Date().toISOString()  // Fecha en formato estándar ISO
-  };
-
-  // Lee los mensajes existentes, agrega el nuevo y guarda
-  const mensajes = leerMensajes();
-  mensajes.push(nuevoMensaje);
-  guardarMensajes(mensajes);
+  // Guarda el mensaje en SQLite y obtiene el registro completo
+  const nuevoMensaje = guardarMensaje(
+    nombre.trim(),
+    email.trim().toLowerCase(),
+    mensaje.trim()
+  );
 
   console.log(`[API] Nuevo mensaje de ${nuevoMensaje.nombre} (${nuevoMensaje.email})`);
 
-  // Responde con éxito
+  // Responde con el mensaje guardado
   res.status(201).json({
     exito:   true,
     mensaje: '¡Mensaje recibido! Te responderemos pronto.',
@@ -102,19 +73,65 @@ app.post('/api/contacto', (req, res) => {
 
 /**
  * GET /api/contacto
- * Devuelve todos los mensajes guardados en mensajes.json
+ * Devuelve todos los mensajes guardados en la base de datos
  * ordenados del más reciente al más antiguo
  */
 app.get('/api/contacto', (_req, res) => {
-  const mensajes = leerMensajes();
+  const mensajes = obtenerMensajes();
 
-  // Ordena del más reciente al más antiguo por ID (timestamp)
-  const ordenados = mensajes.sort((a, b) => b.id - a.id);
+  res.json({
+    exito: true,
+    total: mensajes.length,
+    datos: mensajes
+  });
+});
+
+/**
+ * GET /api/contacto/count
+ * Devuelve únicamente el conteo total de mensajes
+ * Útil para mostrar estadísticas en un panel de administración
+ */
+app.get('/api/contacto/count', (_req, res) => {
+  const total = contarMensajes();
+
+  res.json({
+    exito: true,
+    total
+  });
+});
+
+/**
+ * DELETE /api/contacto/:id
+ * Elimina un mensaje de la base de datos por su id
+ * :id es un parámetro dinámico en la URL (ej: /api/contacto/5)
+ */
+app.delete('/api/contacto/:id', (req, res) => {
+  // Convierte el id de string a número entero
+  const id = parseInt(req.params.id, 10);
+
+  // Valida que el id sea un número válido
+  if (isNaN(id)) {
+    return res.status(400).json({
+      exito: false,
+      error: 'El id debe ser un número válido.'
+    });
+  }
+
+  // Intenta eliminar el mensaje y verifica si existía
+  const eliminado = eliminarMensaje(id);
+
+  if (!eliminado) {
+    return res.status(404).json({
+      exito: false,
+      error: `No se encontró ningún mensaje con id ${id}.`
+    });
+  }
+
+  console.log(`[API] Mensaje con id ${id} eliminado.`);
 
   res.json({
     exito:   true,
-    total:   ordenados.length,
-    datos:   ordenados
+    mensaje: `Mensaje con id ${id} eliminado correctamente.`
   });
 });
 
@@ -125,4 +142,5 @@ app.get('/api/contacto', (_req, res) => {
 app.listen(PORT, () => {
   console.log(`✓ Servidor NexoAI corriendo en http://localhost:${PORT}`);
   console.log(`✓ API disponible en http://localhost:${PORT}/api/contacto`);
+  console.log(`✓ Base de datos SQLite: db/nexoai.db`);
 });
