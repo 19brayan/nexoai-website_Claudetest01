@@ -720,6 +720,120 @@ footer {
 }
 
 /* =============================================
+   SECCIÓN DE TESTIMONIOS
+   Grid de 2 columnas con tarjetas de clientes
+============================================= */
+#testimonios-preview,
+.testimonios-section {
+  padding: 5rem 1.5rem;
+  background: var(--azul-oscuro);
+  color: var(--blanco);
+}
+
+/* El encabezado de la sección de testimonios usa blanco */
+#testimonios-preview .section-header h2,
+.testimonios-section .section-header h2 {
+  color: var(--blanco);
+}
+
+#testimonios-preview .section-header p,
+.testimonios-section .section-header p {
+  color: rgba(255,255,255,0.65);
+}
+
+/* Grid de 2 columnas para las tarjetas */
+.testimonios-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 1.8rem;
+  max-width: 1000px;
+  margin: 0 auto;
+}
+
+/* Tarjeta individual de testimonio */
+.testimonio-card {
+  background: rgba(255,255,255,0.06);
+  border: 1px solid rgba(255,255,255,0.1);
+  border-radius: 16px;
+  padding: 2rem;
+  transition: transform 0.25s, background 0.25s;
+}
+
+.testimonio-card:hover {
+  transform: translateY(-4px);
+  background: rgba(108, 99, 255, 0.15);
+}
+
+/* Comillas decorativas de apertura */
+.testimonio-card .comillas {
+  font-size: 3rem;
+  line-height: 1;
+  color: var(--morado);
+  font-family: Georgia, serif;
+  margin-bottom: 0.5rem;
+  display: block;
+}
+
+/* Texto del testimonio */
+.testimonio-card .texto {
+  font-size: 0.95rem;
+  line-height: 1.8;
+  color: rgba(255,255,255,0.85);
+  margin-bottom: 1.5rem;
+}
+
+/* Fila inferior: avatar + nombre + estrellas */
+.testimonio-autor {
+  display: flex;
+  align-items: center;
+  gap: 0.9rem;
+}
+
+/* Avatar circular con iniciales */
+.testimonio-avatar {
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, var(--morado), #4facfe);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1rem;
+  font-weight: 800;
+  color: var(--blanco);
+  flex-shrink: 0;
+}
+
+/* Nombre y empresa del cliente */
+.testimonio-info {
+  flex: 1;
+}
+
+.testimonio-info strong {
+  display: block;
+  font-size: 0.95rem;
+  color: var(--blanco);
+}
+
+.testimonio-info span {
+  font-size: 0.8rem;
+  color: rgba(255,255,255,0.5);
+}
+
+/* Estrellas de calificación en amarillo */
+.estrellas {
+  color: #ffc107;
+  font-size: 0.9rem;
+  letter-spacing: 1px;
+}
+
+/* Botón centrado bajo el grid */
+.testimonios-cta {
+  text-align: center;
+  margin-top: 2.5rem;
+}
+
+/* =============================================
    RESPONSIVE — MÓVIL
    Ajustes para pantallas menores a 768px
 ============================================= */
@@ -756,7 +870,8 @@ footer {
 
   /* Las tarjetas se apilan verticalmente */
   .cards-grid,
-  .team-grid {
+  .team-grid,
+  .testimonios-grid {
     grid-template-columns: 1fr;
   }
 
