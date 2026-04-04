@@ -1,0 +1,8 @@
+# Dependencias de Node.js — se reinstalan con: npm install
+node_modules/
+
+# Archivos de sistema de macOS
+.DS_Store
+
+# Variables de entorno (contraseñas, claves API)
+.env

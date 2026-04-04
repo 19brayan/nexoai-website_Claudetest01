@@ -113,12 +113,51 @@ document.addEventListener('DOMContentLoaded', () => {
         }
       });
 
-      // Si todo es válido, muestra el mensaje de éxito
+      // Si todo es válido, envía los datos a la API del backend via fetch
       if (formularioValido) {
-        contactForm.querySelectorAll('.form-group, .btn-submit').forEach(el => {
-          el.style.display = 'none';
+        const btnSubmit = contactForm.querySelector('.btn-submit');
+
+        // Deshabilita el botón mientras se envía para evitar doble clic
+        btnSubmit.disabled    = true;
+        btnSubmit.textContent = 'Enviando...';
+
+        // Recolecta los valores del formulario
+        const datos = {
+          nombre:  document.getElementById('nombre').value.trim(),
+          email:   document.getElementById('email').value.trim(),
+          mensaje: document.getElementById('mensaje').value.trim()
+        };
+
+        // Envía los datos como JSON al endpoint POST /api/contacto
+        fetch('/api/contacto', {
+          method:  'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body:    JSON.stringify(datos)
+        })
+        .then(res => res.json())
+        .then(respuesta => {
+          if (respuesta.exito) {
+            // Oculta el formulario y muestra el mensaje de éxito
+            contactForm.querySelectorAll('.form-group, .btn-submit').forEach(el => {
+              el.style.display = 'none';
+            });
+            if (formSuccess) {
+              formSuccess.textContent = '¡Mensaje enviado! Te responderemos pronto.';
+              formSuccess.style.display = 'block';
+            }
+          } else {
+            // Muestra el error devuelto por la API
+            btnSubmit.disabled    = false;
+            btnSubmit.textContent = 'Enviar mensaje';
+            alert('Error: ' + respuesta.error);
+          }
+        })
+        .catch(() => {
+          // Error de red: el servidor no está disponible
+          btnSubmit.disabled    = false;
+          btnSubmit.textContent = 'Enviar mensaje';
+          alert('No se pudo conectar con el servidor. Intenta de nuevo.');
         });
-        if (formSuccess) formSuccess.style.display = 'block';
       }
     });
 
