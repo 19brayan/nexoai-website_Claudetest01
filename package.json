@@ -20,6 +20,7 @@
   },
   "homepage": "https://github.com/19brayan/nexoai-website_Claudetest01#readme",
   "dependencies": {
+    "better-sqlite3": "^12.8.0",
     "express": "^5.2.1"
   }
 }
