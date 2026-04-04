@@ -1,0 +1,625 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Panel Admin — NexoAI</title>
+
+  <style>
+    /* =============================================
+       VARIABLES Y RESET
+       Paleta del panel admin: más oscura que el sitio
+       público para dar sensación de área privada
+    ============================================= */
+    :root {
+      --bg-principal:   #0d0d1a;   /* Fondo más oscuro que el sitio público */
+      --bg-tarjeta:     #13132a;   /* Fondo de tarjetas y tabla */
+      --bg-fila-hover:  #1a1a35;   /* Hover en filas de la tabla */
+      --morado:         #6C63FF;
+      --morado-claro:   #8f88ff;
+      --blanco:         #ffffff;
+      --gris-texto:     #a0a0c0;
+      --borde:          rgba(108, 99, 255, 0.2);
+      --rojo:           #e74c3c;
+      --rojo-hover:     #c0392b;
+      --verde:          #2ecc71;
+    }
+
+    *, *::before, *::after {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Segoe UI', Arial, sans-serif;
+      background-color: var(--bg-principal);
+      color: var(--blanco);
+      min-height: 100vh;
+      line-height: 1.6;
+    }
+
+    /* =============================================
+       HEADER DEL PANEL ADMIN
+       Barra superior diferente al sitio público:
+       más compacta y con etiqueta "ADMIN"
+    ============================================= */
+    .admin-header {
+      background: var(--bg-tarjeta);
+      border-bottom: 1px solid var(--borde);
+      padding: 0 1.5rem;
+      height: 60px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+    }
+
+    /* Logo con badge de admin */
+    .admin-logo {
+      display: flex;
+      align-items: center;
+      gap: 0.8rem;
+      font-size: 1.2rem;
+      font-weight: 800;
+      color: var(--blanco);
+      text-decoration: none;
+    }
+
+    .admin-logo span {
+      color: var(--morado);
+    }
+
+    /* Etiqueta "ADMIN" en morado */
+    .admin-badge {
+      background: var(--morado);
+      color: var(--blanco);
+      font-size: 0.65rem;
+      font-weight: 700;
+      letter-spacing: 1.5px;
+      text-transform: uppercase;
+      padding: 0.2rem 0.6rem;
+      border-radius: 4px;
+    }
+
+    /* Enlace para volver al sitio público */
+    .admin-header a.volver {
+      color: var(--gris-texto);
+      font-size: 0.85rem;
+      text-decoration: none;
+      transition: color 0.2s;
+    }
+
+    .admin-header a.volver:hover {
+      color: var(--blanco);
+    }
+
+    /* =============================================
+       LAYOUT PRINCIPAL
+       Contenedor centrado con padding generoso
+    ============================================= */
+    .admin-main {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 2rem 1.5rem;
+    }
+
+    /* Título de sección con línea decorativa */
+    .admin-titulo {
+      font-size: 1.5rem;
+      font-weight: 800;
+      margin-bottom: 0.3rem;
+    }
+
+    .admin-subtitulo {
+      color: var(--gris-texto);
+      font-size: 0.9rem;
+      margin-bottom: 2rem;
+    }
+
+    /* =============================================
+       TARJETAS DE ESTADÍSTICAS
+       Fila de 3 tarjetas con métricas clave
+    ============================================= */
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 1.2rem;
+      margin-bottom: 2.5rem;
+    }
+
+    /* Tarjeta individual de estadística */
+    .stat-card {
+      background: var(--bg-tarjeta);
+      border: 1px solid var(--borde);
+      border-radius: 12px;
+      padding: 1.5rem;
+      position: relative;
+      overflow: hidden;
+    }
+
+    /* Acento de color en el borde izquierdo */
+    .stat-card::before {
+      content: '';
+      position: absolute;
+      left: 0;
+      top: 0;
+      bottom: 0;
+      width: 3px;
+      background: var(--morado);
+      border-radius: 3px 0 0 3px;
+    }
+
+    /* Etiqueta pequeña sobre el número */
+    .stat-label {
+      font-size: 0.78rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      color: var(--gris-texto);
+      margin-bottom: 0.5rem;
+    }
+
+    /* Número grande de la estadística */
+    .stat-valor {
+      font-size: 2.2rem;
+      font-weight: 800;
+      color: var(--blanco);
+      line-height: 1;
+      margin-bottom: 0.3rem;
+    }
+
+    /* Texto secundario debajo del número */
+    .stat-detalle {
+      font-size: 0.82rem;
+      color: var(--gris-texto);
+    }
+
+    /* =============================================
+       BARRA DE ACCIONES
+       Título de la tabla y botón de actualizar
+    ============================================= */
+    .tabla-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 1rem;
+      flex-wrap: wrap;
+      gap: 0.8rem;
+    }
+
+    .tabla-titulo {
+      font-size: 1.1rem;
+      font-weight: 700;
+    }
+
+    /* Botón para recargar los datos de la tabla */
+    .btn-actualizar {
+      background: rgba(108, 99, 255, 0.15);
+      border: 1px solid var(--morado);
+      color: var(--morado-claro);
+      padding: 0.5rem 1.2rem;
+      border-radius: 8px;
+      font-size: 0.88rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background 0.2s, transform 0.15s;
+    }
+
+    .btn-actualizar:hover {
+      background: rgba(108, 99, 255, 0.3);
+      transform: translateY(-1px);
+    }
+
+    /* =============================================
+       TABLA DE MENSAJES
+       Responsive con scroll horizontal en móvil
+    ============================================= */
+    .tabla-contenedor {
+      background: var(--bg-tarjeta);
+      border: 1px solid var(--borde);
+      border-radius: 12px;
+      overflow: hidden;
+      overflow-x: auto; /* Scroll horizontal en pantallas pequeñas */
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      min-width: 700px; /* Evita que la tabla se comprima demasiado */
+    }
+
+    /* Encabezados de la tabla */
+    thead th {
+      background: rgba(108, 99, 255, 0.1);
+      color: var(--gris-texto);
+      font-size: 0.75rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.8px;
+      padding: 0.9rem 1rem;
+      text-align: left;
+      border-bottom: 1px solid var(--borde);
+    }
+
+    /* Filas de datos */
+    tbody td {
+      padding: 0.9rem 1rem;
+      font-size: 0.9rem;
+      color: var(--blanco);
+      border-bottom: 1px solid rgba(255,255,255,0.04);
+      vertical-align: middle;
+    }
+
+    tbody tr:last-child td {
+      border-bottom: none;
+    }
+
+    tbody tr:hover td {
+      background: var(--bg-fila-hover);
+    }
+
+    /* Columna ID con estilo de badge */
+    .col-id {
+      color: var(--morado-claro);
+      font-weight: 700;
+      font-size: 0.85rem;
+    }
+
+    /* Columna mensaje con truncado para no romper el layout */
+    .col-mensaje {
+      max-width: 250px;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+      color: var(--gris-texto);
+    }
+
+    /* Columna fecha con formato compacto */
+    .col-fecha {
+      color: var(--gris-texto);
+      font-size: 0.82rem;
+      white-space: nowrap;
+    }
+
+    /* Botón rojo de eliminar */
+    .btn-eliminar {
+      background: rgba(231, 76, 60, 0.15);
+      border: 1px solid var(--rojo);
+      color: var(--rojo);
+      padding: 0.35rem 0.8rem;
+      border-radius: 6px;
+      font-size: 0.8rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background 0.2s, transform 0.15s;
+      white-space: nowrap;
+    }
+
+    .btn-eliminar:hover {
+      background: var(--rojo);
+      color: var(--blanco);
+      transform: translateY(-1px);
+    }
+
+    /* =============================================
+       ESTADO VACÍO
+       Mensaje cuando no hay mensajes en la BD
+    ============================================= */
+    .tabla-vacia {
+      text-align: center;
+      padding: 3rem;
+      color: var(--gris-texto);
+    }
+
+    .tabla-vacia p {
+      font-size: 0.95rem;
+      margin-top: 0.5rem;
+    }
+
+    /* =============================================
+       INDICADOR DE CARGA
+       Aparece mientras se consulta la API
+    ============================================= */
+    .cargando {
+      text-align: center;
+      padding: 2rem;
+      color: var(--gris-texto);
+      font-size: 0.9rem;
+    }
+
+    /* =============================================
+       RESPONSIVE — MÓVIL
+       Ajustes para pantallas menores a 768px
+    ============================================= */
+    @media (max-width: 768px) {
+      /* Las tarjetas de stats se apilan en 1 columna */
+      .stats-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .stat-valor {
+        font-size: 1.8rem;
+      }
+
+      .admin-main {
+        padding: 1.2rem 1rem;
+      }
+    }
+  </style>
+</head>
+
+<body>
+
+  <!-- =============================================
+       HEADER DEL PANEL DE ADMINISTRACIÓN
+       Diferente al sitio público: más compacto
+       y con etiqueta ADMIN visible
+  ============================================= -->
+  <header class="admin-header">
+    <div class="admin-logo">
+      Nexo<span>AI</span>
+      <span class="admin-badge">Admin</span>
+    </div>
+    <!-- Enlace para regresar al sitio público -->
+    <a href="../index.html" class="volver">← Volver al sitio</a>
+  </header>
+
+  <!-- =============================================
+       CONTENIDO PRINCIPAL DEL PANEL
+  ============================================= -->
+  <main class="admin-main">
+
+    <h1 class="admin-titulo">Panel de Administración</h1>
+    <p class="admin-subtitulo">Mensajes recibidos desde el formulario de contacto</p>
+
+    <!-- =============================================
+         TARJETAS DE ESTADÍSTICAS
+         Se llenan dinámicamente al cargar la página
+    ============================================= -->
+    <div class="stats-grid">
+
+      <!-- Tarjeta 1: Total de mensajes -->
+      <div class="stat-card">
+        <div class="stat-label">Total de mensajes</div>
+        <div class="stat-valor" id="statTotal">—</div>
+        <div class="stat-detalle">Desde el inicio</div>
+      </div>
+
+      <!-- Tarjeta 2: Mensajes de hoy -->
+      <div class="stat-card">
+        <div class="stat-label">Mensajes hoy</div>
+        <div class="stat-valor" id="statHoy">—</div>
+        <div class="stat-detalle" id="statFechaHoy">Hoy</div>
+      </div>
+
+      <!-- Tarjeta 3: Mensaje más reciente -->
+      <div class="stat-card">
+        <div class="stat-label">Último mensaje de</div>
+        <div class="stat-valor" style="font-size: 1.1rem; padding-top: 0.4rem;" id="statRecienteNombre">—</div>
+        <div class="stat-detalle" id="statRecienteFecha">Sin mensajes aún</div>
+      </div>
+
+    </div>
+
+    <!-- =============================================
+         TABLA DE MENSAJES
+         Con botón de actualizar y filas con botón eliminar
+    ============================================= -->
+    <div class="tabla-header">
+      <span class="tabla-titulo">Mensajes recibidos</span>
+      <!-- Botón para recargar datos sin recargar la página -->
+      <button class="btn-actualizar" id="btnActualizar">↻ Actualizar</button>
+    </div>
+
+    <div class="tabla-contenedor">
+      <!-- Indicador de carga inicial -->
+      <div class="cargando" id="cargando">Cargando mensajes...</div>
+
+      <!-- La tabla se construye dinámicamente con JavaScript -->
+      <table id="tablaMensajes" style="display: none;">
+        <thead>
+          <tr>
+            <th>ID</th>
+            <th>Nombre</th>
+            <th>Email</th>
+            <th>Mensaje</th>
+            <th>Fecha</th>
+            <th>Acción</th>
+          </tr>
+        </thead>
+        <tbody id="cuerpoTabla">
+          <!-- Las filas se insertan aquí con JavaScript -->
+        </tbody>
+      </table>
+
+      <!-- Mensaje cuando no hay datos -->
+      <div class="tabla-vacia" id="tablaVacia" style="display: none;">
+        <p>No hay mensajes recibidos aún.</p>
+      </div>
+    </div>
+
+  </main>
+
+  <!-- =============================================
+       JAVASCRIPT DEL PANEL ADMIN
+       Carga estadísticas y mensajes desde la API,
+       y maneja la eliminación sin recargar la página
+  ============================================= -->
+  <script>
+
+    // -----------------------------------------------
+    // FUNCIÓN: Carga las estadísticas desde la API
+    // y actualiza las 3 tarjetas del dashboard
+    // -----------------------------------------------
+    async function cargarEstadisticas() {
+      try {
+        const res  = await fetch('/api/contacto/stats');
+        const data = await res.json();
+
+        if (!data.exito) return;
+
+        // Actualiza el total de mensajes
+        document.getElementById('statTotal').textContent = data.total;
+
+        // Actualiza los mensajes de hoy
+        document.getElementById('statHoy').textContent = data.hoy;
+
+        // Actualiza la tarjeta del mensaje más reciente
+        if (data.reciente) {
+          document.getElementById('statRecienteNombre').textContent = data.reciente.nombre;
+          document.getElementById('statRecienteFecha').textContent  = data.reciente.fecha;
+        } else {
+          document.getElementById('statRecienteNombre').textContent = '—';
+          document.getElementById('statRecienteFecha').textContent  = 'Sin mensajes aún';
+        }
+
+      } catch (error) {
+        console.error('Error al cargar estadísticas:', error);
+      }
+    }
+
+    // -----------------------------------------------
+    // FUNCIÓN: Construye una fila <tr> para la tabla
+    // con los datos de un mensaje recibido
+    // -----------------------------------------------
+    function crearFila(mensaje) {
+      const fila = document.createElement('tr');
+
+      fila.innerHTML = `
+        <td class="col-id">#${mensaje.id}</td>
+        <td>${escapeHtml(mensaje.nombre)}</td>
+        <td>${escapeHtml(mensaje.email)}</td>
+        <td class="col-mensaje" title="${escapeHtml(mensaje.mensaje)}">${escapeHtml(mensaje.mensaje)}</td>
+        <td class="col-fecha">${mensaje.fecha}</td>
+        <td>
+          <button class="btn-eliminar" data-id="${mensaje.id}">Eliminar</button>
+        </td>
+      `;
+
+      // Agrega el evento de clic al botón eliminar de esta fila
+      fila.querySelector('.btn-eliminar').addEventListener('click', () => {
+        eliminarMensaje(mensaje.id, fila);
+      });
+
+      return fila;
+    }
+
+    // -----------------------------------------------
+    // FUNCIÓN: Carga todos los mensajes desde la API
+    // y construye la tabla dinámicamente
+    // -----------------------------------------------
+    async function cargarMensajes() {
+      const cargando     = document.getElementById('cargando');
+      const tabla        = document.getElementById('tablaMensajes');
+      const tablaVacia   = document.getElementById('tablaVacia');
+      const cuerpoTabla  = document.getElementById('cuerpoTabla');
+
+      // Muestra el indicador de carga y oculta el resto
+      cargando.style.display   = 'block';
+      tabla.style.display      = 'none';
+      tablaVacia.style.display = 'none';
+
+      try {
+        const res  = await fetch('/api/contacto');
+        const data = await res.json();
+
+        cargando.style.display = 'none';
+
+        if (!data.exito || data.datos.length === 0) {
+          // No hay mensajes: muestra el estado vacío
+          tablaVacia.style.display = 'block';
+          return;
+        }
+
+        // Limpia las filas anteriores y construye las nuevas
+        cuerpoTabla.innerHTML = '';
+        data.datos.forEach(mensaje => {
+          cuerpoTabla.appendChild(crearFila(mensaje));
+        });
+
+        // Muestra la tabla con los datos
+        tabla.style.display = 'table';
+
+      } catch (error) {
+        cargando.style.display   = 'none';
+        tablaVacia.style.display = 'block';
+        console.error('Error al cargar mensajes:', error);
+      }
+    }
+
+    // -----------------------------------------------
+    // FUNCIÓN: Elimina un mensaje por su id
+    // Pide confirmación antes de proceder
+    // Actualiza la tabla sin recargar la página
+    // -----------------------------------------------
+    async function eliminarMensaje(id, filaElement) {
+      // Pide confirmación antes de eliminar
+      const confirmar = confirm(`¿Estás seguro de que quieres eliminar el mensaje #${id}? Esta acción no se puede deshacer.`);
+
+      if (!confirmar) return;
+
+      try {
+        const res  = await fetch(`/api/contacto/${id}`, { method: 'DELETE' });
+        const data = await res.json();
+
+        if (data.exito) {
+          // Elimina la fila de la tabla con una animación de fade
+          filaElement.style.transition = 'opacity 0.3s';
+          filaElement.style.opacity   = '0';
+          setTimeout(() => {
+            filaElement.remove();
+
+            // Si ya no hay filas, muestra el estado vacío
+            const cuerpo = document.getElementById('cuerpoTabla');
+            if (cuerpo.children.length === 0) {
+              document.getElementById('tablaMensajes').style.display = 'none';
+              document.getElementById('tablaVacia').style.display    = 'block';
+            }
+          }, 300);
+
+          // Recarga las estadísticas para reflejar el cambio
+          cargarEstadisticas();
+        } else {
+          alert('Error al eliminar: ' + data.error);
+        }
+
+      } catch (error) {
+        alert('No se pudo conectar con el servidor.');
+        console.error('Error al eliminar mensaje:', error);
+      }
+    }
+
+    // -----------------------------------------------
+    // FUNCIÓN AUXILIAR: Escapa caracteres HTML
+    // para evitar inyección de código en la tabla
+    // -----------------------------------------------
+    function escapeHtml(texto) {
+      const div = document.createElement('div');
+      div.appendChild(document.createTextNode(texto));
+      return div.innerHTML;
+    }
+
+    // -----------------------------------------------
+    // INICIALIZACIÓN
+    // Carga datos al abrir la página y conecta
+    // el botón de actualizar
+    // -----------------------------------------------
+    document.addEventListener('DOMContentLoaded', () => {
+      // Carga inicial de estadísticas y mensajes
+      cargarEstadisticas();
+      cargarMensajes();
+
+      // El botón "Actualizar" recarga ambos sin recargar la página
+      document.getElementById('btnActualizar').addEventListener('click', () => {
+        cargarEstadisticas();
+        cargarMensajes();
+      });
+    });
+
+  </script>
+
+</body>
+</html>

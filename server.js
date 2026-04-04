@@ -13,7 +13,9 @@ const {
   guardarMensaje,
   obtenerMensajes,
   eliminarMensaje,
-  contarMensajes
+  contarMensajes,
+  contarMensajesHoy,
+  obtenerMensajeReciente
 } = require('./db/database');
 
 // Inicialización de la aplicación Express
@@ -97,6 +99,24 @@ app.get('/api/contacto/count', (_req, res) => {
   res.json({
     exito: true,
     total
+  });
+});
+
+/**
+ * GET /api/contacto/stats
+ * Devuelve estadísticas del panel de administración:
+ * total de mensajes, mensajes de hoy, y el mensaje más reciente
+ */
+app.get('/api/contacto/stats', (_req, res) => {
+  const total          = contarMensajes();
+  const hoy            = contarMensajesHoy();
+  const mensajeReciente = obtenerMensajeReciente();
+
+  res.json({
+    exito: true,
+    total,
+    hoy,
+    reciente: mensajeReciente || null
   });
 });
 

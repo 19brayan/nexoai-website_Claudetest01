@@ -116,11 +116,40 @@ function contarMensajes() {
   return consulta.get().total;
 }
 
+/**
+ * Cuenta cuántos mensajes fueron recibidos hoy (día actual).
+ * Compara la fecha de cada mensaje con la fecha de hoy en formato local.
+ * @returns {number} Cantidad de mensajes recibidos hoy
+ */
+function contarMensajesHoy() {
+  const consulta = db.prepare(`
+    SELECT COUNT(*) AS total FROM mensajes
+    WHERE date(fecha) = date('now', 'localtime')
+  `);
+  return consulta.get().total;
+}
+
+/**
+ * Devuelve el mensaje más reciente registrado en la base de datos.
+ * Útil para mostrar en el dashboard del panel de administración.
+ * @returns {object|undefined} El mensaje más reciente, o undefined si no hay ninguno
+ */
+function obtenerMensajeReciente() {
+  const consulta = db.prepare(`
+    SELECT * FROM mensajes
+    ORDER BY id DESC
+    LIMIT 1
+  `);
+  return consulta.get();
+}
+
 // Exporta todas las funciones para que server.js pueda usarlas
 module.exports = {
   guardarMensaje,
   obtenerMensajes,
   obtenerMensajePorId,
   eliminarMensaje,
-  contarMensajes
+  contarMensajes,
+  contarMensajesHoy,
+  obtenerMensajeReciente
 };
