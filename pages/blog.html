@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Blog — NexoAI</title>
+
+  <!-- CSS global compartido; ../ sube un nivel desde pages/ -->
+  <link rel="stylesheet" href="../css/styles.css" />
+</head>
+
+<body>
+
+  <!-- =============================================
+       HEADER — Mismo en todas las páginas del sitio
+  ============================================= -->
+  <header>
+    <nav>
+      <a href="../index.html" class="logo">Nexo<span>AI</span></a>
+
+      <ul class="nav-links" id="navLinks">
+        <li><a href="../index.html">Inicio</a></li>
+        <li><a href="servicios.html">Servicios</a></li>
+        <li><a href="nosotros.html">Nosotros</a></li>
+        <li><a href="blog.html">Blog</a></li>
+        <li><a href="testimonios.html">Testimonios</a></li>
+        <li><a href="../index.html#contacto">Contacto</a></li>
+      </ul>
+
+      <button class="menu-toggle" id="menuToggle" aria-label="Abrir menú">
+        <span></span>
+        <span></span>
+        <span></span>
+      </button>
+    </nav>
+  </header>
+
+  <!-- =============================================
+       HERO DE PÁGINA — Banner compacto del blog
+  ============================================= -->
+  <section class="page-hero">
+    <span class="hero-badge">✦ Ideas, tendencias y recursos</span>
+    <h1>Blog de NexoAI</h1>
+    <p>Artículos sobre inteligencia artificial, software y transformación digital.</p>
+  </section>
+
+  <!-- =============================================
+       LISTADO DE ARTÍCULOS
+       Tres tarjetas con imagen placeholder, título,
+       fecha, resumen y botón "Leer más"
+  ============================================= -->
+  <section class="blog-section">
+
+    <div class="blog-grid">
+
+      <!-- Tarjeta artículo 1 -->
+      <article class="blog-card">
+
+        <!-- Imagen placeholder con ícono temático -->
+        <div class="blog-card-img">
+          <svg viewBox="0 0 24 24">
+            <circle cx="12" cy="12" r="3"/>
+            <line x1="12" y1="2" x2="12" y2="9"/>
+            <line x1="12" y1="15" x2="12" y2="22"/>
+            <line x1="2" y1="12" x2="9" y2="12"/>
+            <line x1="15" y1="12" x2="22" y2="12"/>
+          </svg>
+        </div>
+
+        <div class="blog-card-body">
+          <span class="blog-card-tag">Herramientas</span>
+          <p class="blog-card-fecha">📅 15 de marzo, 2026</p>
+          <h3>5 herramientas de IA que todo emprendedor necesita en 2026</h3>
+          <p class="blog-card-resumen">
+            La inteligencia artificial ya no es exclusiva de las grandes corporaciones.
+            Descubre las 5 herramientas que están transformando la forma en que los emprendedores trabajan.
+          </p>
+          <!-- El enlace apunta a blog/ que está en la raíz, un nivel arriba de pages/ -->
+          <a href="../blog/articulo-1.html" class="btn-secondary">Leer más →</a>
+        </div>
+
+      </article>
+
+      <!-- Tarjeta artículo 2 -->
+      <article class="blog-card">
+
+        <div class="blog-card-img" style="background: linear-gradient(135deg, #0f3460, #6C63FF);">
+          <svg viewBox="0 0 24 24">
+            <line x1="18" y1="20" x2="18" y2="10"/>
+            <line x1="12" y1="20" x2="12" y2="4"/>
+            <line x1="6" y1="20" x2="6" y2="14"/>
+          </svg>
+        </div>
+
+        <div class="blog-card-body">
+          <span class="blog-card-tag">Automatización</span>
+          <p class="blog-card-fecha">📅 22 de marzo, 2026</p>
+          <h3>Cómo la automatización con IA puede reducir costos un 40%</h3>
+          <p class="blog-card-resumen">
+            Empresas de todos los tamaños están usando IA para eliminar tareas repetitivas y reducir
+            sus costos operativos. Te mostramos cómo lo hacen con casos reales.
+          </p>
+          <a href="../blog/articulo-2.html" class="btn-secondary">Leer más →</a>
+        </div>
+
+      </article>
+
+      <!-- Tarjeta artículo 3 -->
+      <article class="blog-card">
+
+        <div class="blog-card-img" style="background: linear-gradient(135deg, #16213e, #4facfe);">
+          <svg viewBox="0 0 24 24">
+            <polyline points="16 18 22 12 16 6"/>
+            <polyline points="8 6 2 12 8 18"/>
+          </svg>
+        </div>
+
+        <div class="blog-card-body">
+          <span class="blog-card-tag">Tendencias</span>
+          <p class="blog-card-fecha">📅 29 de marzo, 2026</p>
+          <h3>El futuro del desarrollo de software con agentes de IA</h3>
+          <p class="blog-card-resumen">
+            Los agentes de IA están redefiniendo cómo se construye software. Analizamos hacia dónde
+            va la industria y qué significa esto para los equipos de desarrollo.
+          </p>
+          <a href="../blog/articulo-3.html" class="btn-secondary">Leer más →</a>
+        </div>
+
+      </article>
+
+    </div>
+  </section>
+
+  <!-- =============================================
+       FOOTER — Copyright y redes sociales
+  ============================================= -->
+  <footer>
+    <div class="footer-inner">
+      <div class="footer-logo">Nexo<span>AI</span></div>
+      <p class="footer-copy">© 2026 NexoAI. Todos los derechos reservados.</p>
+      <div class="social-links">
+        <a href="#" aria-label="LinkedIn">
+          <svg viewBox="0 0 24 24">
+            <path d="M16 8a6 6 0 0 1 6 6v7h-4v-7a2 2 0 0 0-2-2 2 2 0 0 0-2 2v7h-4v-7a6 6 0 0 1 6-6z"/>
+            <rect x="2" y="9" width="4" height="12"/>
+            <circle cx="4" cy="4" r="2"/>
+          </svg>
+        </a>
+        <a href="#" aria-label="Twitter">
+          <svg viewBox="0 0 24 24">
+            <path d="M4 4l16 16M4 20L20 4"/>
+          </svg>
+        </a>
+        <a href="#" aria-label="Instagram">
+          <svg viewBox="0 0 24 24">
+            <rect x="2" y="2" width="20" height="20" rx="5" ry="5"/>
+            <circle cx="12" cy="12" r="4"/>
+            <circle cx="17.5" cy="6.5" r="1" fill="white" stroke="none"/>
+          </svg>
+        </a>
+      </div>
+    </div>
+  </footer>
+
+  <!-- Script principal: menú móvil y enlace activo -->
+  <script src="../js/main.js"></script>
+
+</body>
+</html>
