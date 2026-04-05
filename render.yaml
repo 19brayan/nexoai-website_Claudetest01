@@ -1,0 +1,16 @@
+# =============================================
+# RENDER.YAML — Configuración de despliegue para Render.com
+#
+# Este archivo le indica a Render cómo construir
+# y ejecutar el servidor de NexoAI automáticamente.
+# =============================================
+
+services:
+  - type: web                        # Tipo: servicio web con HTTP
+    name: nexoai                     # Nombre del servicio en el dashboard de Render
+    runtime: node                    # Entorno de ejecución: Node.js
+    buildCommand: npm install        # Instala las dependencias del proyecto
+    startCommand: npm start          # Arranca el servidor con: node server.js
+    envVars:
+      - key: NODE_ENV
+        value: production            # Indica que es entorno de producción
