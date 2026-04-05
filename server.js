@@ -7,6 +7,7 @@
 // =============================================
 
 const express = require('express'); // Framework para crear el servidor web
+const jwt     = require('jsonwebtoken'); // Para crear y verificar tokens JWT
 
 // Importa las funciones de acceso a la base de datos SQLite
 const {
@@ -15,8 +16,14 @@ const {
   eliminarMensaje,
   contarMensajes,
   contarMensajesHoy,
-  obtenerMensajeReciente
+  obtenerMensajeReciente,
+  buscarUsuarioPorUsername,
+  verificarPassword
 } = require('./db/database');
+
+// Clave secreta para firmar los tokens JWT
+// En producción esto debe estar en una variable de entorno (.env)
+const JWT_SECRET = 'nexoai_secret_2026';
 
 // Inicialización de la aplicación Express
 const app  = express();
@@ -33,6 +40,114 @@ app.use(express.json());
 // Sirve todos los archivos estáticos del proyecto (HTML, CSS, JS)
 // desde la carpeta raíz del proyecto
 app.use(express.static(__dirname));
+
+// =============================================
+// MIDDLEWARE DE AUTENTICACIÓN
+// Verifica que el token JWT sea válido antes de
+// permitir acceso a rutas protegidas
+// =============================================
+
+/**
+ * Middleware que verifica el token JWT en el header Authorization.
+ * Si el token es válido, agrega el usuario a req.usuario y continúa.
+ * Si no, responde con error 401 (No autorizado).
+ */
+function verificarToken(req, res, next) {
+  // El token viene en el header: "Authorization: Bearer <token>"
+  const authHeader = req.headers['authorization'];
+  const token      = authHeader && authHeader.split(' ')[1];
+
+  // Si no hay token, rechaza la petición
+  if (!token) {
+    return res.status(401).json({
+      exito: false,
+      error: 'Acceso no autorizado. Se requiere token de sesión.'
+    });
+  }
+
+  // Verifica que el token sea válido y no haya expirado
+  jwt.verify(token, JWT_SECRET, (err, usuario) => {
+    if (err) {
+      return res.status(401).json({
+        exito: false,
+        error: 'Token inválido o expirado. Inicia sesión nuevamente.'
+      });
+    }
+
+    // Guarda los datos del usuario en la petición para usarlos en la ruta
+    req.usuario = usuario;
+    next(); // Pasa al siguiente middleware o ruta
+  });
+}
+
+// =============================================
+// RUTAS DE AUTENTICACIÓN
+// Login y verificación de token JWT
+// =============================================
+
+/**
+ * POST /api/auth/login
+ * Recibe: { username, password }
+ * Verifica las credenciales y devuelve un token JWT si son correctas
+ */
+app.post('/api/auth/login', (req, res) => {
+  const { username, password } = req.body;
+
+  // Validación básica de campos
+  if (!username || !password) {
+    return res.status(400).json({
+      exito: false,
+      error: 'El usuario y la contraseña son obligatorios.'
+    });
+  }
+
+  // Busca el usuario en la base de datos
+  const usuario = buscarUsuarioPorUsername(username.trim());
+
+  // Si no existe el usuario o la contraseña es incorrecta, mismo error
+  // (no revelar cuál de los dos falló por seguridad)
+  if (!usuario || !verificarPassword(password, usuario.password_hash)) {
+    return res.status(401).json({
+      exito: false,
+      error: 'Usuario o contraseña incorrectos.'
+    });
+  }
+
+  // Genera un token JWT con los datos del usuario
+  // El token expira en 8 horas (tiempo de una jornada laboral)
+  const token = jwt.sign(
+    {
+      id:       usuario.id,
+      username: usuario.username,
+      nombre:   usuario.nombre,
+      rol:      usuario.rol
+    },
+    JWT_SECRET,
+    { expiresIn: '8h' }
+  );
+
+  console.log(`[AUTH] Login exitoso: ${usuario.username}`);
+
+  res.json({
+    exito:  true,
+    token,
+    nombre: usuario.nombre,
+    rol:    usuario.rol
+  });
+});
+
+/**
+ * GET /api/auth/verify
+ * Verifica si el token JWT del header es válido
+ * Usado por el panel admin al cargar para saber si la sesión sigue activa
+ */
+app.get('/api/auth/verify', verificarToken, (req, res) => {
+  // Si llegó aquí, el token es válido (el middleware lo verificó)
+  res.json({
+    exito:   true,
+    usuario: req.usuario
+  });
+});
 
 // =============================================
 // RUTAS DE LA API
@@ -106,8 +221,9 @@ app.get('/api/contacto/count', (_req, res) => {
  * GET /api/contacto/stats
  * Devuelve estadísticas del panel de administración:
  * total de mensajes, mensajes de hoy, y el mensaje más reciente
+ * PROTEGIDA: requiere token JWT válido
  */
-app.get('/api/contacto/stats', (_req, res) => {
+app.get('/api/contacto/stats', verificarToken, (_req, res) => {
   const total          = contarMensajes();
   const hoy            = contarMensajesHoy();
   const mensajeReciente = obtenerMensajeReciente();
@@ -124,8 +240,9 @@ app.get('/api/contacto/stats', (_req, res) => {
  * DELETE /api/contacto/:id
  * Elimina un mensaje de la base de datos por su id
  * :id es un parámetro dinámico en la URL (ej: /api/contacto/5)
+ * PROTEGIDA: requiere token JWT válido
  */
-app.delete('/api/contacto/:id', (req, res) => {
+app.delete('/api/contacto/:id', verificarToken, (req, res) => {
   // Convierte el id de string a número entero
   const id = parseInt(req.params.id, 10);
 

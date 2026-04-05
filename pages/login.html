@@ -1,0 +1,333 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Iniciar sesión — NexoAI</title>
+
+  <style>
+    /* =============================================
+       VARIABLES Y RESET
+       Paleta oscura del área de administración
+    ============================================= */
+    :root {
+      --bg-principal: #0d0d1a;
+      --bg-tarjeta:   #13132a;
+      --morado:       #6C63FF;
+      --morado-claro: #8f88ff;
+      --blanco:       #ffffff;
+      --gris-texto:   #a0a0c0;
+      --borde:        rgba(108, 99, 255, 0.25);
+      --rojo:         #e74c3c;
+    }
+
+    *, *::before, *::after {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Segoe UI', Arial, sans-serif;
+      background-color: var(--bg-principal);
+      color: var(--blanco);
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 1.5rem;
+    }
+
+    /* =============================================
+       TARJETA DE LOGIN
+       Formulario centrado con diseño oscuro
+    ============================================= */
+    .login-card {
+      background: var(--bg-tarjeta);
+      border: 1px solid var(--borde);
+      border-radius: 16px;
+      padding: 2.5rem 2rem;
+      width: 100%;
+      max-width: 400px;
+      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.4);
+    }
+
+    /* Logo de NexoAI centrado en la parte superior */
+    .login-logo {
+      text-align: center;
+      margin-bottom: 0.5rem;
+      font-size: 1.6rem;
+      font-weight: 800;
+      color: var(--blanco);
+    }
+
+    .login-logo span {
+      color: var(--morado);
+    }
+
+    /* Badge de área privada */
+    .login-badge {
+      text-align: center;
+      margin-bottom: 2rem;
+    }
+
+    .login-badge span {
+      display: inline-block;
+      background: rgba(108, 99, 255, 0.15);
+      border: 1px solid var(--borde);
+      color: var(--morado-claro);
+      font-size: 0.72rem;
+      font-weight: 700;
+      letter-spacing: 1.5px;
+      text-transform: uppercase;
+      padding: 0.25rem 0.8rem;
+      border-radius: 50px;
+    }
+
+    /* Título del formulario */
+    .login-titulo {
+      font-size: 1.2rem;
+      font-weight: 700;
+      margin-bottom: 0.3rem;
+    }
+
+    .login-subtitulo {
+      font-size: 0.85rem;
+      color: var(--gris-texto);
+      margin-bottom: 1.8rem;
+    }
+
+    /* Grupos de campo: etiqueta + input */
+    .form-group {
+      display: flex;
+      flex-direction: column;
+      gap: 0.4rem;
+      margin-bottom: 1.1rem;
+    }
+
+    .form-group label {
+      font-size: 0.82rem;
+      font-weight: 600;
+      color: var(--gris-texto);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .form-group input {
+      background: rgba(255,255,255,0.05);
+      border: 1.5px solid rgba(255,255,255,0.1);
+      border-radius: 8px;
+      padding: 0.8rem 1rem;
+      font-size: 0.95rem;
+      font-family: inherit;
+      color: var(--blanco);
+      outline: none;
+      transition: border-color 0.2s, box-shadow 0.2s;
+    }
+
+    .form-group input:focus {
+      border-color: var(--morado);
+      box-shadow: 0 0 0 3px rgba(108, 99, 255, 0.15);
+    }
+
+    .form-group input::placeholder {
+      color: rgba(255,255,255,0.25);
+    }
+
+    /* Mensaje de error en rojo (oculto por defecto) */
+    .error-msg {
+      display: none;
+      background: rgba(231, 76, 60, 0.1);
+      border: 1px solid var(--rojo);
+      color: var(--rojo);
+      border-radius: 8px;
+      padding: 0.7rem 1rem;
+      font-size: 0.85rem;
+      font-weight: 500;
+      margin-bottom: 1rem;
+      text-align: center;
+    }
+
+    .error-msg.visible {
+      display: block;
+    }
+
+    /* Botón de iniciar sesión */
+    .btn-login {
+      width: 100%;
+      background: var(--morado);
+      color: var(--blanco);
+      border: none;
+      border-radius: 8px;
+      padding: 0.9rem;
+      font-size: 1rem;
+      font-weight: 700;
+      font-family: inherit;
+      cursor: pointer;
+      transition: background 0.2s, transform 0.15s, box-shadow 0.2s;
+      box-shadow: 0 4px 20px rgba(108, 99, 255, 0.35);
+    }
+
+    .btn-login:hover {
+      background: var(--morado-claro);
+      transform: translateY(-1px);
+    }
+
+    .btn-login:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+      transform: none;
+    }
+
+    /* Enlace para volver al sitio público */
+    .login-footer {
+      text-align: center;
+      margin-top: 1.5rem;
+      font-size: 0.82rem;
+      color: var(--gris-texto);
+    }
+
+    .login-footer a {
+      color: var(--morado-claro);
+      text-decoration: none;
+    }
+
+    .login-footer a:hover {
+      text-decoration: underline;
+    }
+  </style>
+</head>
+
+<body>
+
+  <!-- =============================================
+       TARJETA DE LOGIN
+       Formulario centrado para acceder al panel admin
+  ============================================= -->
+  <div class="login-card">
+
+    <!-- Logo de NexoAI -->
+    <div class="login-logo">Nexo<span>AI</span></div>
+    <div class="login-badge"><span>Área privada</span></div>
+
+    <h1 class="login-titulo">Iniciar sesión</h1>
+    <p class="login-subtitulo">Accede al panel de administración</p>
+
+    <!-- Mensaje de error (se muestra si las credenciales son incorrectas) -->
+    <div class="error-msg" id="errorMsg">Usuario o contraseña incorrectos.</div>
+
+    <!-- Formulario de login -->
+    <form id="loginForm" novalidate>
+
+      <!-- Campo: nombre de usuario -->
+      <div class="form-group">
+        <label for="username">Usuario</label>
+        <input
+          type="text"
+          id="username"
+          name="username"
+          placeholder="admin"
+          autocomplete="username"
+          required
+        />
+      </div>
+
+      <!-- Campo: contraseña -->
+      <div class="form-group">
+        <label for="password">Contraseña</label>
+        <input
+          type="password"
+          id="password"
+          name="password"
+          placeholder="••••••••"
+          autocomplete="current-password"
+          required
+        />
+      </div>
+
+      <button type="submit" class="btn-login" id="btnLogin">Iniciar sesión</button>
+
+    </form>
+
+    <!-- Enlace para regresar al sitio público -->
+    <div class="login-footer">
+      <a href="../index.html">← Volver al sitio</a>
+    </div>
+
+  </div>
+
+  <!-- =============================================
+       JAVASCRIPT DEL LOGIN
+       Envía las credenciales a la API, guarda el token
+       JWT en localStorage y redirige al panel admin
+  ============================================= -->
+  <script>
+
+    // Si ya hay un token válido guardado, redirige directo al admin
+    const tokenGuardado = localStorage.getItem('nexoai_token');
+    if (tokenGuardado) {
+      // Verifica que el token siga siendo válido antes de redirigir
+      fetch('/api/auth/verify', {
+        headers: { 'Authorization': `Bearer ${tokenGuardado}` }
+      })
+      .then(res => res.json())
+      .then(data => {
+        if (data.exito) window.location.href = 'admin.html';
+      })
+      .catch(() => {
+        // Si falla la verificación, elimina el token inválido
+        localStorage.removeItem('nexoai_token');
+      });
+    }
+
+    // Maneja el envío del formulario de login
+    document.getElementById('loginForm').addEventListener('submit', async (e) => {
+      e.preventDefault(); // Evita recarga de página
+
+      const username  = document.getElementById('username').value.trim();
+      const password  = document.getElementById('password').value;
+      const errorMsg  = document.getElementById('errorMsg');
+      const btnLogin  = document.getElementById('btnLogin');
+
+      // Oculta el error anterior y deshabilita el botón mientras espera
+      errorMsg.classList.remove('visible');
+      btnLogin.disabled    = true;
+      btnLogin.textContent = 'Verificando...';
+
+      try {
+        // Envía las credenciales a la API de autenticación
+        const res  = await fetch('/api/auth/login', {
+          method:  'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body:    JSON.stringify({ username, password })
+        });
+
+        const data = await res.json();
+
+        if (data.exito) {
+          // Guarda el token JWT en localStorage para usarlo en el admin
+          localStorage.setItem('nexoai_token', data.token);
+
+          // Redirige automáticamente al panel de administración
+          window.location.href = 'admin.html';
+        } else {
+          // Muestra el error SIN recargar la página
+          errorMsg.textContent = data.error || 'Usuario o contraseña incorrectos.';
+          errorMsg.classList.add('visible');
+          btnLogin.disabled    = false;
+          btnLogin.textContent = 'Iniciar sesión';
+        }
+
+      } catch (error) {
+        // Error de red: el servidor no está disponible
+        errorMsg.textContent = 'No se pudo conectar con el servidor.';
+        errorMsg.classList.add('visible');
+        btnLogin.disabled    = false;
+        btnLogin.textContent = 'Iniciar sesión';
+      }
+    });
+
+  </script>
+
+</body>
+</html>

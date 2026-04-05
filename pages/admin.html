@@ -96,6 +96,31 @@
       color: var(--blanco);
     }
 
+    /* Grupo de botones en el header */
+    .header-acciones {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+    }
+
+    /* Botón de cerrar sesión */
+    .btn-logout {
+      background: rgba(231, 76, 60, 0.15);
+      border: 1px solid var(--rojo);
+      color: var(--rojo);
+      padding: 0.35rem 0.9rem;
+      border-radius: 6px;
+      font-size: 0.82rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+
+    .btn-logout:hover {
+      background: var(--rojo);
+      color: var(--blanco);
+    }
+
     /* =============================================
        LAYOUT PRINCIPAL
        Contenedor centrado con padding generoso
@@ -363,8 +388,11 @@
       Nexo<span>AI</span>
       <span class="admin-badge">Admin</span>
     </div>
-    <!-- Enlace para regresar al sitio público -->
-    <a href="../index.html" class="volver">← Volver al sitio</a>
+    <!-- Acciones del header: volver al sitio y cerrar sesión -->
+    <div class="header-acciones">
+      <a href="../index.html" class="volver">← Volver al sitio</a>
+      <button class="btn-logout" id="btnLogout">Cerrar sesión</button>
+    </div>
   </header>
 
   <!-- =============================================
@@ -451,14 +479,69 @@
   <script>
 
     // -----------------------------------------------
+    // AUTENTICACIÓN
+    // Obtiene el token del localStorage y redirige
+    // al login si no existe o es inválido
+    // -----------------------------------------------
+    const TOKEN = localStorage.getItem('nexoai_token');
+
+    // Si no hay token, redirige inmediatamente al login
+    if (!TOKEN) {
+      window.location.href = 'login.html';
+    }
+
+    /**
+     * Función auxiliar para hacer fetch con el token JWT
+     * en el header Authorization automáticamente
+     */
+    function fetchConToken(url, opciones = {}) {
+      return fetch(url, {
+        ...opciones,
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${TOKEN}`,
+          ...(opciones.headers || {})
+        }
+      });
+    }
+
+    /**
+     * Cierra la sesión: elimina el token y redirige al login
+     */
+    function cerrarSesion() {
+      localStorage.removeItem('nexoai_token');
+      window.location.href = 'login.html';
+    }
+
+    // -----------------------------------------------
+    // FUNCIÓN: Verifica el token al cargar la página
+    // Si es inválido o expiró, redirige al login
+    // -----------------------------------------------
+    async function verificarSesion() {
+      try {
+        const res = await fetchConToken('/api/auth/verify');
+
+        // Si el token no es válido, redirige al login
+        if (!res.ok) {
+          cerrarSesion();
+        }
+      } catch {
+        cerrarSesion();
+      }
+    }
+
+    // -----------------------------------------------
     // FUNCIÓN: Carga las estadísticas desde la API
     // y actualiza las 3 tarjetas del dashboard
     // -----------------------------------------------
     async function cargarEstadisticas() {
       try {
-        const res  = await fetch('/api/contacto/stats');
-        const data = await res.json();
+        const res  = await fetchConToken('/api/contacto/stats');
 
+        // Si el servidor rechaza el token, cierra la sesión
+        if (res.status === 401) { cerrarSesion(); return; }
+
+        const data = await res.json();
         if (!data.exito) return;
 
         // Actualiza el total de mensajes
@@ -512,35 +595,33 @@
     // y construye la tabla dinámicamente
     // -----------------------------------------------
     async function cargarMensajes() {
-      const cargando     = document.getElementById('cargando');
-      const tabla        = document.getElementById('tablaMensajes');
-      const tablaVacia   = document.getElementById('tablaVacia');
-      const cuerpoTabla  = document.getElementById('cuerpoTabla');
+      const cargando    = document.getElementById('cargando');
+      const tabla       = document.getElementById('tablaMensajes');
+      const tablaVacia  = document.getElementById('tablaVacia');
+      const cuerpoTabla = document.getElementById('cuerpoTabla');
 
-      // Muestra el indicador de carga y oculta el resto
       cargando.style.display   = 'block';
       tabla.style.display      = 'none';
       tablaVacia.style.display = 'none';
 
       try {
+        // La ruta GET /api/contacto no requiere token (es pública)
         const res  = await fetch('/api/contacto');
         const data = await res.json();
 
         cargando.style.display = 'none';
 
         if (!data.exito || data.datos.length === 0) {
-          // No hay mensajes: muestra el estado vacío
           tablaVacia.style.display = 'block';
           return;
         }
 
-        // Limpia las filas anteriores y construye las nuevas
+        // Limpia filas anteriores y construye las nuevas
         cuerpoTabla.innerHTML = '';
         data.datos.forEach(mensaje => {
           cuerpoTabla.appendChild(crearFila(mensaje));
         });
 
-        // Muestra la tabla con los datos
         tabla.style.display = 'table';
 
       } catch (error) {
@@ -552,27 +633,22 @@
 
     // -----------------------------------------------
     // FUNCIÓN: Elimina un mensaje por su id
-    // Pide confirmación antes de proceder
-    // Actualiza la tabla sin recargar la página
+    // Pide confirmación, usa token en el header
     // -----------------------------------------------
     async function eliminarMensaje(id, filaElement) {
-      // Pide confirmación antes de eliminar
       const confirmar = confirm(`¿Estás seguro de que quieres eliminar el mensaje #${id}? Esta acción no se puede deshacer.`);
-
       if (!confirmar) return;
 
       try {
-        const res  = await fetch(`/api/contacto/${id}`, { method: 'DELETE' });
+        const res  = await fetchConToken(`/api/contacto/${id}`, { method: 'DELETE' });
         const data = await res.json();
 
         if (data.exito) {
-          // Elimina la fila de la tabla con una animación de fade
+          // Animación de fade al eliminar la fila
           filaElement.style.transition = 'opacity 0.3s';
           filaElement.style.opacity   = '0';
           setTimeout(() => {
             filaElement.remove();
-
-            // Si ya no hay filas, muestra el estado vacío
             const cuerpo = document.getElementById('cuerpoTabla');
             if (cuerpo.children.length === 0) {
               document.getElementById('tablaMensajes').style.display = 'none';
@@ -580,7 +656,6 @@
             }
           }, 300);
 
-          // Recarga las estadísticas para reflejar el cambio
           cargarEstadisticas();
         } else {
           alert('Error al eliminar: ' + data.error);
@@ -604,18 +679,25 @@
 
     // -----------------------------------------------
     // INICIALIZACIÓN
-    // Carga datos al abrir la página y conecta
-    // el botón de actualizar
+    // Verifica sesión, carga datos y conecta botones
     // -----------------------------------------------
-    document.addEventListener('DOMContentLoaded', () => {
+    document.addEventListener('DOMContentLoaded', async () => {
+      // Verifica que el token sea válido antes de mostrar el panel
+      await verificarSesion();
+
       // Carga inicial de estadísticas y mensajes
       cargarEstadisticas();
       cargarMensajes();
 
-      // El botón "Actualizar" recarga ambos sin recargar la página
+      // Botón de actualizar datos sin recargar la página
       document.getElementById('btnActualizar').addEventListener('click', () => {
         cargarEstadisticas();
         cargarMensajes();
+      });
+
+      // Botón de cerrar sesión: elimina el token y redirige al login
+      document.getElementById('btnLogout').addEventListener('click', () => {
+        if (confirm('¿Cerrar sesión?')) cerrarSesion();
       });
     });
 

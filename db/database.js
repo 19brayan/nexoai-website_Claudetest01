@@ -9,6 +9,7 @@
 
 const Database = require('better-sqlite3'); // Librería SQLite síncrona para Node.js
 const path     = require('path');            // Para construir rutas de archivo
+const bcrypt   = require('bcryptjs');        // Para encriptar y verificar contraseñas
 
 // Ruta donde se guardará el archivo de base de datos SQLite
 // __dirname apunta a la carpeta db/ donde está este archivo
@@ -36,6 +37,19 @@ db.exec(`
     email   TEXT    NOT NULL,
     mensaje TEXT    NOT NULL,
     fecha   TEXT    NOT NULL DEFAULT (datetime('now', 'localtime'))
+  )
+`);
+
+// Crea la tabla "usuarios" para el sistema de autenticación
+// Solo se crea si no existe, lo que hace seguro reiniciar el servidor
+db.exec(`
+  CREATE TABLE IF NOT EXISTS usuarios (
+    id               INTEGER PRIMARY KEY AUTOINCREMENT,
+    username         TEXT    NOT NULL UNIQUE,
+    password_hash    TEXT    NOT NULL,
+    nombre           TEXT    NOT NULL,
+    rol              TEXT    NOT NULL DEFAULT 'admin',
+    fecha_creacion   TEXT    NOT NULL DEFAULT (datetime('now', 'localtime'))
   )
 `);
 
@@ -143,6 +157,62 @@ function obtenerMensajeReciente() {
   return consulta.get();
 }
 
+// =============================================
+// FUNCIONES DE AUTENTICACIÓN
+// Manejo de usuarios: registro, búsqueda y verificación
+// =============================================
+
+/**
+ * Registra un nuevo usuario encriptando su contraseña antes de guardarla.
+ * Nunca se guarda la contraseña en texto plano, solo el hash.
+ * @param {string} username - Nombre de usuario único
+ * @param {string} password - Contraseña en texto plano (se encripta aquí)
+ * @param {string} nombre   - Nombre completo para mostrar
+ * @param {string} rol      - Rol del usuario (por defecto: 'admin')
+ * @returns {object} El usuario creado (sin el hash de contraseña)
+ */
+function registrarUsuario(username, password, nombre, rol = 'admin') {
+  // Encripta la contraseña con un costo de 10 rondas de hashing
+  // Cuanto mayor el número, más seguro pero más lento
+  const password_hash = bcrypt.hashSync(password, 10);
+
+  const insertar = db.prepare(`
+    INSERT INTO usuarios (username, password_hash, nombre, rol)
+    VALUES (@username, @password_hash, @nombre, @rol)
+  `);
+
+  const resultado = insertar.run({ username, password_hash, nombre, rol });
+
+  // Devuelve el usuario sin el hash de contraseña por seguridad
+  return buscarUsuarioPorUsername(username);
+}
+
+/**
+ * Busca un usuario por su nombre de usuario.
+ * Incluye el password_hash para poder verificarlo en el login.
+ * @param {string} username - El nombre de usuario a buscar
+ * @returns {object|undefined} El usuario encontrado, o undefined si no existe
+ */
+function buscarUsuarioPorUsername(username) {
+  const consulta = db.prepare(`
+    SELECT id, username, password_hash, nombre, rol, fecha_creacion
+    FROM usuarios
+    WHERE username = ?
+  `);
+  return consulta.get(username);
+}
+
+/**
+ * Verifica si una contraseña en texto plano coincide con el hash guardado.
+ * Usa bcrypt.compareSync para comparar de forma segura.
+ * @param {string} password      - Contraseña en texto plano ingresada por el usuario
+ * @param {string} password_hash - Hash guardado en la base de datos
+ * @returns {boolean} true si la contraseña es correcta, false si no
+ */
+function verificarPassword(password, password_hash) {
+  return bcrypt.compareSync(password, password_hash);
+}
+
 // Exporta todas las funciones para que server.js pueda usarlas
 module.exports = {
   guardarMensaje,
@@ -151,5 +221,8 @@ module.exports = {
   eliminarMensaje,
   contarMensajes,
   contarMensajesHoy,
-  obtenerMensajeReciente
+  obtenerMensajeReciente,
+  registrarUsuario,
+  buscarUsuarioPorUsername,
+  verificarPassword
 };

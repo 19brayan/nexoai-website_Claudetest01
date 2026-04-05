@@ -691,6 +691,19 @@ footer {
   opacity: 0.6;
 }
 
+/* Enlace discreto de acceso al panel de administración */
+.footer-admin-link {
+  font-size: 0.72rem;
+  color: rgba(255,255,255,0.2);
+  text-decoration: none;
+  transition: color 0.2s;
+  letter-spacing: 0.3px;
+}
+
+.footer-admin-link:hover {
+  color: rgba(255,255,255,0.5);
+}
+
 /* Íconos de redes sociales en el footer */
 .social-links {
   display: flex;
