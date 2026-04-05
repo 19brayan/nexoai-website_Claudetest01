@@ -27,7 +27,9 @@ const JWT_SECRET = 'nexoai_secret_2026';
 
 // Inicialización de la aplicación Express
 const app  = express();
-const PORT = 3001; // Puerto donde correrá el servidor
+// En Render, el puerto lo asigna la plataforma via variable de entorno PORT.
+// Si no existe (entorno local), usamos 3001 como respaldo.
+const PORT = process.env.PORT || 3001;
 
 // =============================================
 // MIDDLEWARE

@@ -54,6 +54,27 @@ db.exec(`
 `);
 
 // =============================================
+// SEED AUTOMÁTICO DEL USUARIO ADMINISTRADOR
+// Se ejecuta al arrancar el servidor.
+// Si el usuario "admin" ya existe, no hace nada.
+// Esto permite que Render configure todo solo en el
+// primer arranque sin necesidad de correr seed.js manualmente.
+// =============================================
+
+const adminExistente = db.prepare(`
+  SELECT id FROM usuarios WHERE username = 'admin'
+`).get();
+
+if (!adminExistente) {
+  const password_hash = bcrypt.hashSync('nexoai2026', 10);
+  db.prepare(`
+    INSERT INTO usuarios (username, password_hash, nombre, rol)
+    VALUES ('admin', ?, 'Administrador', 'admin')
+  `).run(password_hash);
+  console.log('[DB] Usuario admin creado automáticamente.');
+}
+
+// =============================================
 // FUNCIONES EXPORTADAS
 // Cada función representa una operación sobre
 // la tabla "mensajes"
