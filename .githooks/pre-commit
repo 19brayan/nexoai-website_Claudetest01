@@ -1,0 +1,49 @@
+#!/bin/bash
+# ============================================
+# HOOK PRE-COMMIT — Guardia de seguridad de NexoAI
+# Revisa cada commit antes de dejarlo pasar
+# ============================================
+
+echo "🔒 Guardia de seguridad revisando tu commit..."
+
+# Lista de palabras peligrosas que NO deberían estar en el código
+PALABRAS_PROHIBIDAS="password=|api_key=|secret=|API_KEY|SECRET_KEY|PRIVATE_KEY"
+
+# Revisar los archivos que están a punto de subirse
+ARCHIVOS_CON_PROBLEMAS=$(git diff --cached --name-only | while read archivo; do
+    # Solo revisar archivos de texto, no imágenes ni binarios
+    if file "$archivo" 2>/dev/null | grep -q "text"; then
+        # Buscar palabras peligrosas en el contenido nuevo
+        if git diff --cached "$archivo" | grep -iE "$PALABRAS_PROHIBIDAS" > /dev/null 2>&1; then
+            echo "$archivo"
+        fi
+    fi
+done)
+
+# Si encontró problemas, bloquear el commit
+if [ -n "$ARCHIVOS_CON_PROBLEMAS" ]; then
+    echo ""
+    echo "🚫 ¡COMMIT BLOQUEADO!"
+    echo "Se encontraron posibles contraseñas o claves secretas en:"
+    echo "$ARCHIVOS_CON_PROBLEMAS"
+    echo ""
+    echo "Revisa esos archivos y quita las credenciales antes de hacer commit."
+    echo "Si estás seguro de que es correcto, usa: git commit --no-verify"
+    exit 1
+fi
+
+# Revisar que no se suban archivos .env (donde se guardan secretos)
+ARCHIVOS_ENV=$(git diff --cached --name-only | grep -E "^\.env$|^\.env\." )
+
+if [ -n "$ARCHIVOS_ENV" ]; then
+    echo ""
+    echo "🚫 ¡COMMIT BLOQUEADO!"
+    echo "Estás intentando subir archivos .env que contienen secretos:"
+    echo "$ARCHIVOS_ENV"
+    echo ""
+    echo "Agrega estos archivos a .gitignore primero."
+    exit 1
+fi
+
+echo "✅ Todo limpio. Commit aprobado por el guardia de seguridad."
+exit 0
