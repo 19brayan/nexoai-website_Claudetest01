@@ -34,6 +34,18 @@ Antes de crear cualquier archivo, explicar:
 - **Qué** se va a crear.
 - **Por qué** es necesario crearlo.
 
+## Skills disponibles
+
+### Crear página nueva
+- Archivo: .claude/skills/crear-pagina.md
+- Uso: consultar SIEMPRE antes de crear cualquier página HTML nueva
+- Contiene: estructura, colores, header/footer, reglas de código y backend
+
+### Estándar de código
+- Archivo: .claude/skills/estandar-codigo.md
+- Uso: consultar en CUALQUIER modificación de código del proyecto
+- Contiene: reglas de frontend, backend, Git, seguridad
+
 ## Conexiones MCP
 
 ### GitHub
