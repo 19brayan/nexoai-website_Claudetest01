@@ -1,0 +1,349 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NexoAI - Planes y Precios</title>
+    <link rel="stylesheet" href="../css/styles.css">
+    <style>
+        /* Estilos específicos de la página de precios */
+        .precios-hero {
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+            padding: 80px 20px 40px;
+            text-align: center;
+        }
+
+        .precios-hero h1 {
+            color: #ffffff;
+            font-size: 2.5rem;
+            margin-bottom: 15px;
+        }
+
+        .precios-hero p {
+            color: #b0b0b0;
+            font-size: 1.2rem;
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        /* Contenedor de tarjetas de precios */
+        .planes-contenedor {
+            display: flex;
+            justify-content: center;
+            gap: 30px;
+            padding: 60px 20px;
+            background: #1a1a2e;
+            flex-wrap: wrap;
+        }
+
+        /* Tarjeta individual de plan */
+        .plan-tarjeta {
+            background: #16213e;
+            border-radius: 16px;
+            padding: 40px 30px;
+            width: 300px;
+            text-align: center;
+            border: 2px solid transparent;
+            transition: transform 0.3s ease, border-color 0.3s ease;
+        }
+
+        .plan-tarjeta:hover {
+            transform: translateY(-5px);
+        }
+
+        /* Plan destacado (Pro) */
+        .plan-tarjeta.destacado {
+            border-color: #6C63FF;
+            position: relative;
+        }
+
+        .plan-tarjeta.destacado::before {
+            content: "MÁS POPULAR";
+            position: absolute;
+            top: -12px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: #6C63FF;
+            color: #ffffff;
+            padding: 4px 20px;
+            border-radius: 20px;
+            font-size: 0.75rem;
+            font-weight: bold;
+            letter-spacing: 1px;
+        }
+
+        .plan-nombre {
+            color: #6C63FF;
+            font-size: 1.1rem;
+            font-weight: bold;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            margin-bottom: 20px;
+        }
+
+        .plan-precio {
+            color: #ffffff;
+            margin-bottom: 10px;
+        }
+
+        .plan-precio .cantidad {
+            font-size: 3rem;
+            font-weight: bold;
+        }
+
+        .plan-precio .moneda {
+            font-size: 1.5rem;
+            vertical-align: top;
+            margin-right: 5px;
+        }
+
+        .plan-precio .periodo {
+            color: #b0b0b0;
+            font-size: 1rem;
+        }
+
+        .plan-descripcion {
+            color: #b0b0b0;
+            font-size: 0.95rem;
+            margin-bottom: 30px;
+            min-height: 50px;
+        }
+
+        /* Lista de características */
+        .plan-features {
+            list-style: none;
+            padding: 0;
+            margin: 0 0 30px 0;
+            text-align: left;
+        }
+
+        .plan-features li {
+            color: #d0d0d0;
+            padding: 10px 0;
+            border-bottom: 1px solid #2a2a4a;
+            font-size: 0.95rem;
+        }
+
+        .plan-features li::before {
+            content: "✓ ";
+            color: #6C63FF;
+            font-weight: bold;
+            margin-right: 8px;
+        }
+
+        .plan-features li.no-incluido {
+            color: #555;
+            text-decoration: line-through;
+        }
+
+        .plan-features li.no-incluido::before {
+            content: "✗ ";
+            color: #555;
+        }
+
+        /* Botón de acción */
+        .plan-boton {
+            display: inline-block;
+            width: 100%;
+            padding: 14px 0;
+            border-radius: 8px;
+            font-size: 1rem;
+            font-weight: bold;
+            text-decoration: none;
+            text-align: center;
+            transition: background 0.3s ease;
+            cursor: pointer;
+            border: none;
+        }
+
+        .plan-boton.primario {
+            background: #6C63FF;
+            color: #ffffff;
+        }
+
+        .plan-boton.primario:hover {
+            background: #5a52d5;
+        }
+
+        .plan-boton.secundario {
+            background: transparent;
+            color: #6C63FF;
+            border: 2px solid #6C63FF;
+        }
+
+        .plan-boton.secundario:hover {
+            background: #6C63FF;
+            color: #ffffff;
+        }
+
+        /* Sección de preguntas frecuentes */
+        .faq-seccion {
+            background: #1a1a2e;
+            padding: 60px 20px;
+        }
+
+        .faq-seccion h2 {
+            color: #ffffff;
+            text-align: center;
+            font-size: 2rem;
+            margin-bottom: 40px;
+        }
+
+        .faq-contenedor {
+            max-width: 700px;
+            margin: 0 auto;
+        }
+
+        .faq-item {
+            border-bottom: 1px solid #2a2a4a;
+            padding: 20px 0;
+        }
+
+        .faq-pregunta {
+            color: #ffffff;
+            font-size: 1.1rem;
+            font-weight: bold;
+            margin-bottom: 10px;
+        }
+
+        .faq-respuesta {
+            color: #b0b0b0;
+            font-size: 0.95rem;
+            line-height: 1.6;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .precios-hero h1 {
+                font-size: 1.8rem;
+            }
+
+            .planes-contenedor {
+                flex-direction: column;
+                align-items: center;
+            }
+
+            .plan-tarjeta {
+                width: 100%;
+                max-width: 350px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Header con navegación (idéntico a las demás páginas) -->
+    <header>
+        <nav>
+            <div class="logo">NexoAI</div>
+            <button class="menu-toggle" aria-label="Abrir menú">☰</button>
+            <ul class="nav-links">
+                <li><a href="../index.html">Inicio</a></li>
+                <li><a href="servicios.html">Servicios</a></li>
+                <li><a href="nosotros.html">Nosotros</a></li>
+                <li><a href="blog.html">Blog</a></li>
+                <li><a href="testimonios.html">Testimonios</a></li>
+                <li><a href="precios.html" class="active">Precios</a></li>
+                <li><a href="../index.html#contacto">Contacto</a></li>
+            </ul>
+        </nav>
+    </header>
+
+    <!-- Hero de precios -->
+    <section class="precios-hero">
+        <h1>Planes que crecen contigo</h1>
+        <p>Desde emprendedores hasta empresas. Elige el plan que se adapta a tus necesidades de IA.</p>
+    </section>
+
+    <!-- Tarjetas de planes -->
+    <main>
+        <section class="planes-contenedor">
+            <!-- Plan Gratis -->
+            <div class="plan-tarjeta">
+                <div class="plan-nombre">Starter</div>
+                <div class="plan-precio">
+                    <span class="moneda">$</span><span class="cantidad">0</span>
+                    <div class="periodo">gratis para siempre</div>
+                </div>
+                <p class="plan-descripcion">Perfecto para explorar lo que NexoAI puede hacer por ti.</p>
+                <ul class="plan-features">
+                    <li>1 agente de IA básico</li>
+                    <li>50 consultas por mes</li>
+                    <li>Soporte por email</li>
+                    <li class="no-incluido">Agentes personalizados</li>
+                    <li class="no-incluido">Integraciones avanzadas</li>
+                    <li class="no-incluido">Soporte prioritario</li>
+                </ul>
+                <a href="#" class="plan-boton secundario">Empezar gratis</a>
+            </div>
+
+            <!-- Plan Pro (destacado) -->
+            <div class="plan-tarjeta destacado">
+                <div class="plan-nombre">Pro</div>
+                <div class="plan-precio">
+                    <span class="moneda">$</span><span class="cantidad">1</span>
+                    <div class="periodo">USD / mes</div>
+                </div>
+                <p class="plan-descripcion">Para emprendedores que quieren automatizar su negocio con IA.</p>
+                <ul class="plan-features">
+                    <li>5 agentes de IA</li>
+                    <li>1,000 consultas por mes</li>
+                    <li>Soporte por email y chat</li>
+                    <li>Agentes personalizados</li>
+                    <li>Integraciones con Slack y Drive</li>
+                    <li class="no-incluido">Soporte prioritario 24/7</li>
+                </ul>
+                <a href="#" class="plan-boton primario" id="btn-suscribir-pro">Suscribirme al Pro</a>
+            </div>
+
+            <!-- Plan Enterprise -->
+            <div class="plan-tarjeta">
+                <div class="plan-nombre">Enterprise</div>
+                <div class="plan-precio">
+                    <span class="moneda">$</span><span class="cantidad">5</span>
+                    <div class="periodo">USD / mes</div>
+                </div>
+                <p class="plan-descripcion">Para equipos que necesitan el poder completo de la IA.</p>
+                <ul class="plan-features">
+                    <li>Agentes ilimitados</li>
+                    <li>Consultas ilimitadas</li>
+                    <li>Soporte prioritario 24/7</li>
+                    <li>Agentes personalizados</li>
+                    <li>Integraciones avanzadas</li>
+                    <li>Onboarding personalizado</li>
+                </ul>
+                <a href="#" class="plan-boton secundario" id="btn-suscribir-enterprise">Contactar ventas</a>
+            </div>
+        </section>
+
+        <!-- Preguntas frecuentes -->
+        <section class="faq-seccion">
+            <h2>Preguntas frecuentes</h2>
+            <div class="faq-contenedor">
+                <div class="faq-item">
+                    <div class="faq-pregunta">¿Puedo cambiar de plan en cualquier momento?</div>
+                    <div class="faq-respuesta">Sí. Puedes subir o bajar de plan cuando quieras. Si subes, se cobra la diferencia proporcional. Si bajas, el cambio aplica en tu siguiente ciclo de facturación.</div>
+                </div>
+                <div class="faq-item">
+                    <div class="faq-pregunta">¿Qué métodos de pago aceptan?</div>
+                    <div class="faq-respuesta">Aceptamos todas las tarjetas de crédito y débito principales (Visa, Mastercard, American Express) a través de Stripe, la plataforma de pagos más segura del mundo.</div>
+                </div>
+                <div class="faq-item">
+                    <div class="faq-pregunta">¿Puedo cancelar en cualquier momento?</div>
+                    <div class="faq-respuesta">Sí, sin compromisos. Si cancelas, mantienes el acceso hasta que termine tu período pagado. No hay cargos por cancelación.</div>
+                </div>
+                <div class="faq-item">
+                    <div class="faq-pregunta">¿Qué es un agente de IA?</div>
+                    <div class="faq-respuesta">Un agente de IA es como un empleado digital que trabaja para tu negocio 24/7. Puede atender clientes, procesar datos, generar reportes y automatizar tareas repetitivas.</div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <!-- Footer (idéntico a las demás páginas) -->
+    <footer>
+        <p>&copy; 2026 NexoAI - Todos los derechos reservados</p>
+    </footer>
+
+    <script src="../js/main.js"></script>
+</body>
+</html>
