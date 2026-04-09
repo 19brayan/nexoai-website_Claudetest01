@@ -33,3 +33,12 @@ Cada vez que se cree una página nueva debe incluir:
 Antes de crear cualquier archivo, explicar:
 - **Qué** se va a crear.
 - **Por qué** es necesario crearlo.
+
+## Conexiones MCP
+
+### GitHub
+- Servidor: @modelcontextprotocol/server-github
+- Configuración: .claude/mcp.json
+- Token: almacenado en .env (NUNCA subir a GitHub)
+- Permisos: lectura/escritura de repositorios
+- Uso: Claude Code puede ver issues, crear branches, leer código directamente desde GitHub

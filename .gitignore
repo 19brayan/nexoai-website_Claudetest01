@@ -9,6 +9,9 @@ node_modules/
 .env.local
 .env.production
 
+# Configuración MCP con tokens — NUNCA subir
+.claude/mcp.json
+
 # Base de datos SQLite — cada desarrollador crea la suya localmente
 db/nexoai.db
 db/nexoai.db-shm
