@@ -261,8 +261,8 @@
             <div class="plan-tarjeta">
                 <div class="plan-nombre">Starter</div>
                 <div class="plan-precio">
-                    <span class="moneda">$</span><span class="cantidad">0</span>
-                    <div class="periodo">gratis para siempre</div>
+                    <span class="moneda">$</span><span class="cantidad">1</span>
+                    <div class="periodo">USD / mes</div>
                 </div>
                 <p class="plan-descripcion">Perfecto para explorar lo que NexoAI puede hacer por ti.</p>
                 <ul class="plan-features">
@@ -273,14 +273,14 @@
                     <li class="no-incluido">Integraciones avanzadas</li>
                     <li class="no-incluido">Soporte prioritario</li>
                 </ul>
-                <a href="#" class="plan-boton secundario">Empezar gratis</a>
+                <a href="#" class="plan-boton secundario" id="btn-suscribir-starter">Suscribirme al Starter</a>
             </div>
 
             <!-- Plan Pro (destacado) -->
             <div class="plan-tarjeta destacado">
                 <div class="plan-nombre">Pro</div>
                 <div class="plan-precio">
-                    <span class="moneda">$</span><span class="cantidad">1</span>
+                    <span class="moneda">$</span><span class="cantidad">10</span>
                     <div class="periodo">USD / mes</div>
                 </div>
                 <p class="plan-descripcion">Para emprendedores que quieren automatizar su negocio con IA.</p>
@@ -299,7 +299,7 @@
             <div class="plan-tarjeta">
                 <div class="plan-nombre">Enterprise</div>
                 <div class="plan-precio">
-                    <span class="moneda">$</span><span class="cantidad">5</span>
+                    <span class="moneda">$</span><span class="cantidad">100</span>
                     <div class="periodo">USD / mes</div>
                 </div>
                 <p class="plan-descripcion">Para equipos que necesitan el poder completo de la IA.</p>
@@ -345,5 +345,48 @@
     </footer>
 
     <script src="../js/main.js"></script>
+    <script>
+      // Función reutilizable para iniciar el pago de cualquier plan
+      async function iniciarPago(plan, boton, textoOriginal) {
+        try {
+          boton.textContent = 'Procesando...';
+          boton.disabled = true;
+
+          const respuesta = await fetch('/api/crear-sesion-pago', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ plan }),
+          });
+
+          const datos = await respuesta.json();
+
+          if (datos.url) {
+            window.location.href = datos.url;
+          } else {
+            alert('Hubo un error al procesar el pago. Intenta de nuevo.');
+            boton.textContent = textoOriginal;
+            boton.disabled = false;
+          }
+        } catch (error) {
+          console.error('Error:', error);
+          alert('Error de conexión. Verifica tu internet e intenta de nuevo.');
+        }
+      }
+
+      // Botón Plan Starter
+      document.getElementById('btn-suscribir-starter').addEventListener('click', function() {
+        iniciarPago('starter', this, 'Suscribirme al Starter');
+      });
+
+      // Botón Plan Pro
+      document.getElementById('btn-suscribir-pro').addEventListener('click', function() {
+        iniciarPago('pro', this, 'Suscribirme al Pro');
+      });
+
+      // Botón Plan Enterprise
+      document.getElementById('btn-suscribir-enterprise').addEventListener('click', function() {
+        iniciarPago('enterprise', this, 'Contactar ventas');
+      });
+    </script>
 </body>
 </html>
