@@ -39,6 +39,38 @@ const PORT = process.env.PORT || 3001;
 // Configuración global que se aplica a todas las rutas
 // =============================================
 
+// =============================================
+// WEBHOOK DE STRIPE
+// Debe ir ANTES de express.json() porque Stripe
+// requiere el body en formato raw (sin parsear)
+// para poder verificar la firma del evento.
+// =============================================
+
+app.post('/api/webhook', express.raw({ type: 'application/json' }), (req, res) => {
+  const firma = req.headers['stripe-signature'];
+
+  let evento;
+  try {
+    // Verifica que el evento venga realmente de Stripe usando la firma
+    evento = stripe.webhooks.constructEvent(
+      req.body,
+      firma,
+      process.env.STRIPE_WEBHOOK_SECRET
+    );
+  } catch (error) {
+    console.error('Firma de webhook inválida:', error.message);
+    return res.status(400).json({ error: 'Firma inválida' });
+  }
+
+  // Procesa el evento según su tipo
+  if (evento.type === 'checkout.session.completed') {
+    const sesion = evento.data.object;
+    console.log('✅ Pago exitoso:', sesion.customer_details?.email);
+  }
+
+  res.status(200).json({ received: true });
+});
+
 // Permite que Express entienda el cuerpo de peticiones en formato JSON
 app.use(express.json());
 
