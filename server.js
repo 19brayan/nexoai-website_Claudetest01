@@ -6,6 +6,9 @@
 //   3. Almacena los mensajes en una base de datos SQLite
 // =============================================
 
+require('dotenv').config(); // Carga las variables del .env
+const stripe = require('stripe')(process.env.STRIPE_SECRET_KEY);
+
 const express = require('express'); // Framework para crear el servidor web
 const jwt     = require('jsonwebtoken'); // Para crear y verificar tokens JWT
 
@@ -272,6 +275,44 @@ app.delete('/api/contacto/:id', verificarToken, (req, res) => {
     exito:   true,
     mensaje: `Mensaje con id ${id} eliminado correctamente.`
   });
+});
+
+// =============================================
+// PAGOS CON STRIPE
+// Crea una sesión de pago y devuelve la URL de checkout
+// =============================================
+
+// Mapa de planes a variables de entorno con el price de Stripe
+const PRECIOS_STRIPE = {
+  starter:    process.env.STRIPE_PRICE_STARTER,
+  pro:        process.env.STRIPE_PRICE_PRO,
+  enterprise: process.env.STRIPE_PRICE_ENTERPRISE,
+};
+
+// Ruta para crear sesión de pago con Stripe
+// Recibe: { plan: 'starter' | 'pro' | 'enterprise' }
+app.post('/api/crear-sesion-pago', async (req, res) => {
+  try {
+    const { plan } = req.body;
+    const priceId = PRECIOS_STRIPE[plan];
+
+    if (!priceId) {
+      return res.status(400).json({ error: 'Plan no válido.' });
+    }
+
+    const session = await stripe.checkout.sessions.create({
+      payment_method_types: ['card'],
+      line_items: [{ price: priceId, quantity: 1 }],
+      mode: 'subscription',
+      success_url: 'http://localhost:3001/pago-exitoso.html',
+      cancel_url:  'http://localhost:3001/pages/precios.html',
+    });
+
+    res.json({ url: session.url });
+  } catch (error) {
+    console.error('Error al crear sesión de Stripe:', error);
+    res.status(500).json({ error: 'No se pudo crear la sesión de pago' });
+  }
 });
 
 // =============================================
