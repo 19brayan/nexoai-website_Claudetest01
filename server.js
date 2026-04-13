@@ -21,7 +21,8 @@ const {
   contarMensajesHoy,
   obtenerMensajeReciente,
   buscarUsuarioPorUsername,
-  verificarPassword
+  verificarPassword,
+  guardarSuscripcion
 } = require('./db/database');
 
 // Clave secreta para firmar los tokens JWT
@@ -65,7 +66,12 @@ app.post('/api/webhook', express.raw({ type: 'application/json' }), (req, res) =
   // Procesa el evento según su tipo
   if (evento.type === 'checkout.session.completed') {
     const sesion = evento.data.object;
-    console.log('✅ Pago exitoso:', sesion.customer_details?.email);
+    const email  = sesion.customer_details?.email || 'desconocido';
+    const plan   = sesion.metadata?.plan || 'desconocido';
+
+    // Guarda la suscripción en la base de datos
+    guardarSuscripcion(email, plan, sesion.id);
+    console.log(`✅ Pago exitoso: ${email} — Plan: ${plan}`);
   }
 
   res.status(200).json({ received: true });
@@ -336,6 +342,7 @@ app.post('/api/crear-sesion-pago', async (req, res) => {
       payment_method_types: ['card'],
       line_items: [{ price: priceId, quantity: 1 }],
       mode: 'subscription',
+      metadata: { plan }, // Guardamos el plan para leerlo en el webhook
       success_url: 'http://localhost:3001/pago-exitoso.html',
       cancel_url:  'http://localhost:3001/pages/precios.html',
     });

@@ -53,6 +53,18 @@ db.exec(`
   )
 `);
 
+// Crea la tabla "suscripciones" para registrar los pagos completados via Stripe
+db.exec(`
+  CREATE TABLE IF NOT EXISTS suscripciones (
+    id                INTEGER PRIMARY KEY AUTOINCREMENT,
+    email             TEXT    NOT NULL,
+    plan              TEXT    NOT NULL,
+    estado            TEXT    NOT NULL DEFAULT 'activo',
+    stripe_session_id TEXT    NOT NULL,
+    fecha_creacion    TEXT    NOT NULL DEFAULT (datetime('now', 'localtime'))
+  )
+`);
+
 // =============================================
 // SEED AUTOMÁTICO DEL USUARIO ADMINISTRADOR
 // Se ejecuta al arrancar el servidor.
@@ -234,6 +246,27 @@ function verificarPassword(password, password_hash) {
   return bcrypt.compareSync(password, password_hash);
 }
 
+// =============================================
+// FUNCIONES DE SUSCRIPCIONES
+// Registra los pagos completados via Stripe
+// =============================================
+
+/**
+ * Guarda una nueva suscripción tras un pago exitoso en Stripe.
+ * @param {string} email             - Email del cliente que pagó
+ * @param {string} plan              - Plan contratado: starter, pro o enterprise
+ * @param {string} stripe_session_id - ID de la sesión de Stripe (checkout.session.id)
+ * @returns {object} La suscripción recién creada
+ */
+function guardarSuscripcion(email, plan, stripe_session_id) {
+  const insertar = db.prepare(`
+    INSERT INTO suscripciones (email, plan, stripe_session_id)
+    VALUES (@email, @plan, @stripe_session_id)
+  `);
+  const resultado = insertar.run({ email, plan, stripe_session_id });
+  return db.prepare(`SELECT * FROM suscripciones WHERE id = ?`).get(resultado.lastInsertRowid);
+}
+
 // Exporta todas las funciones para que server.js pueda usarlas
 module.exports = {
   guardarMensaje,
@@ -245,5 +278,6 @@ module.exports = {
   obtenerMensajeReciente,
   registrarUsuario,
   buscarUsuarioPorUsername,
-  verificarPassword
+  verificarPassword,
+  guardarSuscripcion
 };
