@@ -248,8 +248,19 @@ function verificarPassword(password, password_hash) {
 
 // =============================================
 // FUNCIONES DE SUSCRIPCIONES
-// Registra los pagos completados via Stripe
+// Registra y consulta los pagos completados via Stripe
 // =============================================
+
+/**
+ * Devuelve todas las suscripciones ordenadas por fecha, más reciente primero.
+ * @returns {Array} Lista de todas las suscripciones
+ */
+function obtenerSuscripciones() {
+  return db.prepare(`
+    SELECT * FROM suscripciones
+    ORDER BY fecha_creacion DESC
+  `).all();
+}
 
 /**
  * Guarda una nueva suscripción tras un pago exitoso en Stripe.
@@ -279,5 +290,6 @@ module.exports = {
   registrarUsuario,
   buscarUsuarioPorUsername,
   verificarPassword,
-  guardarSuscripcion
+  guardarSuscripcion,
+  obtenerSuscripciones
 };

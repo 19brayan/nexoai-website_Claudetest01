@@ -469,6 +469,34 @@
       </div>
     </div>
 
+    <!-- =============================================
+         TABLA DE SUSCRIPTORES
+         Muestra los pagos registrados via Stripe
+    ============================================= -->
+    <div class="tabla-header" style="margin-top: 2.5rem;">
+      <span class="tabla-titulo">Suscriptores</span>
+    </div>
+
+    <div class="tabla-contenedor">
+      <div class="cargando" id="cargandoSuscripciones">Cargando suscriptores...</div>
+
+      <table id="tablaSuscripciones" style="display: none;">
+        <thead>
+          <tr>
+            <th>Email</th>
+            <th>Plan</th>
+            <th>Estado</th>
+            <th>Fecha</th>
+          </tr>
+        </thead>
+        <tbody id="cuerpoSuscripciones"></tbody>
+      </table>
+
+      <div class="tabla-vacia" id="suscripcionesVacia" style="display: none;">
+        <p>Sin suscriptores aún.</p>
+      </div>
+    </div>
+
   </main>
 
   <!-- =============================================
@@ -678,6 +706,52 @@
     }
 
     // -----------------------------------------------
+    // FUNCIÓN: Carga suscripciones desde /api/suscripciones
+    // y construye la tabla dinámicamente
+    // -----------------------------------------------
+    async function cargarSuscripciones() {
+      const cargando   = document.getElementById('cargandoSuscripciones');
+      const tabla      = document.getElementById('tablaSuscripciones');
+      const vacia      = document.getElementById('suscripcionesVacia');
+      const cuerpo     = document.getElementById('cuerpoSuscripciones');
+
+      cargando.style.display = 'block';
+      tabla.style.display    = 'none';
+      vacia.style.display    = 'none';
+
+      try {
+        const res  = await fetchConToken('/api/suscripciones');
+        const data = await res.json();
+
+        cargando.style.display = 'none';
+
+        if (!data.ok || data.data.length === 0) {
+          vacia.style.display = 'block';
+          return;
+        }
+
+        cuerpo.innerHTML = '';
+        data.data.forEach(s => {
+          const fila = document.createElement('tr');
+          fila.innerHTML = `
+            <td>${escapeHtml(s.email)}</td>
+            <td style="text-transform: capitalize;">${escapeHtml(s.plan)}</td>
+            <td style="color: var(--verde); font-weight: 600;">${escapeHtml(s.estado)}</td>
+            <td class="col-fecha">${escapeHtml(s.fecha_creacion)}</td>
+          `;
+          cuerpo.appendChild(fila);
+        });
+
+        tabla.style.display = 'table';
+
+      } catch (error) {
+        cargando.style.display = 'none';
+        vacia.style.display    = 'block';
+        console.error('Error al cargar suscripciones:', error);
+      }
+    }
+
+    // -----------------------------------------------
     // INICIALIZACIÓN
     // Verifica sesión, carga datos y conecta botones
     // -----------------------------------------------
@@ -685,14 +759,16 @@
       // Verifica que el token sea válido antes de mostrar el panel
       await verificarSesion();
 
-      // Carga inicial de estadísticas y mensajes
+      // Carga inicial de estadísticas, mensajes y suscripciones
       cargarEstadisticas();
       cargarMensajes();
+      cargarSuscripciones();
 
       // Botón de actualizar datos sin recargar la página
       document.getElementById('btnActualizar').addEventListener('click', () => {
         cargarEstadisticas();
         cargarMensajes();
+        cargarSuscripciones();
       });
 
       // Botón de cerrar sesión: elimina el token y redirige al login

@@ -22,7 +22,8 @@ const {
   obtenerMensajeReciente,
   buscarUsuarioPorUsername,
   verificarPassword,
-  guardarSuscripcion
+  guardarSuscripcion,
+  obtenerSuscripciones
 } = require('./db/database');
 
 // Clave secreta para firmar los tokens JWT
@@ -48,30 +49,44 @@ const PORT = process.env.PORT || 3001;
 // =============================================
 
 app.post('/api/webhook', express.raw({ type: 'application/json' }), (req, res) => {
+  console.log('[WEBHOOK] Evento recibido de Stripe');
+
   const firma = req.headers['stripe-signature'];
+  console.log('[WEBHOOK] Firma presente:', !!firma);
 
   let evento;
   try {
-    // Verifica que el evento venga realmente de Stripe usando la firma
     evento = stripe.webhooks.constructEvent(
       req.body,
       firma,
       process.env.STRIPE_WEBHOOK_SECRET
     );
+    console.log('[WEBHOOK] Firma verificada. Tipo de evento:', evento.type);
   } catch (error) {
-    console.error('Firma de webhook inválida:', error.message);
+    console.error('[WEBHOOK] Firma inválida:', error.message);
     return res.status(400).json({ error: 'Firma inválida' });
   }
 
-  // Procesa el evento según su tipo
   if (evento.type === 'checkout.session.completed') {
     const sesion = evento.data.object;
-    const email  = sesion.customer_details?.email || 'desconocido';
-    const plan   = sesion.metadata?.plan || 'desconocido';
 
-    // Guarda la suscripción en la base de datos
-    guardarSuscripcion(email, plan, sesion.id);
-    console.log(`✅ Pago exitoso: ${email} — Plan: ${plan}`);
+    console.log('[WEBHOOK] Session ID:', sesion.id);
+    console.log('[WEBHOOK] customer_details:', JSON.stringify(sesion.customer_details));
+    console.log('[WEBHOOK] metadata:', JSON.stringify(sesion.metadata));
+
+    const email = sesion.customer_details?.email || 'desconocido';
+    const plan  = sesion.metadata?.plan || 'desconocido';
+
+    console.log(`[WEBHOOK] Guardando suscripción — email: ${email}, plan: ${plan}`);
+
+    try {
+      const suscripcion = guardarSuscripcion(email, plan, sesion.id);
+      console.log('[WEBHOOK] Suscripción guardada:', JSON.stringify(suscripcion));
+    } catch (dbError) {
+      console.error('[WEBHOOK] Error al guardar en BD:', dbError.message);
+    }
+
+    console.log(`[WEBHOOK] ✅ Pago exitoso: ${email} — Plan: ${plan}`);
   }
 
   res.status(200).json({ received: true });
@@ -313,6 +328,16 @@ app.delete('/api/contacto/:id', verificarToken, (req, res) => {
     exito:   true,
     mensaje: `Mensaje con id ${id} eliminado correctamente.`
   });
+});
+
+/**
+ * GET /api/suscripciones
+ * Devuelve todas las suscripciones registradas, ordenadas por fecha descendente.
+ * PROTEGIDA: requiere token JWT válido
+ */
+app.get('/api/suscripciones', verificarToken, (_req, res) => {
+  const suscripciones = obtenerSuscripciones();
+  res.json({ ok: true, data: suscripciones });
 });
 
 // =============================================
