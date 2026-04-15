@@ -7,7 +7,9 @@
 // =============================================
 
 require('dotenv').config(); // Carga las variables del .env
-const stripe = require('stripe')(process.env.STRIPE_SECRET_KEY);
+const stripe          = require('stripe')(process.env.STRIPE_SECRET_KEY);
+const { Resend }      = require('resend');
+const resend          = new Resend(process.env.RESEND_API_KEY);
 
 const express = require('express'); // Framework para crear el servidor web
 const jwt     = require('jsonwebtoken'); // Para crear y verificar tokens JWT
@@ -48,7 +50,7 @@ const PORT = process.env.PORT || 3001;
 // para poder verificar la firma del evento.
 // =============================================
 
-app.post('/api/webhook', express.raw({ type: 'application/json' }), (req, res) => {
+app.post('/api/webhook', express.raw({ type: 'application/json' }), async (req, res) => {
   console.log('[WEBHOOK] Evento recibido de Stripe');
 
   const firma = req.headers['stripe-signature'];
@@ -84,6 +86,33 @@ app.post('/api/webhook', express.raw({ type: 'application/json' }), (req, res) =
       console.log('[WEBHOOK] Suscripción guardada:', JSON.stringify(suscripcion));
     } catch (dbError) {
       console.error('[WEBHOOK] Error al guardar en BD:', dbError.message);
+    }
+
+    // Envía email de bienvenida al cliente via Resend
+    try {
+      await resend.emails.send({
+        from: 'NexoAI <onboarding@resend.dev>',
+        to:   email,
+        subject: `¡Bienvenido a NexoAI ${plan}!`,
+        html: `
+          <div style="background:#1a1a2e;color:#ffffff;font-family:Arial,sans-serif;padding:40px;max-width:600px;margin:0 auto;border-radius:12px;">
+            <h1 style="color:#6C63FF;font-size:2rem;margin-bottom:10px;">¡Pago exitoso!</h1>
+            <p style="font-size:1.1rem;color:#b0b0b0;margin-bottom:20px;">Gracias por unirte a NexoAI. Tu suscripción está activa.</p>
+            <div style="background:#16213e;border-radius:8px;padding:20px;margin-bottom:30px;">
+              <p style="margin:0;font-size:0.9rem;color:#b0b0b0;text-transform:uppercase;letter-spacing:1px;">Plan contratado</p>
+              <p style="margin:8px 0 0;font-size:1.5rem;font-weight:bold;color:#6C63FF;text-transform:capitalize;">${plan}</p>
+            </div>
+            <a href="https://nexoai-website-claudetest01.onrender.com"
+               style="display:inline-block;background:#6C63FF;color:#ffffff;padding:14px 32px;border-radius:8px;text-decoration:none;font-weight:bold;font-size:1rem;">
+              Ir a NexoAI
+            </a>
+            <p style="margin-top:30px;font-size:0.8rem;color:#555;">© 2026 NexoAI - Todos los derechos reservados</p>
+          </div>
+        `
+      });
+      console.log(`[WEBHOOK] 📧 Email de bienvenida enviado a: ${email}`);
+    } catch (emailError) {
+      console.error('[WEBHOOK] Error al enviar email:', emailError.message);
     }
 
     console.log(`[WEBHOOK] ✅ Pago exitoso: ${email} — Plan: ${plan}`);
