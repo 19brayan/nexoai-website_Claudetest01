@@ -368,8 +368,8 @@ app.post('/api/crear-sesion-pago', async (req, res) => {
       line_items: [{ price: priceId, quantity: 1 }],
       mode: 'subscription',
       metadata: { plan }, // Guardamos el plan para leerlo en el webhook
-      success_url: 'http://localhost:3001/pago-exitoso.html',
-      cancel_url:  'http://localhost:3001/pages/precios.html',
+      success_url: 'https://nexoai-website-claudetest01.onrender.com/pago-exitoso.html',
+      cancel_url:  'https://nexoai-website-claudetest01.onrender.com/pages/precios.html',
     });
 
     res.json({ url: session.url });
