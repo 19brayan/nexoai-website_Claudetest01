@@ -10,6 +10,8 @@ require('dotenv').config(); // Carga las variables del .env
 const stripe          = require('stripe')(process.env.STRIPE_SECRET_KEY);
 const { Resend }      = require('resend');
 const resend          = new Resend(process.env.RESEND_API_KEY);
+const Anthropic       = require('@anthropic-ai/sdk');
+const anthropic       = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY });
 
 const express = require('express'); // Framework para crear el servidor web
 const jwt     = require('jsonwebtoken'); // Para crear y verificar tokens JWT
@@ -405,6 +407,49 @@ app.post('/api/crear-sesion-pago', async (req, res) => {
   } catch (error) {
     console.error('Error al crear sesión de Stripe:', error);
     res.status(500).json({ error: 'No se pudo crear la sesión de pago' });
+  }
+});
+
+// =============================================
+// AGENTE DE ATENCIÓN AL CLIENTE (ANTHROPIC)
+// Recibe un mensaje del usuario y devuelve una
+// respuesta generada por Claude actuando como
+// el agente de soporte de NexoAI.
+// =============================================
+
+/**
+ * POST /api/agente
+ * Recibe: { mensaje } en el cuerpo de la petición
+ * Devuelve: { ok: true, respuesta: "..." } con la respuesta del agente
+ */
+app.post('/api/agente', async (req, res) => {
+  const { mensaje } = req.body;
+
+  if (!mensaje) {
+    return res.status(400).json({ ok: false, error: 'El campo "mensaje" es obligatorio.' });
+  }
+
+  try {
+    const respuesta = await anthropic.messages.create({
+      model: 'claude-opus-4-5',
+      max_tokens: 500,
+      system: `Eres el agente de atención al cliente de NexoAI, una empresa que crea soluciones de software con inteligencia artificial.
+
+Conoces a la perfección los tres planes disponibles:
+- Plan Starter: $1/mes — ideal para emprendedores y equipos pequeños que quieren dar sus primeros pasos con IA.
+- Plan Pro: $10/mes — diseñado para empresas en crecimiento que necesitan más potencia y funcionalidades avanzadas.
+- Plan Enterprise: $100/mes — solución completa para grandes organizaciones con necesidades personalizadas.
+
+Responde siempre en español, con un tono profesional pero amigable y cercano. Si no sabes la respuesta a alguna pregunta específica, dí: "Para darte la mejor atención, te conecto con el equipo de NexoAI."`,
+      messages: [{ role: 'user', content: mensaje }]
+    });
+
+    const texto = respuesta.content[0].text;
+    res.json({ ok: true, respuesta: texto });
+  } catch (error) {
+    console.error('[AGENTE] Status:', error.status);
+    console.error('[AGENTE] Mensaje:', error.message);
+    res.status(500).json({ ok: false, error: 'No se pudo obtener respuesta del agente.' });
   }
 });
 

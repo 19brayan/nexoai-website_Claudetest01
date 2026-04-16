@@ -1,0 +1,465 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Agente IA — NexoAI</title>
+
+  <link rel="stylesheet" href="../css/styles.css" />
+
+  <style>
+    /* =============================================
+       SECCIÓN HERO DEL CHAT
+    ============================================= */
+    .chat-hero {
+      background: var(--azul-oscuro);
+      padding: 4rem 1.5rem 2rem;
+      text-align: center;
+    }
+
+    .chat-hero .hero-badge {
+      display: inline-block;
+      background: rgba(108, 99, 255, 0.15);
+      color: var(--morado);
+      border: 1px solid rgba(108, 99, 255, 0.3);
+      border-radius: 50px;
+      padding: 0.4rem 1.2rem;
+      font-size: 0.85rem;
+      letter-spacing: 0.05em;
+      margin-bottom: 1rem;
+    }
+
+    .chat-hero h1 {
+      font-size: clamp(1.8rem, 4vw, 2.8rem);
+      color: #fff;
+      margin-bottom: 0.75rem;
+    }
+
+    .chat-hero p {
+      color: #b0b0b0;
+      font-size: 1rem;
+      max-width: 500px;
+      margin: 0 auto;
+    }
+
+    /* =============================================
+       CONTENEDOR PRINCIPAL DEL CHAT
+    ============================================= */
+    .chat-wrapper {
+      background: #0f0f1e;
+      min-height: calc(100vh - 380px);
+      padding: 2rem 1.5rem 4rem;
+      display: flex;
+      justify-content: center;
+    }
+
+    .chat-container {
+      width: 100%;
+      max-width: 760px;
+      display: flex;
+      flex-direction: column;
+      gap: 1.5rem;
+    }
+
+    /* =============================================
+       ÁREA DE MENSAJES
+    ============================================= */
+    .chat-messages {
+      background: #16213e;
+      border-radius: 16px;
+      padding: 1.5rem;
+      min-height: 420px;
+      max-height: 520px;
+      overflow-y: auto;
+      display: flex;
+      flex-direction: column;
+      gap: 1rem;
+      scroll-behavior: smooth;
+    }
+
+    /* Mensaje de bienvenida inicial */
+    .chat-messages:empty::before {
+      content: "Hola, soy el asistente de NexoAI. ¿En qué puedo ayudarte hoy?";
+      color: #b0b0b0;
+      font-style: italic;
+      font-size: 0.95rem;
+      display: block;
+      text-align: center;
+      padding: 3rem 1rem;
+    }
+
+    /* Burbuja genérica */
+    .burbuja {
+      max-width: 80%;
+      padding: 0.85rem 1.1rem;
+      border-radius: 16px;
+      font-size: 0.95rem;
+      line-height: 1.55;
+      word-break: break-word;
+    }
+
+    /* Mensaje del usuario — derecha, color morado */
+    .burbuja-usuario {
+      align-self: flex-end;
+      background: #6C63FF;
+      color: #fff;
+      border-bottom-right-radius: 4px;
+    }
+
+    /* Mensaje del agente — izquierda, fondo oscuro */
+    .burbuja-agente {
+      align-self: flex-start;
+      background: #1a1a2e;
+      color: #e0e0e0;
+      border: 1px solid rgba(108, 99, 255, 0.2);
+      border-bottom-left-radius: 4px;
+    }
+
+    /* Indicador "Escribiendo..." */
+    .burbuja-escribiendo {
+      align-self: flex-start;
+      background: #1a1a2e;
+      border: 1px solid rgba(108, 99, 255, 0.2);
+      border-bottom-left-radius: 4px;
+      padding: 0.85rem 1.1rem;
+      border-radius: 16px;
+      display: flex;
+      align-items: center;
+      gap: 5px;
+    }
+
+    .burbuja-escribiendo span {
+      width: 8px;
+      height: 8px;
+      background: #6C63FF;
+      border-radius: 50%;
+      display: inline-block;
+      animation: pulsoDot 1.2s infinite ease-in-out;
+    }
+
+    .burbuja-escribiendo span:nth-child(2) { animation-delay: 0.2s; }
+    .burbuja-escribiendo span:nth-child(3) { animation-delay: 0.4s; }
+
+    @keyframes pulsoDot {
+      0%, 80%, 100% { transform: scale(0.7); opacity: 0.5; }
+      40%            { transform: scale(1);   opacity: 1;   }
+    }
+
+    /* =============================================
+       ÁREA DE INPUT
+    ============================================= */
+    .chat-input-area {
+      display: flex;
+      gap: 0.75rem;
+      align-items: flex-end;
+    }
+
+    .chat-input {
+      flex: 1;
+      background: #16213e;
+      border: 1px solid rgba(108, 99, 255, 0.3);
+      border-radius: 12px;
+      padding: 0.9rem 1.1rem;
+      color: #e0e0e0;
+      font-size: 0.95rem;
+      font-family: inherit;
+      resize: none;
+      min-height: 52px;
+      max-height: 140px;
+      outline: none;
+      transition: border-color 0.2s;
+      line-height: 1.5;
+    }
+
+    .chat-input::placeholder {
+      color: #666;
+    }
+
+    .chat-input:focus {
+      border-color: #6C63FF;
+    }
+
+    .btn-enviar {
+      background: #6C63FF;
+      color: #fff;
+      border: none;
+      border-radius: 12px;
+      padding: 0.9rem 1.4rem;
+      font-size: 1rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background 0.2s, transform 0.1s;
+      white-space: nowrap;
+      height: 52px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .btn-enviar:hover:not(:disabled) {
+      background: #5a52e0;
+    }
+
+    .btn-enviar:active:not(:disabled) {
+      transform: scale(0.97);
+    }
+
+    .btn-enviar:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+
+    /* Ícono send dentro del botón */
+    .btn-enviar svg {
+      width: 18px;
+      height: 18px;
+      fill: none;
+      stroke: #fff;
+      stroke-width: 2;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+    }
+
+    /* Ayuda de teclado */
+    .chat-hint {
+      font-size: 0.78rem;
+      color: #555;
+      text-align: right;
+    }
+
+    /* =============================================
+       SCROLL PERSONALIZADO
+    ============================================= */
+    .chat-messages::-webkit-scrollbar { width: 6px; }
+    .chat-messages::-webkit-scrollbar-track { background: transparent; }
+    .chat-messages::-webkit-scrollbar-thumb { background: rgba(108, 99, 255, 0.3); border-radius: 3px; }
+
+    /* =============================================
+       RESPONSIVE MÓVIL
+    ============================================= */
+    @media (max-width: 600px) {
+      .chat-messages {
+        min-height: 340px;
+        max-height: 400px;
+      }
+
+      .burbuja { max-width: 92%; }
+
+      .btn-enviar span { display: none; }
+    }
+  </style>
+</head>
+
+<body>
+
+  <!-- =============================================
+       HEADER — Igual en todas las páginas del sitio
+  ============================================= -->
+  <header>
+    <nav>
+      <a href="../index.html" class="logo">Nexo<span>AI</span></a>
+
+      <ul class="nav-links" id="navLinks">
+        <li><a href="../index.html">Inicio</a></li>
+        <li><a href="servicios.html">Servicios</a></li>
+        <li><a href="nosotros.html">Nosotros</a></li>
+        <li><a href="blog.html">Blog</a></li>
+        <li><a href="testimonios.html">Testimonios</a></li>
+        <li><a href="precios.html">Precios</a></li>
+        <li><a href="agente.html" class="active">Agente IA</a></li>
+        <li><a href="../index.html#contacto">Contacto</a></li>
+      </ul>
+
+      <button class="menu-toggle" id="menuToggle" aria-label="Abrir menú">
+        <span></span>
+        <span></span>
+        <span></span>
+      </button>
+    </nav>
+  </header>
+
+  <!-- =============================================
+       HERO DE LA PÁGINA DE CHAT
+  ============================================= -->
+  <section class="chat-hero">
+    <span class="hero-badge">✦ Atención 24/7</span>
+    <h1>Agente de Atención IA</h1>
+    <p>Pregúntame sobre nuestros planes, servicios o cualquier duda que tengas. Estoy aquí para ayudarte.</p>
+  </section>
+
+  <!-- =============================================
+       CHAT PRINCIPAL
+       - .chat-messages: historial de la conversación
+       - .chat-input-area: input + botón enviar
+  ============================================= -->
+  <div class="chat-wrapper">
+    <div class="chat-container">
+
+      <!-- Área de mensajes -->
+      <div class="chat-messages" id="chatMessages"></div>
+
+      <!-- Input + Botón -->
+      <div class="chat-input-area">
+        <textarea
+          id="chatInput"
+          class="chat-input"
+          placeholder="Escribe tu pregunta aquí..."
+          rows="1"
+          aria-label="Mensaje al agente"
+        ></textarea>
+
+        <button id="btnEnviar" class="btn-enviar" aria-label="Enviar mensaje">
+          <svg viewBox="0 0 24 24">
+            <line x1="22" y1="2" x2="11" y2="13"/>
+            <polygon points="22 2 15 22 11 13 2 9 22 2"/>
+          </svg>
+          <span>Enviar</span>
+        </button>
+      </div>
+
+      <p class="chat-hint">Presiona <kbd>Enter</kbd> para enviar · <kbd>Shift+Enter</kbd> para nueva línea</p>
+
+    </div>
+  </div>
+
+  <!-- =============================================
+       FOOTER — Copyright y redes sociales
+  ============================================= -->
+  <footer>
+    <div class="footer-inner">
+      <div class="footer-logo">Nexo<span>AI</span></div>
+      <p class="footer-copy">© 2026 NexoAI. Todos los derechos reservados.</p>
+      <a href="login.html" class="footer-admin-link">🔒 Acceso Administrador</a>
+      <div class="social-links">
+        <a href="#" aria-label="LinkedIn">
+          <svg viewBox="0 0 24 24">
+            <path d="M16 8a6 6 0 0 1 6 6v7h-4v-7a2 2 0 0 0-2-2 2 2 0 0 0-2 2v7h-4v-7a6 6 0 0 1 6-6z"/>
+            <rect x="2" y="9" width="4" height="12"/>
+            <circle cx="4" cy="4" r="2"/>
+          </svg>
+        </a>
+        <a href="#" aria-label="Twitter">
+          <svg viewBox="0 0 24 24">
+            <path d="M4 4l16 16M4 20L20 4"/>
+          </svg>
+        </a>
+        <a href="#" aria-label="Instagram">
+          <svg viewBox="0 0 24 24">
+            <rect x="2" y="2" width="20" height="20" rx="5" ry="5"/>
+            <circle cx="12" cy="12" r="4"/>
+            <circle cx="17.5" cy="6.5" r="1" fill="white" stroke="none"/>
+          </svg>
+        </a>
+      </div>
+    </div>
+  </footer>
+
+  <!-- Script principal: menú móvil -->
+  <script src="../js/main.js"></script>
+
+  <!-- =============================================
+       LÓGICA DEL CHAT
+       - Muestra los mensajes en burbujas
+       - Llama a /api/agente con el mensaje del usuario
+       - Muestra el indicador "Escribiendo..." mientras espera
+  ============================================= -->
+  <script>
+    const messagesEl = document.getElementById('chatMessages');
+    const inputEl    = document.getElementById('chatInput');
+    const btnEnviar  = document.getElementById('btnEnviar');
+
+    // Muestra el saludo inicial del agente al cargar la página
+    agregarMensaje('agente', '¡Hola! Soy el asistente de NexoAI. Puedo ayudarte con información sobre nuestros planes y servicios. ¿En qué puedo ayudarte hoy?');
+
+    /**
+     * Crea y agrega una burbuja de mensaje al área de chat.
+     * @param {'usuario'|'agente'} tipo - Quién envía el mensaje
+     * @param {string} texto           - Contenido del mensaje
+     * @returns {HTMLElement}          - La burbuja creada
+     */
+    function agregarMensaje(tipo, texto) {
+      const burbuja = document.createElement('div');
+      burbuja.classList.add('burbuja', `burbuja-${tipo}`);
+      burbuja.textContent = texto;
+      messagesEl.appendChild(burbuja);
+      messagesEl.scrollTop = messagesEl.scrollHeight;
+      return burbuja;
+    }
+
+    /**
+     * Muestra el indicador animado "Escribiendo..." mientras el agente responde.
+     * @returns {HTMLElement} - El elemento, para poder eliminarlo después
+     */
+    function mostrarEscribiendo() {
+      const indicador = document.createElement('div');
+      indicador.classList.add('burbuja-escribiendo');
+      indicador.id = 'indicador-escribiendo';
+      indicador.innerHTML = '<span></span><span></span><span></span>';
+      messagesEl.appendChild(indicador);
+      messagesEl.scrollTop = messagesEl.scrollHeight;
+      return indicador;
+    }
+
+    /**
+     * Envía el mensaje del usuario al endpoint /api/agente y muestra la respuesta.
+     */
+    async function enviarMensaje() {
+      const texto = inputEl.value.trim();
+      if (!texto) return;
+
+      // Muestra el mensaje del usuario y limpia el input
+      agregarMensaje('usuario', texto);
+      inputEl.value = '';
+      inputEl.style.height = 'auto';
+      btnEnviar.disabled = true;
+
+      // Muestra el indicador "Escribiendo..."
+      const indicador = mostrarEscribiendo();
+
+      try {
+        const respuesta = await fetch('/api/agente', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ mensaje: texto })
+        });
+
+        const datos = await respuesta.json();
+
+        // Elimina el indicador y muestra la respuesta del agente
+        indicador.remove();
+
+        if (datos.ok) {
+          agregarMensaje('agente', datos.respuesta);
+        } else {
+          agregarMensaje('agente', 'Lo siento, no pude procesar tu mensaje en este momento. Por favor intenta de nuevo.');
+        }
+
+      } catch (error) {
+        indicador.remove();
+        agregarMensaje('agente', 'Hubo un problema de conexión. Por favor verifica tu internet e intenta de nuevo.');
+      } finally {
+        btnEnviar.disabled = false;
+        inputEl.focus();
+      }
+    }
+
+    // Evento: clic en botón "Enviar"
+    btnEnviar.addEventListener('click', enviarMensaje);
+
+    // Evento: Enter para enviar, Shift+Enter para nueva línea
+    inputEl.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter' && !e.shiftKey) {
+        e.preventDefault();
+        enviarMensaje();
+      }
+    });
+
+    // Auto-resize del textarea según el contenido
+    inputEl.addEventListener('input', () => {
+      inputEl.style.height = 'auto';
+      inputEl.style.height = Math.min(inputEl.scrollHeight, 140) + 'px';
+    });
+  </script>
+
+</body>
+</html>
