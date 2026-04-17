@@ -419,14 +419,24 @@ app.post('/api/crear-sesion-pago', async (req, res) => {
 
 /**
  * POST /api/agente
- * Recibe: { mensaje } en el cuerpo de la petición
+ * Recibe: { mensajes } — array con el historial completo de la conversación
+ *   en formato [{ role: "user"|"assistant", content: "texto" }, ...]
+ * Por compatibilidad también acepta { mensaje } (string) y lo convierte a array.
  * Devuelve: { ok: true, respuesta: "..." } con la respuesta del agente
  */
 app.post('/api/agente', async (req, res) => {
-  const { mensaje } = req.body;
+  const { mensaje, mensajes } = req.body;
 
-  if (!mensaje) {
-    return res.status(400).json({ ok: false, error: 'El campo "mensaje" es obligatorio.' });
+  // Construye el array de mensajes según lo que llegue:
+  // - Si llega "mensajes" (array), lo usa directamente
+  // - Si llega "mensaje" (string, compatibilidad), lo envuelve en array
+  let historial;
+  if (Array.isArray(mensajes) && mensajes.length > 0) {
+    historial = mensajes;
+  } else if (typeof mensaje === 'string' && mensaje.trim()) {
+    historial = [{ role: 'user', content: mensaje.trim() }];
+  } else {
+    return res.status(400).json({ ok: false, error: 'Se requiere "mensajes" (array) o "mensaje" (string).' });
   }
 
   try {
@@ -441,7 +451,7 @@ Conoces a la perfección los tres planes disponibles:
 - Plan Enterprise: $100/mes — solución completa para grandes organizaciones con necesidades personalizadas.
 
 Responde siempre en español, con un tono profesional pero amigable y cercano. Si no sabes la respuesta a alguna pregunta específica, dí: "Para darte la mejor atención, te conecto con el equipo de NexoAI."`,
-      messages: [{ role: 'user', content: mensaje }]
+      messages: historial
     });
 
     const texto = respuesta.content[0].text;

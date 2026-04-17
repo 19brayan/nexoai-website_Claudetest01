@@ -368,6 +368,9 @@
     const inputEl    = document.getElementById('chatInput');
     const btnEnviar  = document.getElementById('btnEnviar');
 
+    // Historial completo de la conversación — crece con cada intercambio
+    const historial = [];
+
     // Muestra el saludo inicial del agente al cargar la página
     agregarMensaje('agente', '¡Hola! Soy el asistente de NexoAI. Puedo ayudarte con información sobre nuestros planes y servicios. ¿En qué puedo ayudarte hoy?');
 
@@ -401,13 +404,16 @@
     }
 
     /**
-     * Envía el mensaje del usuario al endpoint /api/agente y muestra la respuesta.
+     * Envía el historial completo al endpoint /api/agente y muestra la respuesta.
+     * Cada intercambio agrega al historial: primero el mensaje del usuario,
+     * luego la respuesta del agente — así Claude recuerda toda la conversación.
      */
     async function enviarMensaje() {
       const texto = inputEl.value.trim();
       if (!texto) return;
 
-      // Muestra el mensaje del usuario y limpia el input
+      // Agrega el mensaje del usuario al historial y lo muestra en pantalla
+      historial.push({ role: 'user', content: texto });
       agregarMensaje('usuario', texto);
       inputEl.value = '';
       inputEl.style.height = 'auto';
@@ -417,10 +423,11 @@
       const indicador = mostrarEscribiendo();
 
       try {
+        // Envía el historial completo para que el agente tenga todo el contexto
         const respuesta = await fetch('/api/agente', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ mensaje: texto })
+          body: JSON.stringify({ mensajes: historial })
         });
 
         const datos = await respuesta.json();
@@ -429,6 +436,8 @@
         indicador.remove();
 
         if (datos.ok) {
+          // Agrega la respuesta del agente al historial y la muestra en pantalla
+          historial.push({ role: 'assistant', content: datos.respuesta });
           agregarMensaje('agente', datos.respuesta);
         } else {
           agregarMensaje('agente', 'Lo siento, no pude procesar tu mensaje en este momento. Por favor intenta de nuevo.');
