@@ -355,6 +355,159 @@
       font-size: 0.9rem;
     }
 
+    /* Badge de origen en la tabla */
+    .badge-origen {
+      display: inline-block;
+      padding: 0.2rem 0.6rem;
+      border-radius: 20px;
+      font-size: 0.75rem;
+      font-weight: 700;
+      letter-spacing: 0.5px;
+      white-space: nowrap;
+    }
+
+    .badge-formulario {
+      background: rgba(46, 204, 113, 0.12);
+      color: var(--verde);
+      border: 1px solid rgba(46, 204, 113, 0.3);
+    }
+
+    .badge-agente {
+      background: rgba(108, 99, 255, 0.15);
+      color: var(--morado-claro);
+      border: 1px solid rgba(108, 99, 255, 0.4);
+    }
+
+    /* Fila de origen agente: cursor pointer para indicar que es clickeable */
+    tr.fila-agente:hover td {
+      background: rgba(108, 99, 255, 0.08);
+      cursor: pointer;
+    }
+
+    /* Botones de filtro sobre la tabla */
+    .filtros {
+      display: flex;
+      gap: 0.5rem;
+      flex-wrap: wrap;
+    }
+
+    .btn-filtro {
+      background: transparent;
+      border: 1px solid var(--borde);
+      color: var(--gris-texto);
+      padding: 0.35rem 0.9rem;
+      border-radius: 20px;
+      font-size: 0.82rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .btn-filtro:hover {
+      border-color: var(--morado);
+      color: var(--morado-claro);
+    }
+
+    .btn-filtro.activo {
+      background: var(--morado);
+      border-color: var(--morado);
+      color: var(--blanco);
+    }
+
+    /* =============================================
+       MODAL DE CONVERSACIÓN
+    ============================================= */
+    .modal-overlay {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.7);
+      z-index: 200;
+      align-items: center;
+      justify-content: center;
+      padding: 1rem;
+    }
+
+    .modal-overlay.visible {
+      display: flex;
+    }
+
+    .modal {
+      background: var(--bg-tarjeta);
+      border: 1px solid var(--borde);
+      border-radius: 16px;
+      width: 100%;
+      max-width: 620px;
+      max-height: 80vh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .modal-header {
+      padding: 1.2rem 1.5rem;
+      border-bottom: 1px solid var(--borde);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .modal-header h3 {
+      font-size: 1rem;
+      font-weight: 700;
+    }
+
+    .modal-cerrar {
+      background: none;
+      border: none;
+      color: var(--gris-texto);
+      font-size: 1.4rem;
+      cursor: pointer;
+      line-height: 1;
+      padding: 0.2rem;
+    }
+
+    .modal-cerrar:hover { color: var(--blanco); }
+
+    .modal-body {
+      overflow-y: auto;
+      padding: 1.2rem 1.5rem;
+      display: flex;
+      flex-direction: column;
+      gap: 0.75rem;
+    }
+
+    /* Burbujas dentro del modal */
+    .modal-burbuja {
+      max-width: 80%;
+      padding: 0.7rem 1rem;
+      border-radius: 14px;
+      font-size: 0.88rem;
+      line-height: 1.5;
+      word-break: break-word;
+    }
+
+    .modal-burbuja.user {
+      align-self: flex-end;
+      background: #6C63FF;
+      color: #fff;
+      border-bottom-right-radius: 4px;
+    }
+
+    .modal-burbuja.assistant {
+      align-self: flex-start;
+      background: #1a1a2e;
+      color: #e0e0e0;
+      border: 1px solid rgba(108,99,255,0.2);
+      border-bottom-left-radius: 4px;
+    }
+
+    .modal-fecha {
+      font-size: 0.78rem;
+      color: var(--gris-texto);
+      text-align: center;
+      padding: 0.3rem 0 0.5rem;
+    }
+
     /* =============================================
        RESPONSIVE — MÓVIL
        Ajustes para pantallas menores a 768px
@@ -434,12 +587,20 @@
 
     <!-- =============================================
          TABLA DE MENSAJES
-         Con botón de actualizar y filas con botón eliminar
+         Con botón de actualizar, filtros por origen y filas con botón eliminar
     ============================================= -->
     <div class="tabla-header">
       <span class="tabla-titulo">Mensajes recibidos</span>
-      <!-- Botón para recargar datos sin recargar la página -->
-      <button class="btn-actualizar" id="btnActualizar">↻ Actualizar</button>
+      <div style="display:flex; gap:0.8rem; align-items:center; flex-wrap:wrap;">
+        <!-- Botones de filtro por origen -->
+        <div class="filtros">
+          <button class="btn-filtro activo" data-filtro="todos">Todos</button>
+          <button class="btn-filtro" data-filtro="formulario">Formulario</button>
+          <button class="btn-filtro" data-filtro="agente">Agente IA</button>
+        </div>
+        <!-- Botón para recargar datos sin recargar la página -->
+        <button class="btn-actualizar" id="btnActualizar">↻ Actualizar</button>
+      </div>
     </div>
 
     <div class="tabla-contenedor">
@@ -454,6 +615,7 @@
             <th>Nombre</th>
             <th>Email</th>
             <th>Mensaje</th>
+            <th>Origen</th>
             <th>Fecha</th>
             <th>Acción</th>
           </tr>
@@ -468,6 +630,19 @@
         <p>No hay mensajes recibidos aún.</p>
       </div>
     </div>
+
+  <!-- Modal para mostrar el historial de conversación del agente -->
+  <div class="modal-overlay" id="modalConversacion">
+    <div class="modal">
+      <div class="modal-header">
+        <h3>Conversación del Agente IA</h3>
+        <button class="modal-cerrar" id="btnCerrarModal">✕</button>
+      </div>
+      <div class="modal-body" id="modalBody">
+        <!-- Las burbujas se insertan aquí con JavaScript -->
+      </div>
+    </div>
+  </div>
 
     <!-- =============================================
          TABLA DE SUSCRIPTORES
@@ -599,16 +774,35 @@
     function crearFila(mensaje) {
       const fila = document.createElement('tr');
 
+      // Marca las filas de origen "agente" para poder filtrarlas y hacerlas clickeables
+      const esAgente = mensaje.origen === 'agente';
+      if (esAgente) fila.classList.add('fila-agente');
+      fila.dataset.origen = mensaje.origen || 'formulario';
+
+      const badgeHtml = esAgente
+        ? `<span class="badge-origen badge-agente">Agente IA</span>`
+        : `<span class="badge-origen badge-formulario">Formulario</span>`;
+
       fila.innerHTML = `
         <td class="col-id">#${mensaje.id}</td>
         <td>${escapeHtml(mensaje.nombre)}</td>
         <td>${escapeHtml(mensaje.email)}</td>
         <td class="col-mensaje" title="${escapeHtml(mensaje.mensaje)}">${escapeHtml(mensaje.mensaje)}</td>
+        <td>${badgeHtml}</td>
         <td class="col-fecha">${mensaje.fecha}</td>
         <td>
           <button class="btn-eliminar" data-id="${mensaje.id}">Eliminar</button>
         </td>
       `;
+
+      // Clic en fila de agente: abre el modal con el historial de conversación
+      if (esAgente) {
+        fila.addEventListener('click', (e) => {
+          // Evita abrir el modal si el clic fue en el botón eliminar
+          if (e.target.classList.contains('btn-eliminar')) return;
+          abrirModalConversacion(mensaje.id, mensaje.nombre);
+        });
+      }
 
       // Agrega el evento de clic al botón eliminar de esta fila
       fila.querySelector('.btn-eliminar').addEventListener('click', () => {
@@ -704,6 +898,92 @@
       div.appendChild(document.createTextNode(texto));
       return div.innerHTML;
     }
+
+    // -----------------------------------------------
+    // FILTROS POR ORIGEN
+    // Muestra/oculta filas según el filtro activo
+    // -----------------------------------------------
+    let filtroActivo = 'todos';
+
+    document.querySelectorAll('.btn-filtro').forEach(btn => {
+      btn.addEventListener('click', () => {
+        filtroActivo = btn.dataset.filtro;
+
+        // Actualiza estado visual de los botones
+        document.querySelectorAll('.btn-filtro').forEach(b => b.classList.remove('activo'));
+        btn.classList.add('activo');
+
+        // Muestra u oculta filas según el filtro
+        document.querySelectorAll('#cuerpoTabla tr').forEach(fila => {
+          const origen = fila.dataset.origen || 'formulario';
+          fila.style.display = (filtroActivo === 'todos' || origen === filtroActivo) ? '' : 'none';
+        });
+
+        // Muestra el estado vacío si no quedan filas visibles
+        const filasVisibles = [...document.querySelectorAll('#cuerpoTabla tr')].filter(f => f.style.display !== 'none');
+        document.getElementById('tablaVacia').style.display = filasVisibles.length === 0 ? 'block' : 'none';
+        document.getElementById('tablaMensajes').style.display = filasVisibles.length > 0 ? 'table' : 'none';
+      });
+    });
+
+    // -----------------------------------------------
+    // MODAL DE CONVERSACIÓN
+    // Abre el historial completo de un chat del agente
+    // -----------------------------------------------
+    async function abrirModalConversacion(contacto_id, nombre) {
+      const modalBody = document.getElementById('modalBody');
+      modalBody.innerHTML = '<p style="color:var(--gris-texto);text-align:center;padding:1rem;">Cargando conversación...</p>';
+      document.getElementById('modalConversacion').classList.add('visible');
+      document.querySelector('#modalConversacion .modal-header h3').textContent = `Conversación — ${nombre}`;
+
+      try {
+        const res  = await fetchConToken(`/api/conversaciones/${contacto_id}`);
+        const data = await res.json();
+
+        if (!data.ok) {
+          modalBody.innerHTML = `<p style="color:var(--gris-texto);text-align:center;">Sin historial disponible.</p>`;
+          return;
+        }
+
+        modalBody.innerHTML = '';
+
+        // Renderiza cada sesión con su fecha como separador
+        data.sesiones.forEach((sesion, idx) => {
+          // Separador de sesión con fecha
+          const separador = document.createElement('div');
+          separador.style.cssText = 'text-align:center;margin:0.5rem 0;';
+          separador.innerHTML = `
+            <span style="background:rgba(108,99,255,0.15);border:1px solid rgba(108,99,255,0.3);
+              color:var(--morado-claro);border-radius:20px;padding:0.25rem 0.9rem;
+              font-size:0.75rem;font-weight:600;">
+              Sesión ${idx + 1} — ${sesion.fecha}
+            </span>`;
+          modalBody.appendChild(separador);
+
+          // Burbujas de la sesión
+          sesion.mensajes.forEach(turno => {
+            const burbuja = document.createElement('div');
+            burbuja.classList.add('modal-burbuja', turno.role);
+            burbuja.textContent = turno.content;
+            modalBody.appendChild(burbuja);
+          });
+        });
+
+      } catch {
+        modalBody.innerHTML = `<p style="color:var(--gris-texto);text-align:center;">Error al cargar la conversación.</p>`;
+      }
+    }
+
+    // Cierra el modal al hacer clic en ✕ o en el overlay
+    document.getElementById('btnCerrarModal').addEventListener('click', () => {
+      document.getElementById('modalConversacion').classList.remove('visible');
+    });
+
+    document.getElementById('modalConversacion').addEventListener('click', (e) => {
+      if (e.target === e.currentTarget) {
+        e.currentTarget.classList.remove('visible');
+      }
+    });
 
     // -----------------------------------------------
     // FUNCIÓN: Carga suscripciones desde /api/suscripciones

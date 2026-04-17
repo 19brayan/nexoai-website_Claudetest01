@@ -27,7 +27,10 @@ const {
   buscarUsuarioPorUsername,
   verificarPassword,
   guardarSuscripcion,
-  obtenerSuscripciones
+  obtenerSuscripciones,
+  buscarContactoPorEmail,
+  guardarConversacion,
+  obtenerConversaciones
 } = require('./db/database');
 
 // Clave secreta para firmar los tokens JWT
@@ -362,6 +365,27 @@ app.delete('/api/contacto/:id', verificarToken, (req, res) => {
 });
 
 /**
+ * GET /api/conversaciones/:contacto_id
+ * Devuelve el historial de conversación vinculado a un contacto del agente.
+ * PROTEGIDA: requiere token JWT válido
+ */
+app.get('/api/conversaciones/:contacto_id', verificarToken, (req, res) => {
+  const contacto_id = parseInt(req.params.contacto_id, 10);
+
+  if (isNaN(contacto_id)) {
+    return res.status(400).json({ ok: false, error: 'contacto_id inválido.' });
+  }
+
+  const sesiones = obtenerConversaciones(contacto_id);
+
+  if (!sesiones.length) {
+    return res.status(404).json({ ok: false, error: 'No se encontró conversación para este contacto.' });
+  }
+
+  res.json({ ok: true, sesiones });
+});
+
+/**
  * GET /api/suscripciones
  * Devuelve todas las suscripciones registradas, ordenadas por fecha descendente.
  * PROTEGIDA: requiere token JWT válido
@@ -417,12 +441,45 @@ app.post('/api/crear-sesion-pago', async (req, res) => {
 // el agente de soporte de NexoAI.
 // =============================================
 
+// Herramientas disponibles para el agente de atención al cliente
+const TOOLS_AGENTE = [
+  {
+    name: 'guardar_contacto',
+    description: 'Guarda los datos de contacto de un cliente interesado en NexoAI',
+    input_schema: {
+      type: 'object',
+      properties: {
+        nombre:  { type: 'string', description: 'Nombre del cliente' },
+        email:   { type: 'string', description: 'Email del cliente' },
+        interes: { type: 'string', description: 'En qué plan está interesado' }
+      },
+      required: ['nombre', 'email', 'interes']
+    }
+  }
+];
+
+// System prompt compartido para las dos llamadas del agente
+const SYSTEM_AGENTE = `Eres el agente de atención al cliente de NexoAI, una empresa que crea soluciones de software con inteligencia artificial.
+
+Conoces a la perfección los tres planes disponibles:
+- Plan Starter: $1/mes — ideal para emprendedores y equipos pequeños que quieren dar sus primeros pasos con IA.
+- Plan Pro: $10/mes — diseñado para empresas en crecimiento que necesitan más potencia y funcionalidades avanzadas.
+- Plan Enterprise: $100/mes — solución completa para grandes organizaciones con necesidades personalizadas.
+
+Responde siempre en español, con un tono profesional pero amigable y cercano. Si no sabes la respuesta a alguna pregunta específica, dí: "Para darte la mejor atención, te conecto con el equipo de NexoAI."
+
+Cuando el usuario muestre interés en un plan o pida que lo contacten, y proporcione su nombre y email, usa la herramienta guardar_contacto para registrar sus datos.
+
+Cuando el usuario proporcione su nombre Y email en el mismo mensaje, DEBES usar la herramienta guardar_contacto inmediatamente. No preguntes confirmación, no digas que tomaste nota — ejecuta la herramienta.`;
+
 /**
  * POST /api/agente
  * Recibe: { mensajes } — array con el historial completo de la conversación
  *   en formato [{ role: "user"|"assistant", content: "texto" }, ...]
  * Por compatibilidad también acepta { mensaje } (string) y lo convierte a array.
- * Devuelve: { ok: true, respuesta: "..." } con la respuesta del agente
+ * Soporta tool_use: si Claude invoca guardar_contacto, guarda el contacto en BD
+ * y hace una segunda llamada para que Claude confirme al usuario.
+ * Devuelve: { ok: true, respuesta: "..." } con la respuesta final del agente
  */
 app.post('/api/agente', async (req, res) => {
   const { mensaje, mensajes } = req.body;
@@ -440,22 +497,75 @@ app.post('/api/agente', async (req, res) => {
   }
 
   try {
-    const respuesta = await anthropic.messages.create({
-      model: 'claude-opus-4-5',
-      max_tokens: 500,
-      system: `Eres el agente de atención al cliente de NexoAI, una empresa que crea soluciones de software con inteligencia artificial.
-
-Conoces a la perfección los tres planes disponibles:
-- Plan Starter: $1/mes — ideal para emprendedores y equipos pequeños que quieren dar sus primeros pasos con IA.
-- Plan Pro: $10/mes — diseñado para empresas en crecimiento que necesitan más potencia y funcionalidades avanzadas.
-- Plan Enterprise: $100/mes — solución completa para grandes organizaciones con necesidades personalizadas.
-
-Responde siempre en español, con un tono profesional pero amigable y cercano. Si no sabes la respuesta a alguna pregunta específica, dí: "Para darte la mejor atención, te conecto con el equipo de NexoAI."`,
-      messages: historial
+    // Primera llamada: Claude puede responder o invocar una herramienta
+    const primeraRespuesta = await anthropic.messages.create({
+      model:       'claude-opus-4-5',
+      max_tokens:  500,
+      system:      SYSTEM_AGENTE,
+      tools:       TOOLS_AGENTE,
+      tool_choice: { type: 'auto' },
+      messages:    historial
     });
 
-    const texto = respuesta.content[0].text;
-    res.json({ ok: true, respuesta: texto });
+    // Si Claude no usó herramienta, devuelve la respuesta directamente
+    if (primeraRespuesta.stop_reason !== 'tool_use') {
+      const texto = primeraRespuesta.content[0].text;
+      return res.json({ ok: true, respuesta: texto });
+    }
+
+    // Claude decidió usar guardar_contacto — extrae el bloque tool_use
+    const bloqueHerramienta = primeraRespuesta.content.find(b => b.type === 'tool_use');
+    const { nombre, email, interes } = bloqueHerramienta.input;
+
+    console.log(`[AGENTE] Tool use — guardar_contacto: ${nombre} | ${email} | ${interes}`);
+
+    // Busca si el email ya tiene un registro previo para no duplicar contactos
+    const contactoExistente = buscarContactoPorEmail(email);
+    let contactoId;
+
+    if (contactoExistente) {
+      // Email ya conocido — reutiliza el id existente
+      contactoId = contactoExistente.id;
+      console.log(`[AGENTE] Contacto ya existe id ${contactoId} — no se duplica`);
+    } else {
+      // Email nuevo — crea el registro en la tabla mensajes
+      const contactoNuevo = guardarMensaje(nombre, email, `Interés: ${interes}`, 'agente');
+      contactoId = contactoNuevo.id;
+      console.log(`[AGENTE] Contacto nuevo guardado con id ${contactoId}`);
+    }
+
+    // Acumula la sesión actual al historial de conversaciones del contacto
+    guardarConversacion(contactoId, historial);
+    console.log(`[AGENTE] Sesión acumulada para contacto id ${contactoId}`);
+
+    // Segunda llamada: añade al historial la respuesta de Claude + el resultado
+    // de la herramienta para que Claude genere la confirmación al usuario
+    const historialConTool = [
+      ...historial,
+      { role: 'assistant', content: primeraRespuesta.content },
+      {
+        role: 'user',
+        content: [
+          {
+            type:        'tool_result',
+            tool_use_id: bloqueHerramienta.id,
+            content:     `Contacto registrado correctamente. id: ${contactoId}`
+          }
+        ]
+      }
+    ];
+
+    const segundaRespuesta = await anthropic.messages.create({
+      model:      'claude-opus-4-5',
+      max_tokens: 500,
+      system:     SYSTEM_AGENTE,
+      tools:      TOOLS_AGENTE,
+      messages:   historialConTool
+    });
+
+    const textoFinal = segundaRespuesta.content[0].text;
+    res.json({ ok: true, respuesta: textoFinal });
+
   } catch (error) {
     console.error('[AGENTE] Status:', error.status);
     console.error('[AGENTE] Mensaje:', error.message);

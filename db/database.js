@@ -40,6 +40,26 @@ db.exec(`
   )
 `);
 
+// Agrega la columna "origen" si no existe todavía
+// SQLite no soporta ALTER TABLE ... ADD COLUMN IF NOT EXISTS,
+// por eso verificamos primero con PRAGMA
+const columnasM = db.prepare('PRAGMA table_info(mensajes)').all();
+if (!columnasM.some(c => c.name === 'origen')) {
+  db.exec(`ALTER TABLE mensajes ADD COLUMN origen TEXT NOT NULL DEFAULT 'formulario'`);
+  console.log('[DB] Columna "origen" agregada a mensajes.');
+}
+
+// Crea la tabla "conversaciones" para guardar el historial completo
+// de los chats iniciados desde el agente de IA
+db.exec(`
+  CREATE TABLE IF NOT EXISTS conversaciones (
+    id              INTEGER PRIMARY KEY AUTOINCREMENT,
+    contacto_id     INTEGER NOT NULL,
+    historial       TEXT    NOT NULL,
+    fecha_creacion  TEXT    NOT NULL DEFAULT (datetime('now', 'localtime'))
+  )
+`);
+
 // Crea la tabla "usuarios" para el sistema de autenticación
 // Solo se crea si no existe, lo que hace seguro reiniciar el servidor
 db.exec(`
@@ -97,20 +117,76 @@ if (!adminExistente) {
  * @param {string} nombre  - Nombre del remitente
  * @param {string} email   - Correo electrónico del remitente
  * @param {string} mensaje - Texto del mensaje
+ * @param {string} origen  - Origen del contacto: "formulario" (por defecto) o "agente"
  * @returns {object} El mensaje recién insertado con su id y fecha
  */
-function guardarMensaje(nombre, email, mensaje) {
-  // Prepara la sentencia SQL una sola vez (más eficiente)
+function guardarMensaje(nombre, email, mensaje, origen = 'formulario') {
   const insertar = db.prepare(`
-    INSERT INTO mensajes (nombre, email, mensaje)
-    VALUES (@nombre, @email, @mensaje)
+    INSERT INTO mensajes (nombre, email, mensaje, origen)
+    VALUES (@nombre, @email, @mensaje, @origen)
   `);
 
-  // Ejecuta la inserción y obtiene el id generado
-  const resultado = insertar.run({ nombre, email, mensaje });
+  const resultado = insertar.run({ nombre, email, mensaje, origen });
 
-  // Devuelve el registro completo recién insertado
   return obtenerMensajePorId(resultado.lastInsertRowid);
+}
+
+/**
+ * Busca si ya existe un contacto con ese email en la tabla mensajes.
+ * @param {string} email - Email a buscar
+ * @returns {object|undefined} El registro encontrado, o undefined si no existe
+ */
+function buscarContactoPorEmail(email) {
+  return db.prepare(`
+    SELECT * FROM mensajes WHERE email = ? ORDER BY id ASC LIMIT 1
+  `).get(email.trim().toLowerCase());
+}
+
+/**
+ * Acumula una nueva sesión de conversación al historial del contacto.
+ * El campo "historial" guarda un array JSON de sesiones:
+ *   [{ fecha: "2026-01-15", mensajes: [...] }, ...]
+ * Si ya existe un registro para ese contacto_id, agrega la sesión al array.
+ * Si no existe, crea el registro con la primera sesión.
+ * @param {number} contacto_id - Id del registro en la tabla mensajes
+ * @param {Array}  mensajes    - Array de turnos [{ role, content }, ...] de esta sesión
+ */
+function guardarConversacion(contacto_id, mensajes) {
+  const fecha = new Date().toISOString().slice(0, 10); // "2026-04-17"
+  const sesionNueva = { fecha, mensajes };
+
+  const existente = db.prepare(`
+    SELECT * FROM conversaciones WHERE contacto_id = ? LIMIT 1
+  `).get(contacto_id);
+
+  if (existente) {
+    // Agrega la sesión nueva al array acumulado sin sobreescribir las anteriores
+    const sesiones = JSON.parse(existente.historial);
+    sesiones.push(sesionNueva);
+
+    db.prepare(`
+      UPDATE conversaciones SET historial = ? WHERE contacto_id = ?
+    `).run(JSON.stringify(sesiones), contacto_id);
+  } else {
+    // Primera conversación para este contacto
+    db.prepare(`
+      INSERT INTO conversaciones (contacto_id, historial)
+      VALUES (@contacto_id, @historial)
+    `).run({ contacto_id, historial: JSON.stringify([sesionNueva]) });
+  }
+}
+
+/**
+ * Devuelve el array de sesiones acumuladas de un contacto.
+ * @param {number} contacto_id - Id del contacto en la tabla mensajes
+ * @returns {Array} Array de sesiones [{ fecha, mensajes }] o [] si no existe
+ */
+function obtenerConversaciones(contacto_id) {
+  const fila = db.prepare(`
+    SELECT historial FROM conversaciones WHERE contacto_id = ? LIMIT 1
+  `).get(contacto_id);
+
+  return fila ? JSON.parse(fila.historial) : [];
 }
 
 /**
@@ -291,5 +367,8 @@ module.exports = {
   buscarUsuarioPorUsername,
   verificarPassword,
   guardarSuscripcion,
-  obtenerSuscripciones
+  obtenerSuscripciones,
+  buscarContactoPorEmail,
+  guardarConversacion,
+  obtenerConversaciones
 };
