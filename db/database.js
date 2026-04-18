@@ -1,322 +1,225 @@
 // =============================================
 // DATABASE.JS — CAPA DE ACCESO A DATOS
-// Maneja toda la interacción con la base de datos
-// SQLite usando la librería better-sqlite3.
+// Soporta dos modos de conexión:
+//   - Turso (nube): si existen TURSO_DATABASE_URL y TURSO_AUTH_TOKEN
+//   - SQLite local (desarrollo): usando archivo db/nexoai.db
 //
-// Exporta funciones limpias para que server.js
-// no tenga que escribir SQL directamente.
+// Todas las funciones son async porque @libsql/client es asíncrono.
 // =============================================
 
-const Database = require('better-sqlite3'); // Librería SQLite síncrona para Node.js
-const path     = require('path');            // Para construir rutas de archivo
-const bcrypt   = require('bcryptjs');        // Para encriptar y verificar contraseñas
+const { createClient } = require('@libsql/client'); // Cliente oficial de Turso / libSQL
+const bcrypt           = require('bcryptjs');        // Para encriptar y verificar contraseñas
+const path             = require('path');
 
-// Ruta donde se guardará el archivo de base de datos SQLite
-// __dirname apunta a la carpeta db/ donde está este archivo
-const DB_PATH = path.join(__dirname, 'nexoai.db');
+// Determina el modo de conexión según las variables de entorno
+const usaTurso = !!(process.env.TURSO_DATABASE_URL && process.env.TURSO_AUTH_TOKEN);
 
-// Abre (o crea si no existe) la base de datos SQLite
-// El archivo nexoai.db se genera automáticamente la primera vez
-const db = new Database(DB_PATH);
+// Crea el cliente según el entorno:
+// - Producción (Turso): conexión remota autenticada
+// - Desarrollo local: archivo SQLite en db/nexoai.db
+const db = usaTurso
+  ? createClient({
+      url:       process.env.TURSO_DATABASE_URL,
+      authToken: process.env.TURSO_AUTH_TOKEN
+    })
+  : createClient({
+      url: `file:${path.join(__dirname, 'nexoai.db')}`
+    });
 
-// =============================================
-// CONFIGURACIÓN INICIAL DE LA BASE DE DATOS
-// Se ejecuta una sola vez al arrancar el servidor
-// =============================================
-
-// Activa WAL (Write-Ahead Logging) para mejor rendimiento
-// en lecturas y escrituras concurrentes
-db.pragma('journal_mode = WAL');
-
-// Crea la tabla "mensajes" si aún no existe
-// La sentencia es idempotente: no falla si ya existe
-db.exec(`
-  CREATE TABLE IF NOT EXISTS mensajes (
-    id      INTEGER PRIMARY KEY AUTOINCREMENT,
-    nombre  TEXT    NOT NULL,
-    email   TEXT    NOT NULL,
-    mensaje TEXT    NOT NULL,
-    fecha   TEXT    NOT NULL DEFAULT (datetime('now', 'localtime'))
-  )
-`);
-
-// Agrega la columna "origen" si no existe todavía
-// SQLite no soporta ALTER TABLE ... ADD COLUMN IF NOT EXISTS,
-// por eso verificamos primero con PRAGMA
-const columnasM = db.prepare('PRAGMA table_info(mensajes)').all();
-if (!columnasM.some(c => c.name === 'origen')) {
-  db.exec(`ALTER TABLE mensajes ADD COLUMN origen TEXT NOT NULL DEFAULT 'formulario'`);
-  console.log('[DB] Columna "origen" agregada a mensajes.');
-}
-
-// Crea la tabla "conversaciones" para guardar el historial completo
-// de los chats iniciados desde el agente de IA
-db.exec(`
-  CREATE TABLE IF NOT EXISTS conversaciones (
-    id              INTEGER PRIMARY KEY AUTOINCREMENT,
-    contacto_id     INTEGER NOT NULL,
-    historial       TEXT    NOT NULL,
-    fecha_creacion  TEXT    NOT NULL DEFAULT (datetime('now', 'localtime'))
-  )
-`);
-
-// Crea la tabla "usuarios" para el sistema de autenticación
-// Solo se crea si no existe, lo que hace seguro reiniciar el servidor
-db.exec(`
-  CREATE TABLE IF NOT EXISTS usuarios (
-    id               INTEGER PRIMARY KEY AUTOINCREMENT,
-    username         TEXT    NOT NULL UNIQUE,
-    password_hash    TEXT    NOT NULL,
-    nombre           TEXT    NOT NULL,
-    rol              TEXT    NOT NULL DEFAULT 'admin',
-    fecha_creacion   TEXT    NOT NULL DEFAULT (datetime('now', 'localtime'))
-  )
-`);
-
-// Crea la tabla "suscripciones" para registrar los pagos completados via Stripe
-db.exec(`
-  CREATE TABLE IF NOT EXISTS suscripciones (
-    id                INTEGER PRIMARY KEY AUTOINCREMENT,
-    email             TEXT    NOT NULL,
-    plan              TEXT    NOT NULL,
-    estado            TEXT    NOT NULL DEFAULT 'activo',
-    stripe_session_id TEXT    NOT NULL,
-    fecha_creacion    TEXT    NOT NULL DEFAULT (datetime('now', 'localtime'))
-  )
-`);
+console.log(`[DB] Modo: ${usaTurso ? 'Turso (nube)' : 'SQLite local'}`);
 
 // =============================================
-// SEED AUTOMÁTICO DEL USUARIO ADMINISTRADOR
-// Se ejecuta al arrancar el servidor.
-// Si el usuario "admin" ya existe, no hace nada.
-// Esto permite que Render configure todo solo en el
-// primer arranque sin necesidad de correr seed.js manualmente.
+// INICIALIZACIÓN DE TABLAS
+// Crea todas las tablas y el usuario admin si no existen.
+// Se llama una vez al arrancar el servidor (await en server.js).
 // =============================================
 
-const adminExistente = db.prepare(`
-  SELECT id FROM usuarios WHERE username = 'admin'
-`).get();
+async function inicializarDB() {
+  // WAL solo aplica a SQLite local; Turso maneja su propio journaling
+  if (!usaTurso) {
+    await db.execute('PRAGMA journal_mode = WAL');
+  }
 
-if (!adminExistente) {
-  const password_hash = bcrypt.hashSync('nexoai2026', 10);
-  db.prepare(`
-    INSERT INTO usuarios (username, password_hash, nombre, rol)
-    VALUES ('admin', ?, 'Administrador', 'admin')
-  `).run(password_hash);
-  console.log('[DB] Usuario admin creado automáticamente.');
-}
-
-// =============================================
-// FUNCIONES EXPORTADAS
-// Cada función representa una operación sobre
-// la tabla "mensajes"
-// =============================================
-
-/**
- * Guarda un nuevo mensaje en la base de datos.
- * @param {string} nombre  - Nombre del remitente
- * @param {string} email   - Correo electrónico del remitente
- * @param {string} mensaje - Texto del mensaje
- * @param {string} origen  - Origen del contacto: "formulario" (por defecto) o "agente"
- * @returns {object} El mensaje recién insertado con su id y fecha
- */
-function guardarMensaje(nombre, email, mensaje, origen = 'formulario') {
-  const insertar = db.prepare(`
-    INSERT INTO mensajes (nombre, email, mensaje, origen)
-    VALUES (@nombre, @email, @mensaje, @origen)
+  // Tabla mensajes — incluye columna "origen" desde el inicio
+  await db.execute(`
+    CREATE TABLE IF NOT EXISTS mensajes (
+      id      INTEGER PRIMARY KEY AUTOINCREMENT,
+      nombre  TEXT    NOT NULL,
+      email   TEXT    NOT NULL,
+      mensaje TEXT    NOT NULL,
+      fecha   TEXT    NOT NULL DEFAULT (datetime('now', 'localtime')),
+      origen  TEXT    NOT NULL DEFAULT 'formulario'
+    )
   `);
 
-  const resultado = insertar.run({ nombre, email, mensaje, origen });
+  // Agrega "origen" si la BD ya existía sin esa columna (backward compat)
+  try {
+    await db.execute(`ALTER TABLE mensajes ADD COLUMN origen TEXT NOT NULL DEFAULT 'formulario'`);
+    console.log('[DB] Columna "origen" agregada a mensajes.');
+  } catch {
+    // La columna ya existe — ignorar el error
+  }
 
-  return obtenerMensajePorId(resultado.lastInsertRowid);
-}
+  // Tabla usuarios para autenticación JWT
+  await db.execute(`
+    CREATE TABLE IF NOT EXISTS usuarios (
+      id             INTEGER PRIMARY KEY AUTOINCREMENT,
+      username       TEXT    NOT NULL UNIQUE,
+      password_hash  TEXT    NOT NULL,
+      nombre         TEXT    NOT NULL,
+      rol            TEXT    NOT NULL DEFAULT 'admin',
+      fecha_creacion TEXT    NOT NULL DEFAULT (datetime('now', 'localtime'))
+    )
+  `);
 
-/**
- * Busca si ya existe un contacto con ese email en la tabla mensajes.
- * @param {string} email - Email a buscar
- * @returns {object|undefined} El registro encontrado, o undefined si no existe
- */
-function buscarContactoPorEmail(email) {
-  return db.prepare(`
-    SELECT * FROM mensajes WHERE email = ? ORDER BY id ASC LIMIT 1
-  `).get(email.trim().toLowerCase());
-}
+  // Tabla suscripciones para registrar pagos de Stripe
+  await db.execute(`
+    CREATE TABLE IF NOT EXISTS suscripciones (
+      id                INTEGER PRIMARY KEY AUTOINCREMENT,
+      email             TEXT    NOT NULL,
+      plan              TEXT    NOT NULL,
+      estado            TEXT    NOT NULL DEFAULT 'activo',
+      stripe_session_id TEXT    NOT NULL,
+      fecha_creacion    TEXT    NOT NULL DEFAULT (datetime('now', 'localtime'))
+    )
+  `);
 
-/**
- * Acumula una nueva sesión de conversación al historial del contacto.
- * El campo "historial" guarda un array JSON de sesiones:
- *   [{ fecha: "2026-01-15", mensajes: [...] }, ...]
- * Si ya existe un registro para ese contacto_id, agrega la sesión al array.
- * Si no existe, crea el registro con la primera sesión.
- * @param {number} contacto_id - Id del registro en la tabla mensajes
- * @param {Array}  mensajes    - Array de turnos [{ role, content }, ...] de esta sesión
- */
-function guardarConversacion(contacto_id, mensajes) {
-  const fecha = new Date().toISOString().slice(0, 10); // "2026-04-17"
-  const sesionNueva = { fecha, mensajes };
+  // Tabla conversaciones — historial acumulado por contacto (array JSON de sesiones)
+  await db.execute(`
+    CREATE TABLE IF NOT EXISTS conversaciones (
+      id             INTEGER PRIMARY KEY AUTOINCREMENT,
+      contacto_id    INTEGER NOT NULL,
+      historial      TEXT    NOT NULL,
+      fecha_creacion TEXT    NOT NULL DEFAULT (datetime('now', 'localtime'))
+    )
+  `);
 
-  const existente = db.prepare(`
-    SELECT * FROM conversaciones WHERE contacto_id = ? LIMIT 1
-  `).get(contacto_id);
-
-  if (existente) {
-    // Agrega la sesión nueva al array acumulado sin sobreescribir las anteriores
-    const sesiones = JSON.parse(existente.historial);
-    sesiones.push(sesionNueva);
-
-    db.prepare(`
-      UPDATE conversaciones SET historial = ? WHERE contacto_id = ?
-    `).run(JSON.stringify(sesiones), contacto_id);
-  } else {
-    // Primera conversación para este contacto
-    db.prepare(`
-      INSERT INTO conversaciones (contacto_id, historial)
-      VALUES (@contacto_id, @historial)
-    `).run({ contacto_id, historial: JSON.stringify([sesionNueva]) });
+  // Seed automático del usuario administrador al primer arranque
+  const adminResult = await db.execute(`SELECT id FROM usuarios WHERE username = 'admin'`);
+  if (adminResult.rows.length === 0) {
+    const password_hash = bcrypt.hashSync('nexoai2026', 10);
+    await db.execute({
+      sql:  `INSERT INTO usuarios (username, password_hash, nombre, rol) VALUES (?, ?, ?, ?)`,
+      args: ['admin', password_hash, 'Administrador', 'admin']
+    });
+    console.log('[DB] Usuario admin creado automáticamente.');
   }
 }
 
-/**
- * Devuelve el array de sesiones acumuladas de un contacto.
- * @param {number} contacto_id - Id del contacto en la tabla mensajes
- * @returns {Array} Array de sesiones [{ fecha, mensajes }] o [] si no existe
- */
-function obtenerConversaciones(contacto_id) {
-  const fila = db.prepare(`
-    SELECT historial FROM conversaciones WHERE contacto_id = ? LIMIT 1
-  `).get(contacto_id);
+// =============================================
+// FUNCIONES DE MENSAJES (CONTACTOS)
+// =============================================
 
-  return fila ? JSON.parse(fila.historial) : [];
+/**
+ * Guarda un nuevo mensaje / contacto en la base de datos.
+ * @param {string} nombre  - Nombre del remitente
+ * @param {string} email   - Correo electrónico
+ * @param {string} mensaje - Texto del mensaje
+ * @param {string} origen  - "formulario" (por defecto) o "agente"
+ * @returns {object} El registro recién insertado
+ */
+async function guardarMensaje(nombre, email, mensaje, origen = 'formulario') {
+  const result = await db.execute({
+    sql:  `INSERT INTO mensajes (nombre, email, mensaje, origen) VALUES (?, ?, ?, ?)`,
+    args: [nombre, email, mensaje, origen]
+  });
+  return obtenerMensajePorId(Number(result.lastInsertRowid));
 }
 
 /**
  * Devuelve todos los mensajes ordenados del más reciente al más antiguo.
- * @returns {Array} Lista de todos los mensajes
  */
-function obtenerMensajes() {
-  const consulta = db.prepare(`
-    SELECT * FROM mensajes
-    ORDER BY id DESC
-  `);
-  return consulta.all();
+async function obtenerMensajes() {
+  const result = await db.execute(`SELECT * FROM mensajes ORDER BY id DESC`);
+  return result.rows;
 }
 
 /**
- * Busca y devuelve un mensaje por su id.
- * @param {number} id - El id del mensaje a buscar
- * @returns {object|undefined} El mensaje encontrado, o undefined si no existe
+ * Busca un mensaje por su id.
  */
-function obtenerMensajePorId(id) {
-  const consulta = db.prepare(`
-    SELECT * FROM mensajes WHERE id = ?
-  `);
-  return consulta.get(id);
+async function obtenerMensajePorId(id) {
+  const result = await db.execute({ sql: `SELECT * FROM mensajes WHERE id = ?`, args: [id] });
+  return result.rows[0];
 }
 
 /**
- * Elimina un mensaje de la base de datos por su id.
- * @param {number} id - El id del mensaje a eliminar
+ * Elimina un mensaje por su id.
  * @returns {boolean} true si se eliminó, false si no existía
  */
-function eliminarMensaje(id) {
-  const borrar = db.prepare(`
-    DELETE FROM mensajes WHERE id = ?
-  `);
-  const resultado = borrar.run(id);
-
-  // changes indica cuántas filas fueron afectadas
-  return resultado.changes > 0;
+async function eliminarMensaje(id) {
+  const result = await db.execute({ sql: `DELETE FROM mensajes WHERE id = ?`, args: [id] });
+  return result.rowsAffected > 0;
 }
 
 /**
- * Devuelve el total de mensajes guardados en la base de datos.
- * @returns {number} Cantidad total de mensajes
+ * Devuelve el total de mensajes guardados.
  */
-function contarMensajes() {
-  const consulta = db.prepare(`
-    SELECT COUNT(*) AS total FROM mensajes
-  `);
-  return consulta.get().total;
+async function contarMensajes() {
+  const result = await db.execute(`SELECT COUNT(*) AS total FROM mensajes`);
+  return Number(result.rows[0].total);
 }
 
 /**
- * Cuenta cuántos mensajes fueron recibidos hoy (día actual).
- * Compara la fecha de cada mensaje con la fecha de hoy en formato local.
- * @returns {number} Cantidad de mensajes recibidos hoy
+ * Cuenta mensajes recibidos hoy.
  */
-function contarMensajesHoy() {
-  const consulta = db.prepare(`
-    SELECT COUNT(*) AS total FROM mensajes
-    WHERE date(fecha) = date('now', 'localtime')
-  `);
-  return consulta.get().total;
+async function contarMensajesHoy() {
+  const result = await db.execute(
+    `SELECT COUNT(*) AS total FROM mensajes WHERE date(fecha) = date('now', 'localtime')`
+  );
+  return Number(result.rows[0].total);
 }
 
 /**
- * Devuelve el mensaje más reciente registrado en la base de datos.
- * Útil para mostrar en el dashboard del panel de administración.
- * @returns {object|undefined} El mensaje más reciente, o undefined si no hay ninguno
+ * Devuelve el mensaje más reciente.
  */
-function obtenerMensajeReciente() {
-  const consulta = db.prepare(`
-    SELECT * FROM mensajes
-    ORDER BY id DESC
-    LIMIT 1
-  `);
-  return consulta.get();
+async function obtenerMensajeReciente() {
+  const result = await db.execute(`SELECT * FROM mensajes ORDER BY id DESC LIMIT 1`);
+  return result.rows[0];
+}
+
+/**
+ * Busca si ya existe un contacto con ese email (para evitar duplicados del agente).
+ * @param {string} email - Email a buscar
+ * @returns {object|undefined} El registro encontrado, o undefined
+ */
+async function buscarContactoPorEmail(email) {
+  const result = await db.execute({
+    sql:  `SELECT * FROM mensajes WHERE email = ? ORDER BY id ASC LIMIT 1`,
+    args: [email.trim().toLowerCase()]
+  });
+  return result.rows[0];
 }
 
 // =============================================
 // FUNCIONES DE AUTENTICACIÓN
-// Manejo de usuarios: registro, búsqueda y verificación
 // =============================================
 
 /**
- * Registra un nuevo usuario encriptando su contraseña antes de guardarla.
- * Nunca se guarda la contraseña en texto plano, solo el hash.
- * @param {string} username - Nombre de usuario único
- * @param {string} password - Contraseña en texto plano (se encripta aquí)
- * @param {string} nombre   - Nombre completo para mostrar
- * @param {string} rol      - Rol del usuario (por defecto: 'admin')
- * @returns {object} El usuario creado (sin el hash de contraseña)
+ * Registra un nuevo usuario encriptando su contraseña.
  */
-function registrarUsuario(username, password, nombre, rol = 'admin') {
-  // Encripta la contraseña con un costo de 10 rondas de hashing
-  // Cuanto mayor el número, más seguro pero más lento
+async function registrarUsuario(username, password, nombre, rol = 'admin') {
   const password_hash = bcrypt.hashSync(password, 10);
-
-  const insertar = db.prepare(`
-    INSERT INTO usuarios (username, password_hash, nombre, rol)
-    VALUES (@username, @password_hash, @nombre, @rol)
-  `);
-
-  const resultado = insertar.run({ username, password_hash, nombre, rol });
-
-  // Devuelve el usuario sin el hash de contraseña por seguridad
+  await db.execute({
+    sql:  `INSERT INTO usuarios (username, password_hash, nombre, rol) VALUES (?, ?, ?, ?)`,
+    args: [username, password_hash, nombre, rol]
+  });
   return buscarUsuarioPorUsername(username);
 }
 
 /**
- * Busca un usuario por su nombre de usuario.
- * Incluye el password_hash para poder verificarlo en el login.
- * @param {string} username - El nombre de usuario a buscar
- * @returns {object|undefined} El usuario encontrado, o undefined si no existe
+ * Busca un usuario por su username. Incluye el hash para verificar login.
  */
-function buscarUsuarioPorUsername(username) {
-  const consulta = db.prepare(`
-    SELECT id, username, password_hash, nombre, rol, fecha_creacion
-    FROM usuarios
-    WHERE username = ?
-  `);
-  return consulta.get(username);
+async function buscarUsuarioPorUsername(username) {
+  const result = await db.execute({
+    sql:  `SELECT id, username, password_hash, nombre, rol, fecha_creacion FROM usuarios WHERE username = ?`,
+    args: [username]
+  });
+  return result.rows[0];
 }
 
 /**
  * Verifica si una contraseña en texto plano coincide con el hash guardado.
- * Usa bcrypt.compareSync para comparar de forma segura.
- * @param {string} password      - Contraseña en texto plano ingresada por el usuario
- * @param {string} password_hash - Hash guardado en la base de datos
- * @returns {boolean} true si la contraseña es correcta, false si no
+ * Es síncrona porque bcrypt.compareSync no es una operación de BD.
  */
 function verificarPassword(password, password_hash) {
   return bcrypt.compareSync(password, password_hash);
@@ -324,38 +227,87 @@ function verificarPassword(password, password_hash) {
 
 // =============================================
 // FUNCIONES DE SUSCRIPCIONES
-// Registra y consulta los pagos completados via Stripe
 // =============================================
 
 /**
- * Devuelve todas las suscripciones ordenadas por fecha, más reciente primero.
- * @returns {Array} Lista de todas las suscripciones
+ * Devuelve todas las suscripciones ordenadas por fecha descendente.
  */
-function obtenerSuscripciones() {
-  return db.prepare(`
-    SELECT * FROM suscripciones
-    ORDER BY fecha_creacion DESC
-  `).all();
+async function obtenerSuscripciones() {
+  const result = await db.execute(`SELECT * FROM suscripciones ORDER BY fecha_creacion DESC`);
+  return result.rows;
 }
 
 /**
- * Guarda una nueva suscripción tras un pago exitoso en Stripe.
- * @param {string} email             - Email del cliente que pagó
- * @param {string} plan              - Plan contratado: starter, pro o enterprise
- * @param {string} stripe_session_id - ID de la sesión de Stripe (checkout.session.id)
- * @returns {object} La suscripción recién creada
+ * Guarda una suscripción tras un pago exitoso en Stripe.
  */
-function guardarSuscripcion(email, plan, stripe_session_id) {
-  const insertar = db.prepare(`
-    INSERT INTO suscripciones (email, plan, stripe_session_id)
-    VALUES (@email, @plan, @stripe_session_id)
-  `);
-  const resultado = insertar.run({ email, plan, stripe_session_id });
-  return db.prepare(`SELECT * FROM suscripciones WHERE id = ?`).get(resultado.lastInsertRowid);
+async function guardarSuscripcion(email, plan, stripe_session_id) {
+  const result = await db.execute({
+    sql:  `INSERT INTO suscripciones (email, plan, stripe_session_id) VALUES (?, ?, ?)`,
+    args: [email, plan, stripe_session_id]
+  });
+  const row = await db.execute({
+    sql:  `SELECT * FROM suscripciones WHERE id = ?`,
+    args: [Number(result.lastInsertRowid)]
+  });
+  return row.rows[0];
+}
+
+// =============================================
+// FUNCIONES DE CONVERSACIONES
+// Acumula sesiones de chat del agente por contacto.
+// El campo historial es un array JSON de sesiones:
+//   [{ fecha: "2026-04-18", mensajes: [...] }, ...]
+// =============================================
+
+/**
+ * Acumula una nueva sesión de conversación al historial del contacto.
+ * Si ya existe un registro para ese contacto_id, agrega la sesión al array.
+ * Si no existe, crea el registro con la primera sesión.
+ * @param {number} contacto_id - Id del contacto en la tabla mensajes
+ * @param {Array}  mensajes    - Turnos [{ role, content }] de esta sesión
+ */
+async function guardarConversacion(contacto_id, mensajes) {
+  const fecha = new Date().toISOString().slice(0, 10); // "2026-04-18"
+  const sesionNueva = { fecha, mensajes };
+
+  const existente = await db.execute({
+    sql:  `SELECT * FROM conversaciones WHERE contacto_id = ? LIMIT 1`,
+    args: [contacto_id]
+  });
+
+  if (existente.rows.length > 0) {
+    // Agrega la sesión nueva al array acumulado sin sobreescribir las anteriores
+    const sesiones = JSON.parse(existente.rows[0].historial);
+    sesiones.push(sesionNueva);
+    await db.execute({
+      sql:  `UPDATE conversaciones SET historial = ? WHERE contacto_id = ?`,
+      args: [JSON.stringify(sesiones), contacto_id]
+    });
+  } else {
+    // Primera conversación para este contacto
+    await db.execute({
+      sql:  `INSERT INTO conversaciones (contacto_id, historial) VALUES (?, ?)`,
+      args: [contacto_id, JSON.stringify([sesionNueva])]
+    });
+  }
+}
+
+/**
+ * Devuelve el array de sesiones acumuladas de un contacto.
+ * @param {number} contacto_id
+ * @returns {Array} [{ fecha, mensajes }] o [] si no existe
+ */
+async function obtenerConversaciones(contacto_id) {
+  const result = await db.execute({
+    sql:  `SELECT historial FROM conversaciones WHERE contacto_id = ? LIMIT 1`,
+    args: [contacto_id]
+  });
+  return result.rows.length > 0 ? JSON.parse(result.rows[0].historial) : [];
 }
 
 // Exporta todas las funciones para que server.js pueda usarlas
 module.exports = {
+  inicializarDB,
   guardarMensaje,
   obtenerMensajes,
   obtenerMensajePorId,

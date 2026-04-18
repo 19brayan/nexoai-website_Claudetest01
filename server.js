@@ -3,7 +3,7 @@
 // Levanta un servidor Express que:
 //   1. Sirve el sitio web estático (HTML, CSS, JS)
 //   2. Expone una API REST para el formulario de contacto
-//   3. Almacena los mensajes en una base de datos SQLite
+//   3. Almacena los mensajes en Turso (nube) o SQLite local
 // =============================================
 
 require('dotenv').config(); // Carga las variables del .env
@@ -16,8 +16,9 @@ const anthropic       = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY })
 const express = require('express'); // Framework para crear el servidor web
 const jwt     = require('jsonwebtoken'); // Para crear y verificar tokens JWT
 
-// Importa las funciones de acceso a la base de datos SQLite
+// Importa las funciones de acceso a la base de datos
 const {
+  inicializarDB,
   guardarMensaje,
   obtenerMensajes,
   eliminarMensaje,
@@ -34,25 +35,21 @@ const {
 } = require('./db/database');
 
 // Clave secreta para firmar los tokens JWT
-// En producción esto debe estar en una variable de entorno (.env)
 const JWT_SECRET = 'nexoai_secret_2026';
 
 // Inicialización de la aplicación Express
 const app  = express();
 // En Render, el puerto lo asigna la plataforma via variable de entorno PORT.
-// Si no existe (entorno local), usamos 3001 como respaldo.
 const PORT = process.env.PORT || 3001;
 
 // =============================================
 // MIDDLEWARE
-// Configuración global que se aplica a todas las rutas
 // =============================================
 
 // =============================================
 // WEBHOOK DE STRIPE
 // Debe ir ANTES de express.json() porque Stripe
 // requiere el body en formato raw (sin parsear)
-// para poder verificar la firma del evento.
 // =============================================
 
 app.post('/api/webhook', express.raw({ type: 'application/json' }), async (req, res) => {
@@ -87,7 +84,7 @@ app.post('/api/webhook', express.raw({ type: 'application/json' }), async (req, 
     console.log(`[WEBHOOK] Guardando suscripción — email: ${email}, plan: ${plan}`);
 
     try {
-      const suscripcion = guardarSuscripcion(email, plan, sesion.id);
+      const suscripcion = await guardarSuscripcion(email, plan, sesion.id);
       console.log('[WEBHOOK] Suscripción guardada:', JSON.stringify(suscripcion));
     } catch (dbError) {
       console.error('[WEBHOOK] Error al guardar en BD:', dbError.message);
@@ -115,12 +112,12 @@ app.post('/api/webhook', express.raw({ type: 'application/json' }), async (req, 
           </div>
         `
       });
-      console.log(`[WEBHOOK] 📧 Email de bienvenida enviado a: ${email}`);
+      console.log(`[WEBHOOK] Email de bienvenida enviado a: ${email}`);
     } catch (emailError) {
       console.error('[WEBHOOK] Error al enviar email:', emailError.message);
     }
 
-    console.log(`[WEBHOOK] ✅ Pago exitoso: ${email} — Plan: ${plan}`);
+    console.log(`[WEBHOOK] Pago exitoso: ${email} — Plan: ${plan}`);
   }
 
   res.status(200).json({ received: true });
@@ -130,7 +127,6 @@ app.post('/api/webhook', express.raw({ type: 'application/json' }), async (req, 
 app.use(express.json());
 
 // Sirve todos los archivos estáticos del proyecto (HTML, CSS, JS)
-// desde la carpeta raíz del proyecto
 app.use(express.static(__dirname));
 
 // =============================================
@@ -139,17 +135,10 @@ app.use(express.static(__dirname));
 // permitir acceso a rutas protegidas
 // =============================================
 
-/**
- * Middleware que verifica el token JWT en el header Authorization.
- * Si el token es válido, agrega el usuario a req.usuario y continúa.
- * Si no, responde con error 401 (No autorizado).
- */
 function verificarToken(req, res, next) {
-  // El token viene en el header: "Authorization: Bearer <token>"
   const authHeader = req.headers['authorization'];
   const token      = authHeader && authHeader.split(' ')[1];
 
-  // Si no hay token, rechaza la petición
   if (!token) {
     return res.status(401).json({
       exito: false,
@@ -157,7 +146,6 @@ function verificarToken(req, res, next) {
     });
   }
 
-  // Verifica que el token sea válido y no haya expirado
   jwt.verify(token, JWT_SECRET, (err, usuario) => {
     if (err) {
       return res.status(401).json({
@@ -165,16 +153,13 @@ function verificarToken(req, res, next) {
         error: 'Token inválido o expirado. Inicia sesión nuevamente.'
       });
     }
-
-    // Guarda los datos del usuario en la petición para usarlos en la ruta
     req.usuario = usuario;
-    next(); // Pasa al siguiente middleware o ruta
+    next();
   });
 }
 
 // =============================================
 // RUTAS DE AUTENTICACIÓN
-// Login y verificación de token JWT
 // =============================================
 
 /**
@@ -182,10 +167,9 @@ function verificarToken(req, res, next) {
  * Recibe: { username, password }
  * Verifica las credenciales y devuelve un token JWT si son correctas
  */
-app.post('/api/auth/login', (req, res) => {
+app.post('/api/auth/login', async (req, res) => {
   const { username, password } = req.body;
 
-  // Validación básica de campos
   if (!username || !password) {
     return res.status(400).json({
       exito: false,
@@ -193,11 +177,8 @@ app.post('/api/auth/login', (req, res) => {
     });
   }
 
-  // Busca el usuario en la base de datos
-  const usuario = buscarUsuarioPorUsername(username.trim());
+  const usuario = await buscarUsuarioPorUsername(username.trim());
 
-  // Si no existe el usuario o la contraseña es incorrecta, mismo error
-  // (no revelar cuál de los dos falló por seguridad)
   if (!usuario || !verificarPassword(password, usuario.password_hash)) {
     return res.status(401).json({
       exito: false,
@@ -205,8 +186,7 @@ app.post('/api/auth/login', (req, res) => {
     });
   }
 
-  // Genera un token JWT con los datos del usuario
-  // El token expira en 8 horas (tiempo de una jornada laboral)
+  // Token JWT con expiración de 8 horas
   const token = jwt.sign(
     {
       id:       usuario.id,
@@ -231,31 +211,23 @@ app.post('/api/auth/login', (req, res) => {
 /**
  * GET /api/auth/verify
  * Verifica si el token JWT del header es válido
- * Usado por el panel admin al cargar para saber si la sesión sigue activa
  */
 app.get('/api/auth/verify', verificarToken, (req, res) => {
-  // Si llegó aquí, el token es válido (el middleware lo verificó)
-  res.json({
-    exito:   true,
-    usuario: req.usuario
-  });
+  res.json({ exito: true, usuario: req.usuario });
 });
 
 // =============================================
-// RUTAS DE LA API
-// Endpoints que el frontend puede llamar via fetch
+// RUTAS DE LA API — MENSAJES / CONTACTO
 // =============================================
 
 /**
  * POST /api/contacto
- * Recibe: { nombre, email, mensaje } en el cuerpo de la petición
- * Guarda el mensaje en la base de datos SQLite
- * Responde con el mensaje guardado o un error de validación
+ * Recibe: { nombre, email, mensaje }
+ * Guarda el mensaje en la base de datos
  */
-app.post('/api/contacto', (req, res) => {
+app.post('/api/contacto', async (req, res) => {
   const { nombre, email, mensaje } = req.body;
 
-  // Validación: los tres campos son obligatorios
   if (!nombre || !email || !mensaje) {
     return res.status(400).json({
       exito: false,
@@ -263,8 +235,7 @@ app.post('/api/contacto', (req, res) => {
     });
   }
 
-  // Guarda el mensaje en SQLite y obtiene el registro completo
-  const nuevoMensaje = guardarMensaje(
+  const nuevoMensaje = await guardarMensaje(
     nombre.trim(),
     email.trim().toLowerCase(),
     mensaje.trim()
@@ -272,7 +243,6 @@ app.post('/api/contacto', (req, res) => {
 
   console.log(`[API] Nuevo mensaje de ${nuevoMensaje.nombre} (${nuevoMensaje.email})`);
 
-  // Responde con el mensaje guardado
   res.status(201).json({
     exito:   true,
     mensaje: '¡Mensaje recibido! Te responderemos pronto.',
@@ -282,43 +252,31 @@ app.post('/api/contacto', (req, res) => {
 
 /**
  * GET /api/contacto
- * Devuelve todos los mensajes guardados en la base de datos
- * ordenados del más reciente al más antiguo
+ * Devuelve todos los mensajes del más reciente al más antiguo
  */
-app.get('/api/contacto', (_req, res) => {
-  const mensajes = obtenerMensajes();
-
-  res.json({
-    exito: true,
-    total: mensajes.length,
-    datos: mensajes
-  });
+app.get('/api/contacto', async (_req, res) => {
+  const mensajes = await obtenerMensajes();
+  res.json({ exito: true, total: mensajes.length, datos: mensajes });
 });
 
 /**
  * GET /api/contacto/count
- * Devuelve únicamente el conteo total de mensajes
- * Útil para mostrar estadísticas en un panel de administración
+ * Devuelve el conteo total de mensajes
  */
-app.get('/api/contacto/count', (_req, res) => {
-  const total = contarMensajes();
-
-  res.json({
-    exito: true,
-    total
-  });
+app.get('/api/contacto/count', async (_req, res) => {
+  const total = await contarMensajes();
+  res.json({ exito: true, total });
 });
 
 /**
  * GET /api/contacto/stats
- * Devuelve estadísticas del panel de administración:
- * total de mensajes, mensajes de hoy, y el mensaje más reciente
+ * Devuelve estadísticas del panel de administración
  * PROTEGIDA: requiere token JWT válido
  */
-app.get('/api/contacto/stats', verificarToken, (_req, res) => {
-  const total          = contarMensajes();
-  const hoy            = contarMensajesHoy();
-  const mensajeReciente = obtenerMensajeReciente();
+app.get('/api/contacto/stats', verificarToken, async (_req, res) => {
+  const total           = await contarMensajes();
+  const hoy             = await contarMensajesHoy();
+  const mensajeReciente = await obtenerMensajeReciente();
 
   res.json({
     exito: true,
@@ -330,24 +288,17 @@ app.get('/api/contacto/stats', verificarToken, (_req, res) => {
 
 /**
  * DELETE /api/contacto/:id
- * Elimina un mensaje de la base de datos por su id
- * :id es un parámetro dinámico en la URL (ej: /api/contacto/5)
+ * Elimina un mensaje por su id
  * PROTEGIDA: requiere token JWT válido
  */
-app.delete('/api/contacto/:id', verificarToken, (req, res) => {
-  // Convierte el id de string a número entero
+app.delete('/api/contacto/:id', verificarToken, async (req, res) => {
   const id = parseInt(req.params.id, 10);
 
-  // Valida que el id sea un número válido
   if (isNaN(id)) {
-    return res.status(400).json({
-      exito: false,
-      error: 'El id debe ser un número válido.'
-    });
+    return res.status(400).json({ exito: false, error: 'El id debe ser un número válido.' });
   }
 
-  // Intenta eliminar el mensaje y verifica si existía
-  const eliminado = eliminarMensaje(id);
+  const eliminado = await eliminarMensaje(id);
 
   if (!eliminado) {
     return res.status(404).json({
@@ -357,26 +308,22 @@ app.delete('/api/contacto/:id', verificarToken, (req, res) => {
   }
 
   console.log(`[API] Mensaje con id ${id} eliminado.`);
-
-  res.json({
-    exito:   true,
-    mensaje: `Mensaje con id ${id} eliminado correctamente.`
-  });
+  res.json({ exito: true, mensaje: `Mensaje con id ${id} eliminado correctamente.` });
 });
 
 /**
  * GET /api/conversaciones/:contacto_id
- * Devuelve el historial de conversación vinculado a un contacto del agente.
+ * Devuelve el historial acumulado de sesiones de un contacto del agente.
  * PROTEGIDA: requiere token JWT válido
  */
-app.get('/api/conversaciones/:contacto_id', verificarToken, (req, res) => {
+app.get('/api/conversaciones/:contacto_id', verificarToken, async (req, res) => {
   const contacto_id = parseInt(req.params.contacto_id, 10);
 
   if (isNaN(contacto_id)) {
     return res.status(400).json({ ok: false, error: 'contacto_id inválido.' });
   }
 
-  const sesiones = obtenerConversaciones(contacto_id);
+  const sesiones = await obtenerConversaciones(contacto_id);
 
   if (!sesiones.length) {
     return res.status(404).json({ ok: false, error: 'No se encontró conversación para este contacto.' });
@@ -387,28 +334,24 @@ app.get('/api/conversaciones/:contacto_id', verificarToken, (req, res) => {
 
 /**
  * GET /api/suscripciones
- * Devuelve todas las suscripciones registradas, ordenadas por fecha descendente.
+ * Devuelve todas las suscripciones registradas
  * PROTEGIDA: requiere token JWT válido
  */
-app.get('/api/suscripciones', verificarToken, (_req, res) => {
-  const suscripciones = obtenerSuscripciones();
+app.get('/api/suscripciones', verificarToken, async (_req, res) => {
+  const suscripciones = await obtenerSuscripciones();
   res.json({ ok: true, data: suscripciones });
 });
 
 // =============================================
 // PAGOS CON STRIPE
-// Crea una sesión de pago y devuelve la URL de checkout
 // =============================================
 
-// Mapa de planes a variables de entorno con el price de Stripe
 const PRECIOS_STRIPE = {
   starter:    process.env.STRIPE_PRICE_STARTER,
   pro:        process.env.STRIPE_PRICE_PRO,
   enterprise: process.env.STRIPE_PRICE_ENTERPRISE,
 };
 
-// Ruta para crear sesión de pago con Stripe
-// Recibe: { plan: 'starter' | 'pro' | 'enterprise' }
 app.post('/api/crear-sesion-pago', async (req, res) => {
   try {
     const { plan } = req.body;
@@ -422,7 +365,7 @@ app.post('/api/crear-sesion-pago', async (req, res) => {
       payment_method_types: ['card'],
       line_items: [{ price: priceId, quantity: 1 }],
       mode: 'subscription',
-      metadata: { plan }, // Guardamos el plan para leerlo en el webhook
+      metadata: { plan },
       success_url: 'https://nexoai-website-claudetest01.onrender.com/pago-exitoso.html',
       cancel_url:  'https://nexoai-website-claudetest01.onrender.com/pages/precios.html',
     });
@@ -436,12 +379,9 @@ app.post('/api/crear-sesion-pago', async (req, res) => {
 
 // =============================================
 // AGENTE DE ATENCIÓN AL CLIENTE (ANTHROPIC)
-// Recibe un mensaje del usuario y devuelve una
-// respuesta generada por Claude actuando como
-// el agente de soporte de NexoAI.
 // =============================================
 
-// Herramientas disponibles para el agente de atención al cliente
+// Herramientas disponibles para el agente
 const TOOLS_AGENTE = [
   {
     name: 'guardar_contacto',
@@ -474,19 +414,14 @@ Cuando el usuario proporcione su nombre Y email en el mismo mensaje, DEBES usar 
 
 /**
  * POST /api/agente
- * Recibe: { mensajes } — array con el historial completo de la conversación
- *   en formato [{ role: "user"|"assistant", content: "texto" }, ...]
- * Por compatibilidad también acepta { mensaje } (string) y lo convierte a array.
- * Soporta tool_use: si Claude invoca guardar_contacto, guarda el contacto en BD
- * y hace una segunda llamada para que Claude confirme al usuario.
- * Devuelve: { ok: true, respuesta: "..." } con la respuesta final del agente
+ * Recibe: { mensajes } — historial completo [{ role, content }, ...]
+ * Por compatibilidad acepta { mensaje } (string) y lo convierte a array.
+ * Soporta tool_use: guarda contacto y acumula conversación en BD.
+ * Devuelve: { ok: true, respuesta: "..." }
  */
 app.post('/api/agente', async (req, res) => {
   const { mensaje, mensajes } = req.body;
 
-  // Construye el array de mensajes según lo que llegue:
-  // - Si llega "mensajes" (array), lo usa directamente
-  // - Si llega "mensaje" (string, compatibilidad), lo envuelve en array
   let historial;
   if (Array.isArray(mensajes) && mensajes.length > 0) {
     historial = mensajes;
@@ -513,33 +448,30 @@ app.post('/api/agente', async (req, res) => {
       return res.json({ ok: true, respuesta: texto });
     }
 
-    // Claude decidió usar guardar_contacto — extrae el bloque tool_use
+    // Claude invocó guardar_contacto — extrae los inputs
     const bloqueHerramienta = primeraRespuesta.content.find(b => b.type === 'tool_use');
     const { nombre, email, interes } = bloqueHerramienta.input;
 
     console.log(`[AGENTE] Tool use — guardar_contacto: ${nombre} | ${email} | ${interes}`);
 
-    // Busca si el email ya tiene un registro previo para no duplicar contactos
-    const contactoExistente = buscarContactoPorEmail(email);
+    // Busca si el email ya tiene registro para no duplicar contactos
+    const contactoExistente = await buscarContactoPorEmail(email);
     let contactoId;
 
     if (contactoExistente) {
-      // Email ya conocido — reutiliza el id existente
       contactoId = contactoExistente.id;
       console.log(`[AGENTE] Contacto ya existe id ${contactoId} — no se duplica`);
     } else {
-      // Email nuevo — crea el registro en la tabla mensajes
-      const contactoNuevo = guardarMensaje(nombre, email, `Interés: ${interes}`, 'agente');
+      const contactoNuevo = await guardarMensaje(nombre, email, `Interés: ${interes}`, 'agente');
       contactoId = contactoNuevo.id;
       console.log(`[AGENTE] Contacto nuevo guardado con id ${contactoId}`);
     }
 
-    // Acumula la sesión actual al historial de conversaciones del contacto
-    guardarConversacion(contactoId, historial);
+    // Acumula la sesión actual al historial del contacto
+    await guardarConversacion(contactoId, historial);
     console.log(`[AGENTE] Sesión acumulada para contacto id ${contactoId}`);
 
-    // Segunda llamada: añade al historial la respuesta de Claude + el resultado
-    // de la herramienta para que Claude genere la confirmación al usuario
+    // Segunda llamada: Claude genera la confirmación al usuario
     const historialConTool = [
       ...historial,
       { role: 'assistant', content: primeraRespuesta.content },
@@ -575,10 +507,17 @@ app.post('/api/agente', async (req, res) => {
 
 // =============================================
 // INICIO DEL SERVIDOR
-// Escucha en el puerto definido y muestra un mensaje en consola
+// Primero inicializa la BD (crea tablas y seed),
+// luego levanta Express en el puerto configurado.
 // =============================================
-app.listen(PORT, () => {
-  console.log(`✓ Servidor NexoAI corriendo en http://localhost:${PORT}`);
-  console.log(`✓ API disponible en http://localhost:${PORT}/api/contacto`);
-  console.log(`✓ Base de datos SQLite: db/nexoai.db`);
-});
+inicializarDB()
+  .then(() => {
+    app.listen(PORT, () => {
+      console.log(`✓ Servidor NexoAI corriendo en http://localhost:${PORT}`);
+      console.log(`✓ API disponible en http://localhost:${PORT}/api/contacto`);
+    });
+  })
+  .catch((err) => {
+    console.error('[DB] Error al inicializar la base de datos:', err);
+    process.exit(1);
+  });
