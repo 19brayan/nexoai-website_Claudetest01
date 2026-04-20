@@ -415,6 +415,127 @@
     }
 
     /* =============================================
+       SECCIÓN ANALYTICS
+    ============================================= */
+    .analytics-titulo {
+      font-size: 1.1rem;
+      font-weight: 700;
+      margin-bottom: 1rem;
+    }
+
+    .analytics-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 1rem;
+      margin-bottom: 1.5rem;
+    }
+
+    .analytics-card {
+      background: var(--bg-tarjeta);
+      border: 1px solid var(--borde);
+      border-radius: 12px;
+      padding: 1.2rem 1.4rem;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .analytics-card::before {
+      content: '';
+      position: absolute;
+      left: 0; top: 0; bottom: 0;
+      width: 3px;
+      border-radius: 3px 0 0 3px;
+    }
+
+    .analytics-card.color-morado::before { background: #6C63FF; }
+    .analytics-card.color-verde::before  { background: #2ecc71; }
+    .analytics-card.color-rojo::before   { background: #FF6B6B; }
+    .analytics-card.color-agua::before   { background: #4ECDC4; }
+
+    .analytics-label {
+      font-size: 0.72rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      color: var(--gris-texto);
+      margin-bottom: 0.4rem;
+    }
+
+    .analytics-valor {
+      font-size: 1.9rem;
+      font-weight: 800;
+      color: var(--blanco);
+      line-height: 1;
+      margin-bottom: 0.25rem;
+    }
+
+    .analytics-detalle {
+      font-size: 0.8rem;
+      color: var(--gris-texto);
+    }
+
+    /* Barra de desglose por agente */
+    .agentes-barra-wrap {
+      background: var(--bg-tarjeta);
+      border: 1px solid var(--borde);
+      border-radius: 12px;
+      padding: 1.2rem 1.4rem;
+      margin-bottom: 2.5rem;
+    }
+
+    .agentes-barra-titulo {
+      font-size: 0.78rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      color: var(--gris-texto);
+      margin-bottom: 1rem;
+    }
+
+    .agentes-barra {
+      display: flex;
+      height: 10px;
+      border-radius: 10px;
+      overflow: hidden;
+      gap: 2px;
+      margin-bottom: 0.75rem;
+    }
+
+    .agentes-barra-segmento {
+      border-radius: 10px;
+      transition: width 0.5s ease;
+    }
+
+    .agentes-leyenda {
+      display: flex;
+      gap: 1.2rem;
+      flex-wrap: wrap;
+    }
+
+    .agentes-leyenda-item {
+      display: flex;
+      align-items: center;
+      gap: 0.4rem;
+      font-size: 0.82rem;
+      color: var(--gris-texto);
+    }
+
+    .agentes-leyenda-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      flex-shrink: 0;
+    }
+
+    @media (max-width: 768px) {
+      .analytics-grid { grid-template-columns: repeat(2, 1fr); }
+    }
+
+    @media (max-width: 480px) {
+      .analytics-grid { grid-template-columns: 1fr; }
+    }
+
+    /* =============================================
        MODAL DE CONVERSACIÓN
     ============================================= */
     .modal-overlay {
@@ -583,6 +704,59 @@
         <div class="stat-detalle" id="statRecienteFecha">Sin mensajes aún</div>
       </div>
 
+    </div>
+
+    <!-- =============================================
+         SECCIÓN ANALYTICS DEL AGENTE IA
+         Métricas de conversaciones, leads y conversión
+    ============================================= -->
+    <p class="analytics-titulo">Analytics del Agente IA</p>
+
+    <div class="analytics-grid">
+      <div class="analytics-card color-morado">
+        <div class="analytics-label">Conversaciones</div>
+        <div class="analytics-valor" id="anConversaciones">—</div>
+        <div class="analytics-detalle">Total de sesiones</div>
+      </div>
+      <div class="analytics-card color-verde">
+        <div class="analytics-label">Leads captados</div>
+        <div class="analytics-valor" id="anLeads">—</div>
+        <div class="analytics-detalle">Contactos vía agente</div>
+      </div>
+      <div class="analytics-card color-agua">
+        <div class="analytics-label">Suscriptores activos</div>
+        <div class="analytics-valor" id="anSuscriptores">—</div>
+        <div class="analytics-detalle">Planes pagados</div>
+      </div>
+      <div class="analytics-card color-rojo">
+        <div class="analytics-label">Tasa de conversión</div>
+        <div class="analytics-valor" id="anConversion">—</div>
+        <div class="analytics-detalle">Leads → suscriptores</div>
+      </div>
+    </div>
+
+    <!-- Barra de desglose por tipo de agente -->
+    <div class="agentes-barra-wrap">
+      <div class="agentes-barra-titulo">Conversaciones por agente</div>
+      <div class="agentes-barra" id="agentesBarra">
+        <div class="agentes-barra-segmento" style="background:#6C63FF; width:0%"></div>
+        <div class="agentes-barra-segmento" style="background:#FF6B6B; width:0%"></div>
+        <div class="agentes-barra-segmento" style="background:#4ECDC4; width:0%"></div>
+      </div>
+      <div class="agentes-leyenda">
+        <div class="agentes-leyenda-item">
+          <div class="agentes-leyenda-dot" style="background:#6C63FF"></div>
+          <span>Ventas: <strong id="anVentas">0</strong></span>
+        </div>
+        <div class="agentes-leyenda-item">
+          <div class="agentes-leyenda-dot" style="background:#FF6B6B"></div>
+          <span>Soporte: <strong id="anSoporte">0</strong></span>
+        </div>
+        <div class="agentes-leyenda-item">
+          <div class="agentes-leyenda-dot" style="background:#4ECDC4"></div>
+          <span>FAQ: <strong id="anFaq">0</strong></span>
+        </div>
+      </div>
     </div>
 
     <!-- =============================================
@@ -813,6 +987,40 @@
     }
 
     // -----------------------------------------------
+    // FUNCIÓN: Carga métricas del agente IA desde /api/analytics
+    // y actualiza las tarjetas y la barra de desglose
+    // -----------------------------------------------
+    async function cargarAnalytics() {
+      try {
+        const res  = await fetchConToken('/api/analytics');
+        if (res.status === 401) { cerrarSesion(); return; }
+        const data = await res.json();
+        if (!data.ok) return;
+
+        document.getElementById('anConversaciones').textContent = data.total_conversaciones;
+        document.getElementById('anLeads').textContent          = data.leads_agente;
+        document.getElementById('anSuscriptores').textContent   = data.suscriptores_activos;
+        document.getElementById('anConversion').textContent     = data.tasa_conversion + '%';
+
+        // Desglose por agente
+        const { ventas, soporte, faq } = data.por_agente;
+        document.getElementById('anVentas').textContent  = ventas;
+        document.getElementById('anSoporte').textContent = soporte;
+        document.getElementById('anFaq').textContent     = faq;
+
+        // Actualiza los segmentos de la barra proporcional
+        const total = ventas + soporte + faq || 1; // evita división por cero
+        const segmentos = document.querySelectorAll('#agentesBarra .agentes-barra-segmento');
+        segmentos[0].style.width = (ventas  / total * 100) + '%';
+        segmentos[1].style.width = (soporte / total * 100) + '%';
+        segmentos[2].style.width = (faq     / total * 100) + '%';
+
+      } catch (error) {
+        console.error('Error al cargar analytics:', error);
+      }
+    }
+
+    // -----------------------------------------------
     // FUNCIÓN: Carga todos los mensajes desde la API
     // y construye la tabla dinámicamente
     // -----------------------------------------------
@@ -1039,14 +1247,16 @@
       // Verifica que el token sea válido antes de mostrar el panel
       await verificarSesion();
 
-      // Carga inicial de estadísticas, mensajes y suscripciones
+      // Carga inicial de estadísticas, mensajes, analytics y suscripciones
       cargarEstadisticas();
+      cargarAnalytics();
       cargarMensajes();
       cargarSuscripciones();
 
       // Botón de actualizar datos sin recargar la página
       document.getElementById('btnActualizar').addEventListener('click', () => {
         cargarEstadisticas();
+        cargarAnalytics();
         cargarMensajes();
         cargarSuscripciones();
       });

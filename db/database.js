@@ -90,9 +90,18 @@ async function inicializarDB() {
       id             INTEGER PRIMARY KEY AUTOINCREMENT,
       contacto_id    INTEGER NOT NULL,
       historial      TEXT    NOT NULL,
+      tipo_agente    TEXT,
       fecha_creacion TEXT    NOT NULL DEFAULT (datetime('now', 'localtime'))
     )
   `);
+
+  // Agrega tipo_agente si la tabla ya existía sin esa columna (backward compat)
+  try {
+    await db.execute(`ALTER TABLE conversaciones ADD COLUMN tipo_agente TEXT`);
+    console.log('[DB] Columna "tipo_agente" agregada a conversaciones.');
+  } catch {
+    // La columna ya existe — ignorar
+  }
 
   // Seed automático del usuario administrador al primer arranque
   const adminResult = await db.execute(`SELECT id FROM usuarios WHERE username = 'admin'`);
@@ -265,9 +274,10 @@ async function guardarSuscripcion(email, plan, stripe_session_id) {
  * Si no existe, crea el registro con la primera sesión.
  * @param {number} contacto_id - Id del contacto en la tabla mensajes
  * @param {Array}  mensajes    - Turnos [{ role, content }] de esta sesión
+ * @param {string} tipo_agente - "ventas", "soporte" o "faq"
  */
-async function guardarConversacion(contacto_id, mensajes) {
-  const fecha = new Date().toISOString().slice(0, 10); // "2026-04-18"
+async function guardarConversacion(contacto_id, mensajes, tipo_agente = null) {
+  const fecha = new Date().toISOString().slice(0, 10);
   const sesionNueva = { fecha, mensajes };
 
   const existente = await db.execute({
@@ -280,16 +290,57 @@ async function guardarConversacion(contacto_id, mensajes) {
     const sesiones = JSON.parse(existente.rows[0].historial);
     sesiones.push(sesionNueva);
     await db.execute({
-      sql:  `UPDATE conversaciones SET historial = ? WHERE contacto_id = ?`,
-      args: [JSON.stringify(sesiones), contacto_id]
+      sql:  `UPDATE conversaciones SET historial = ?, tipo_agente = ? WHERE contacto_id = ?`,
+      args: [JSON.stringify(sesiones), tipo_agente, contacto_id]
     });
   } else {
     // Primera conversación para este contacto
     await db.execute({
-      sql:  `INSERT INTO conversaciones (contacto_id, historial) VALUES (?, ?)`,
-      args: [contacto_id, JSON.stringify([sesionNueva])]
+      sql:  `INSERT INTO conversaciones (contacto_id, historial, tipo_agente) VALUES (?, ?, ?)`,
+      args: [contacto_id, JSON.stringify([sesionNueva]), tipo_agente]
     });
   }
+}
+
+/**
+ * Devuelve métricas generales del negocio:
+ * - total_conversaciones: total de registros en la tabla conversaciones
+ * - leads_agente: contactos captados por el agente de IA
+ * - suscriptores_activos: suscripciones con estado "activo"
+ * - por_agente: desglose de conversaciones por tipo de agente
+ * - tasa_conversion: porcentaje de leads que se convirtieron en suscriptores
+ */
+async function obtenerAnalytics() {
+  const [convResult, leadsResult, suscResult, porAgenteResult] = await Promise.all([
+    db.execute(`SELECT COUNT(*) AS total FROM conversaciones`),
+    db.execute(`SELECT COUNT(*) AS total FROM mensajes WHERE origen = 'agente'`),
+    db.execute(`SELECT COUNT(*) AS total FROM suscripciones WHERE estado = 'activo'`),
+    db.execute(`
+      SELECT tipo_agente, COUNT(*) AS total
+      FROM conversaciones
+      WHERE tipo_agente IS NOT NULL
+      GROUP BY tipo_agente
+    `)
+  ]);
+
+  const total_conversaciones = Number(convResult.rows[0].total);
+  const leads_agente         = Number(leadsResult.rows[0].total);
+  const suscriptores_activos = Number(suscResult.rows[0].total);
+
+  // Construye el desglose por agente con valores por defecto en 0
+  const por_agente = { ventas: 0, soporte: 0, faq: 0 };
+  for (const fila of porAgenteResult.rows) {
+    if (fila.tipo_agente in por_agente) {
+      por_agente[fila.tipo_agente] = Number(fila.total);
+    }
+  }
+
+  // Tasa de conversión: suscriptores / leads × 100 (0 si no hay leads)
+  const tasa_conversion = leads_agente > 0
+    ? Math.round((suscriptores_activos / leads_agente) * 100)
+    : 0;
+
+  return { total_conversaciones, leads_agente, suscriptores_activos, por_agente, tasa_conversion };
 }
 
 /**
@@ -322,5 +373,6 @@ module.exports = {
   obtenerSuscripciones,
   buscarContactoPorEmail,
   guardarConversacion,
-  obtenerConversaciones
+  obtenerConversaciones,
+  obtenerAnalytics
 };

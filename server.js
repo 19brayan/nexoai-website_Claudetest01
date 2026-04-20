@@ -31,7 +31,8 @@ const {
   obtenerSuscripciones,
   buscarContactoPorEmail,
   guardarConversacion,
-  obtenerConversaciones
+  obtenerConversaciones,
+  obtenerAnalytics
 } = require('./db/database');
 
 // Clave secreta para firmar los tokens JWT
@@ -333,6 +334,21 @@ app.get('/api/conversaciones/:contacto_id', verificarToken, async (req, res) => 
 });
 
 /**
+ * GET /api/analytics
+ * Devuelve métricas del negocio: conversaciones, leads, suscriptores y tasa de conversión.
+ * PROTEGIDA: requiere token JWT válido
+ */
+app.get('/api/analytics', verificarToken, async (_req, res) => {
+  try {
+    const datos = await obtenerAnalytics();
+    res.json({ ok: true, ...datos });
+  } catch (error) {
+    console.error('[ANALYTICS] Error:', error.message);
+    res.status(500).json({ ok: false, error: 'No se pudieron obtener las métricas.' });
+  }
+});
+
+/**
  * GET /api/suscripciones
  * Devuelve todas las suscripciones registradas
  * PROTEGIDA: requiere token JWT válido
@@ -467,8 +483,8 @@ app.post('/api/agente', async (req, res) => {
       console.log(`[AGENTE] Contacto nuevo guardado con id ${contactoId}`);
     }
 
-    // Acumula la sesión actual al historial del contacto
-    await guardarConversacion(contactoId, historial);
+    // Acumula la sesión actual al historial del contacto (origen: agente de ventas)
+    await guardarConversacion(contactoId, historial, 'ventas');
     console.log(`[AGENTE] Sesión acumulada para contacto id ${contactoId}`);
 
     // Segunda llamada: Claude genera la confirmación al usuario
@@ -633,8 +649,8 @@ app.post('/api/orquestador', async (req, res) => {
       console.log(`[ORQUESTADOR] Contacto nuevo guardado con id ${contactoId}`);
     }
 
-    // Acumula la sesión al historial del contacto
-    await guardarConversacion(contactoId, mensajes);
+    // Acumula la sesión al historial del contacto con el tipo de agente
+    await guardarConversacion(contactoId, mensajes, agente);
     console.log(`[ORQUESTADOR] Sesión acumulada para contacto id ${contactoId}`);
 
     // Segunda llamada para que el agente confirme al usuario
