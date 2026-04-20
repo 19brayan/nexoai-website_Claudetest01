@@ -506,6 +506,172 @@ app.post('/api/agente', async (req, res) => {
 });
 
 // =============================================
+// SISTEMA MULTI-AGENTE
+// El orquestador analiza el mensaje del usuario y
+// lo deriva al agente especializado correcto.
+// =============================================
+
+// Prompt del orquestador: clasifica el mensaje en una sola palabra
+const SYSTEM_ORQUESTADOR = `Eres un orquestador. Analiza el último mensaje del usuario y responde SOLO con una de estas palabras: ventas, soporte, faq.
+- ventas: si menciona precios, planes, quiere comprar o dar sus datos
+- soporte: si tiene un problema técnico o de acceso
+- faq: cualquier otra pregunta general`;
+
+// Agente especializado en ventas — recomienda planes y guarda contactos
+const AGENTE_VENTAS = `Eres el especialista en ventas de NexoAI, una empresa que crea soluciones de software con inteligencia artificial.
+
+Conoces a la perfección los tres planes disponibles:
+- Plan Starter: $1/mes — ideal para emprendedores y equipos pequeños que quieren dar sus primeros pasos con IA.
+- Plan Pro: $10/mes — diseñado para empresas en crecimiento que necesitan más potencia y funcionalidades avanzadas.
+- Plan Enterprise: $100/mes — solución completa para grandes organizaciones con necesidades personalizadas.
+
+Tu objetivo es entender el negocio del cliente, hacer las preguntas correctas y recomendar el plan que mejor se adapte a sus necesidades. Sé consultivo, no agresivo.
+
+Cuando tengas el nombre y email del cliente, usa la herramienta guardar_contacto inmediatamente para registrar sus datos. No pidas confirmación — ejecuta la herramienta.
+
+Responde siempre en español, con un tono profesional, cálido y orientado a resultados.`;
+
+// Agente especializado en soporte técnico
+const AGENTE_SOPORTE = `Eres el especialista en soporte técnico de NexoAI, una empresa que crea soluciones de software con inteligencia artificial.
+
+Ayudas a los clientes con:
+- Problemas de acceso a su cuenta o panel
+- Dudas sobre pagos, facturas y suscripciones
+- Configuración inicial de los servicios contratados
+- Errores o comportamientos inesperados en la plataforma
+
+Tu tono es empático, paciente y resolutivo. Siempre reconoces el problema del cliente antes de proponer soluciones. Si necesitas más información para diagnosticar el problema, haz preguntas concretas una a la vez.
+
+Si el problema está fuera de tu alcance o requiere intervención del equipo técnico, dí: "Voy a escalar tu caso al equipo técnico de NexoAI. Te contactaremos en menos de 24 horas."
+
+Responde siempre en español.`;
+
+// Agente especializado en preguntas generales (FAQ)
+const AGENTE_FAQ = `Eres el especialista en información general de NexoAI, una empresa que crea soluciones de software con inteligencia artificial.
+
+Respondes preguntas sobre:
+- Qué es NexoAI y a qué se dedica
+- Cómo funcionan los servicios: desarrollo web, automatización con IA, consultoría tecnológica
+- Casos de uso reales de inteligencia artificial en empresas
+- Diferencias entre NexoAI y otras opciones del mercado
+- Tecnologías que utilizamos y metodología de trabajo
+
+Tu tono es educativo, claro y accesible. Usas ejemplos concretos cuando ayudan a entender conceptos técnicos. No inventas información — si no sabes algo, dices: "Para más detalles sobre ese tema, te recomiendo hablar con nuestro equipo."
+
+Responde siempre en español.`;
+
+// Mapa de clave → system prompt para selección dinámica
+const AGENTES = {
+  ventas:  AGENTE_VENTAS,
+  soporte: AGENTE_SOPORTE,
+  faq:     AGENTE_FAQ
+};
+
+/**
+ * POST /api/orquestador
+ * Recibe: { mensajes: [...historial] }
+ * 1. Llama a Claude como orquestador para clasificar el mensaje (ventas/soporte/faq)
+ * 2. Llama a Claude con el agente especializado correspondiente
+ * 3. El agente de ventas puede invocar guardar_contacto (tool_use)
+ * Devuelve: { ok: true, respuesta: "...", agente: "ventas|soporte|faq" }
+ */
+app.post('/api/orquestador', async (req, res) => {
+  const { mensajes } = req.body;
+
+  if (!Array.isArray(mensajes) || mensajes.length === 0) {
+    return res.status(400).json({ ok: false, error: 'Se requiere "mensajes" (array no vacío).' });
+  }
+
+  try {
+    // — Paso 1: El orquestador clasifica el último mensaje —
+    const clasificacion = await anthropic.messages.create({
+      model:      'claude-opus-4-5',
+      max_tokens: 10, // Solo necesita responder una palabra
+      system:     SYSTEM_ORQUESTADOR,
+      messages:   mensajes
+    });
+
+    // Extrae la palabra clave y valida que sea una de las esperadas
+    const claveAgente = clasificacion.content[0].text.trim().toLowerCase();
+    const agente      = AGENTES[claveAgente] ? claveAgente : 'faq'; // fallback a faq
+
+    console.log(`[ORQUESTADOR] Clasificación: "${claveAgente}" → agente: ${agente}`);
+
+    // — Paso 2: El agente especializado genera la respuesta —
+    const primeraRespuesta = await anthropic.messages.create({
+      model:       'claude-opus-4-5',
+      max_tokens:  500,
+      system:      AGENTES[agente],
+      tools:       agente === 'ventas' ? TOOLS_AGENTE : [], // solo ventas usa tools
+      tool_choice: agente === 'ventas' ? { type: 'auto' } : undefined,
+      messages:    mensajes
+    });
+
+    // Si el agente de ventas no invocó herramienta, responde directo
+    if (primeraRespuesta.stop_reason !== 'tool_use') {
+      const texto = primeraRespuesta.content[0].text;
+      console.log(`[ORQUESTADOR] Enviando al frontend → agente: ${agente} | respuesta: "${texto.slice(0, 60)}..."`);
+      return res.json({ ok: true, respuesta: texto, agente });
+    }
+
+    // — Paso 3 (solo ventas): maneja tool_use guardar_contacto —
+    const bloqueHerramienta = primeraRespuesta.content.find(b => b.type === 'tool_use');
+    const { nombre, email, interes } = bloqueHerramienta.input;
+
+    console.log(`[ORQUESTADOR] Tool use — guardar_contacto: ${nombre} | ${email} | ${interes}`);
+
+    // Upsert: reutiliza el id si el email ya existe, si no crea nuevo registro
+    const contactoExistente = await buscarContactoPorEmail(email);
+    let contactoId;
+
+    if (contactoExistente) {
+      contactoId = contactoExistente.id;
+      console.log(`[ORQUESTADOR] Contacto ya existe id ${contactoId} — no se duplica`);
+    } else {
+      const contactoNuevo = await guardarMensaje(nombre, email, `Interés: ${interes}`, 'agente');
+      contactoId = contactoNuevo.id;
+      console.log(`[ORQUESTADOR] Contacto nuevo guardado con id ${contactoId}`);
+    }
+
+    // Acumula la sesión al historial del contacto
+    await guardarConversacion(contactoId, mensajes);
+    console.log(`[ORQUESTADOR] Sesión acumulada para contacto id ${contactoId}`);
+
+    // Segunda llamada para que el agente confirme al usuario
+    const historialConTool = [
+      ...mensajes,
+      { role: 'assistant', content: primeraRespuesta.content },
+      {
+        role: 'user',
+        content: [
+          {
+            type:        'tool_result',
+            tool_use_id: bloqueHerramienta.id,
+            content:     `Contacto registrado correctamente. id: ${contactoId}`
+          }
+        ]
+      }
+    ];
+
+    const segundaRespuesta = await anthropic.messages.create({
+      model:      'claude-opus-4-5',
+      max_tokens: 500,
+      system:     AGENTES[agente],
+      tools:      TOOLS_AGENTE,
+      messages:   historialConTool
+    });
+
+    const textoFinal = segundaRespuesta.content[0].text;
+    console.log(`[ORQUESTADOR] Enviando al frontend (tool_use) → agente: ${agente} | respuesta: "${textoFinal.slice(0, 60)}..."`);
+    res.json({ ok: true, respuesta: textoFinal, agente });
+
+  } catch (error) {
+    console.error('[ORQUESTADOR] Error:', error.message);
+    res.status(500).json({ ok: false, error: 'No se pudo procesar la solicitud.' });
+  }
+});
+
+// =============================================
 // INICIO DEL SERVIDOR
 // Primero inicializa la BD (crea tablas y seed),
 // luego levanta Express en el puerto configurado.

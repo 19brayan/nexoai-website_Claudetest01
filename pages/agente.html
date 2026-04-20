@@ -360,8 +360,9 @@
   <!-- =============================================
        LÓGICA DEL CHAT
        - Muestra los mensajes en burbujas
-       - Llama a /api/agente con el mensaje del usuario
-       - Muestra el indicador "Escribiendo..." mientras espera
+       - Llama a /api/orquestador con el historial completo
+       - El orquestador devuelve la respuesta y el agente que respondió
+       - Muestra un badge con el nombre del agente sobre cada respuesta
   ============================================= -->
   <script>
     const messagesEl = document.getElementById('chatMessages');
@@ -371,22 +372,64 @@
     // Historial completo de la conversación — crece con cada intercambio
     const historial = [];
 
+    // Configuración visual de cada agente: etiqueta y color del badge
+    const CONFIG_AGENTES = {
+      ventas:  { label: 'Agente Ventas',  color: '#6C63FF' },
+      soporte: { label: 'Agente Soporte', color: '#FF6B6B' },
+      faq:     { label: 'Agente FAQ',     color: '#4ECDC4' }
+    };
+
     // Muestra el saludo inicial del agente al cargar la página
-    agregarMensaje('agente', '¡Hola! Soy el asistente de NexoAI. Puedo ayudarte con información sobre nuestros planes y servicios. ¿En qué puedo ayudarte hoy?');
+    agregarMensajeAgente('¡Hola! Soy el asistente de NexoAI. Puedo ayudarte con información sobre nuestros planes y servicios. ¿En qué puedo ayudarte hoy?', null);
 
     /**
-     * Crea y agrega una burbuja de mensaje al área de chat.
-     * @param {'usuario'|'agente'} tipo - Quién envía el mensaje
-     * @param {string} texto           - Contenido del mensaje
-     * @returns {HTMLElement}          - La burbuja creada
+     * Crea y agrega una burbuja del usuario al área de chat.
+     * @param {string} texto - Contenido del mensaje
      */
-    function agregarMensaje(tipo, texto) {
+    function agregarMensajeUsuario(texto) {
       const burbuja = document.createElement('div');
-      burbuja.classList.add('burbuja', `burbuja-${tipo}`);
+      burbuja.classList.add('burbuja', 'burbuja-usuario');
       burbuja.textContent = texto;
       messagesEl.appendChild(burbuja);
       messagesEl.scrollTop = messagesEl.scrollHeight;
-      return burbuja;
+    }
+
+    /**
+     * Crea y agrega una respuesta del agente con su badge identificador.
+     * @param {string}      texto  - Contenido de la respuesta
+     * @param {string|null} agente - "ventas", "soporte", "faq" o null (saludo inicial)
+     */
+    function agregarMensajeAgente(texto, agente) {
+      const contenedor = document.createElement('div');
+      contenedor.style.cssText = 'display:flex; flex-direction:column; align-items:flex-start; gap:4px;';
+
+      // Badge del agente — solo si se recibió el tipo
+      if (agente && CONFIG_AGENTES[agente]) {
+        const cfg   = CONFIG_AGENTES[agente];
+        const badge = document.createElement('span');
+        badge.textContent = cfg.label;
+        badge.style.cssText = `
+          font-size: 0.7rem;
+          font-weight: 700;
+          letter-spacing: 0.4px;
+          padding: 0.15rem 0.6rem;
+          border-radius: 20px;
+          background: ${cfg.color}22;
+          color: ${cfg.color};
+          border: 1px solid ${cfg.color}55;
+          margin-left: 4px;
+        `;
+        contenedor.appendChild(badge);
+      }
+
+      // Burbuja con el texto de la respuesta
+      const burbuja = document.createElement('div');
+      burbuja.classList.add('burbuja', 'burbuja-agente');
+      burbuja.textContent = texto;
+      contenedor.appendChild(burbuja);
+
+      messagesEl.appendChild(contenedor);
+      messagesEl.scrollTop = messagesEl.scrollHeight;
     }
 
     /**
@@ -404,9 +447,8 @@
     }
 
     /**
-     * Envía el historial completo al endpoint /api/agente y muestra la respuesta.
-     * Cada intercambio agrega al historial: primero el mensaje del usuario,
-     * luego la respuesta del agente — así Claude recuerda toda la conversación.
+     * Envía el historial completo al orquestador y muestra la respuesta
+     * con el badge del agente especializado que respondió.
      */
     async function enviarMensaje() {
       const texto = inputEl.value.trim();
@@ -414,7 +456,7 @@
 
       // Agrega el mensaje del usuario al historial y lo muestra en pantalla
       historial.push({ role: 'user', content: texto });
-      agregarMensaje('usuario', texto);
+      agregarMensajeUsuario(texto);
       inputEl.value = '';
       inputEl.style.height = 'auto';
       btnEnviar.disabled = true;
@@ -423,8 +465,8 @@
       const indicador = mostrarEscribiendo();
 
       try {
-        // Envía el historial completo para que el agente tenga todo el contexto
-        const respuesta = await fetch('/api/agente', {
+        // Envía el historial completo al orquestador
+        const respuesta = await fetch('/api/orquestador', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ mensajes: historial })
@@ -432,20 +474,19 @@
 
         const datos = await respuesta.json();
 
-        // Elimina el indicador y muestra la respuesta del agente
         indicador.remove();
 
         if (datos.ok) {
-          // Agrega la respuesta del agente al historial y la muestra en pantalla
+          // Agrega la respuesta al historial y la muestra con el badge del agente
           historial.push({ role: 'assistant', content: datos.respuesta });
-          agregarMensaje('agente', datos.respuesta);
+          agregarMensajeAgente(datos.respuesta, datos.agente);
         } else {
-          agregarMensaje('agente', 'Lo siento, no pude procesar tu mensaje en este momento. Por favor intenta de nuevo.');
+          agregarMensajeAgente('Lo siento, no pude procesar tu mensaje en este momento. Por favor intenta de nuevo.', null);
         }
 
       } catch (error) {
         indicador.remove();
-        agregarMensaje('agente', 'Hubo un problema de conexión. Por favor verifica tu internet e intenta de nuevo.');
+        agregarMensajeAgente('Hubo un problema de conexión. Por favor verifica tu internet e intenta de nuevo.', null);
       } finally {
         btnEnviar.disabled = false;
         inputEl.focus();
