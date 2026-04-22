@@ -168,6 +168,23 @@ function verificarToken(req, res, next) {
   });
 }
 
+// Solo permite acceso a usuarios con rol "admin"
+function verificarAdmin(req, res, next) {
+  if (req.usuario?.rol !== 'admin') {
+    return res.status(403).json({ ok: false, error: 'Acceso denegado' });
+  }
+  next();
+}
+
+// Permite acceso a clientes y también a admins
+function verificarCliente(req, res, next) {
+  const rol = req.usuario?.rol;
+  if (rol !== 'cliente' && rol !== 'admin') {
+    return res.status(403).json({ ok: false, error: 'Acceso denegado' });
+  }
+  next();
+}
+
 // =============================================
 // RUTAS DE AUTENTICACIÓN
 // =============================================
@@ -264,7 +281,7 @@ app.post('/api/contacto', async (req, res) => {
  * GET /api/contacto
  * Devuelve todos los mensajes del más reciente al más antiguo
  */
-app.get('/api/contacto', async (_req, res) => {
+app.get('/api/contacto', verificarToken, verificarAdmin, async (_req, res) => {
   const mensajes = await obtenerMensajes();
   res.json({ exito: true, total: mensajes.length, datos: mensajes });
 });
@@ -301,7 +318,7 @@ app.get('/api/contacto/stats', verificarToken, async (_req, res) => {
  * Elimina un mensaje por su id
  * PROTEGIDA: requiere token JWT válido
  */
-app.delete('/api/contacto/:id', verificarToken, async (req, res) => {
+app.delete('/api/contacto/:id', verificarToken, verificarAdmin, async (req, res) => {
   const id = parseInt(req.params.id, 10);
 
   if (isNaN(id)) {
@@ -409,12 +426,7 @@ app.post('/api/usuarios/login', async (req, res) => {
  * Devuelve datos del cliente autenticado + sus conversaciones con el agente.
  * PROTEGIDA: requiere JWT con rol "cliente"
  */
-app.get('/api/usuarios/perfil', verificarToken, async (req, res) => {
-  // Solo clientes pueden acceder a este endpoint
-  if (req.usuario.rol !== 'cliente') {
-    return res.status(403).json({ ok: false, error: 'Acceso restringido a clientes.' });
-  }
-
+app.get('/api/usuarios/perfil', verificarToken, verificarCliente, async (req, res) => {
   const usuario = await buscarUsuarioPorId(req.usuario.id);
   if (!usuario) {
     return res.status(404).json({ ok: false, error: 'Usuario no encontrado.' });
@@ -436,7 +448,7 @@ app.get('/api/usuarios/perfil', verificarToken, async (req, res) => {
  * Devuelve métricas del negocio: conversaciones, leads, suscriptores y tasa de conversión.
  * PROTEGIDA: requiere token JWT válido
  */
-app.get('/api/analytics', verificarToken, async (_req, res) => {
+app.get('/api/analytics', verificarToken, verificarAdmin, async (_req, res) => {
   try {
     const datos = await obtenerAnalytics();
     res.json({ ok: true, ...datos });
@@ -451,7 +463,7 @@ app.get('/api/analytics', verificarToken, async (_req, res) => {
  * Devuelve todas las suscripciones registradas
  * PROTEGIDA: requiere token JWT válido
  */
-app.get('/api/suscripciones', verificarToken, async (_req, res) => {
+app.get('/api/suscripciones', verificarToken, verificarAdmin, async (_req, res) => {
   const suscripciones = await obtenerSuscripciones();
   res.json({ ok: true, data: suscripciones });
 });
@@ -689,7 +701,7 @@ const AGENTES = {
  * 3. El agente de ventas puede invocar guardar_contacto (tool_use)
  * Devuelve: { ok: true, respuesta: "...", agente: "ventas|soporte|faq" }
  */
-app.post('/api/orquestador', async (req, res) => {
+app.post('/api/orquestador', verificarToken, verificarCliente, async (req, res) => {
   const { mensajes } = req.body;
 
   if (!Array.isArray(mensajes) || mensajes.length === 0) {

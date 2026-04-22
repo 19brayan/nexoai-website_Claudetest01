@@ -5,6 +5,18 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Mi Dashboard — NexoAI</title>
 
+  <!-- Guard de autenticación: se ejecuta antes de renderizar la página -->
+  <script>
+    (function() {
+      var token = localStorage.getItem('nexoai_cliente_token');
+      if (!token) { window.location.replace('login-cliente.html'); return; }
+      try {
+        var payload = JSON.parse(atob(token.split('.')[1]));
+        if (payload.rol === 'admin') { window.location.replace('admin.html'); }
+      } catch { window.location.replace('login-cliente.html'); }
+    })();
+  </script>
+
   <link rel="stylesheet" href="../css/styles.css" />
 
   <style>
