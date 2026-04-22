@@ -84,6 +84,19 @@ async function inicializarDB() {
     )
   `);
 
+  // Tabla clientes — usuarios registrados desde el portal o Stripe
+  await db.execute(`
+    CREATE TABLE IF NOT EXISTS clientes (
+      id              INTEGER PRIMARY KEY AUTOINCREMENT,
+      email           TEXT    NOT NULL UNIQUE,
+      password_hash   TEXT,
+      nombre          TEXT    NOT NULL,
+      plan            TEXT    NOT NULL DEFAULT 'starter',
+      estado          TEXT    NOT NULL DEFAULT 'activo',
+      fecha_registro  TEXT    NOT NULL DEFAULT (datetime('now', 'localtime'))
+    )
+  `);
+
   // Tabla conversaciones — historial acumulado por contacto (array JSON de sesiones)
   await db.execute(`
     CREATE TABLE IF NOT EXISTS conversaciones (
@@ -343,6 +356,68 @@ async function obtenerAnalytics() {
   return { total_conversaciones, leads_agente, suscriptores_activos, por_agente, tasa_conversion };
 }
 
+// =============================================
+// FUNCIONES DE CLIENTES
+// Gestión de usuarios del portal (clientes finales, no admins)
+// =============================================
+
+/**
+ * Crea un nuevo cliente. password_hash puede ser null si el registro
+ * viene de Stripe (aún no tiene contraseña definida).
+ */
+async function crearUsuario(email, password_hash, nombre, plan = 'starter') {
+  const result = await db.execute({
+    sql:  `INSERT INTO clientes (email, password_hash, nombre, plan) VALUES (?, ?, ?, ?)`,
+    args: [email.trim().toLowerCase(), password_hash, nombre, plan]
+  });
+  return buscarUsuarioPorId(Number(result.lastInsertRowid));
+}
+
+/**
+ * Busca un cliente por su email.
+ * @returns {object|undefined}
+ */
+async function buscarUsuarioPorEmail(email) {
+  const result = await db.execute({
+    sql:  `SELECT * FROM clientes WHERE email = ?`,
+    args: [email.trim().toLowerCase()]
+  });
+  return result.rows[0];
+}
+
+/**
+ * Busca un cliente por su id.
+ * @returns {object|undefined}
+ */
+async function buscarUsuarioPorId(id) {
+  const result = await db.execute({
+    sql:  `SELECT * FROM clientes WHERE id = ?`,
+    args: [id]
+  });
+  return result.rows[0];
+}
+
+/**
+ * Actualiza el plan de un cliente por email.
+ * Si el cliente no existe, lo crea con los datos mínimos disponibles.
+ * @returns {object} El cliente actualizado
+ */
+async function actualizarPlanUsuario(email, plan) {
+  const emailNorm = email.trim().toLowerCase();
+  const existente = await buscarUsuarioPorEmail(emailNorm);
+
+  if (existente) {
+    await db.execute({
+      sql:  `UPDATE clientes SET plan = ?, estado = 'activo' WHERE email = ?`,
+      args: [plan, emailNorm]
+    });
+    return buscarUsuarioPorEmail(emailNorm);
+  } else {
+    // Cliente aún no registrado en el portal — lo crea con datos mínimos de Stripe
+    return crearUsuario(emailNorm, null, emailNorm, plan);
+  }
+}
+
 /**
  * Devuelve el array de sesiones acumuladas de un contacto.
  * @param {number} contacto_id
@@ -374,5 +449,9 @@ module.exports = {
   buscarContactoPorEmail,
   guardarConversacion,
   obtenerConversaciones,
-  obtenerAnalytics
+  obtenerAnalytics,
+  crearUsuario,
+  buscarUsuarioPorEmail,
+  buscarUsuarioPorId,
+  actualizarPlanUsuario
 };

@@ -15,6 +15,7 @@ const anthropic       = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY })
 
 const express = require('express'); // Framework para crear el servidor web
 const jwt     = require('jsonwebtoken'); // Para crear y verificar tokens JWT
+const bcrypt  = require('bcryptjs');    // Para hashear passwords de clientes
 
 // Importa las funciones de acceso a la base de datos
 const {
@@ -32,7 +33,11 @@ const {
   buscarContactoPorEmail,
   guardarConversacion,
   obtenerConversaciones,
-  obtenerAnalytics
+  obtenerAnalytics,
+  actualizarPlanUsuario,
+  crearUsuario,
+  buscarUsuarioPorEmail,
+  buscarUsuarioPorId
 } = require('./db/database');
 
 // Clave secreta para firmar los tokens JWT
@@ -87,6 +92,10 @@ app.post('/api/webhook', express.raw({ type: 'application/json' }), async (req, 
     try {
       const suscripcion = await guardarSuscripcion(email, plan, sesion.id);
       console.log('[WEBHOOK] Suscripción guardada:', JSON.stringify(suscripcion));
+
+      // Sincroniza el plan en la tabla clientes (crea el registro si no existe)
+      const cliente = await actualizarPlanUsuario(email, plan);
+      console.log(`[WEBHOOK] Plan de cliente actualizado: ${email} → ${plan} (id: ${cliente?.id})`);
     } catch (dbError) {
       console.error('[WEBHOOK] Error al guardar en BD:', dbError.message);
     }
@@ -331,6 +340,95 @@ app.get('/api/conversaciones/:contacto_id', verificarToken, async (req, res) => 
   }
 
   res.json({ ok: true, sesiones });
+});
+
+// =============================================
+// RUTAS DE CLIENTES (PORTAL DE USUARIO)
+// Registro, login y perfil de clientes finales.
+// Coexisten con el sistema de admins (/api/auth)
+// usando el campo "rol" del JWT para distinguirlos.
+// =============================================
+
+/**
+ * POST /api/usuarios/registro
+ * Recibe: { email, password, nombre }
+ * Crea un cliente nuevo con plan "starter"
+ */
+app.post('/api/usuarios/registro', async (req, res) => {
+  const { email, password, nombre } = req.body;
+
+  if (!email || !password || !nombre) {
+    return res.status(400).json({ ok: false, error: 'email, password y nombre son obligatorios.' });
+  }
+
+  const emailNorm = email.trim().toLowerCase();
+
+  // Verifica que el email no esté ya registrado
+  const existente = await buscarUsuarioPorEmail(emailNorm);
+  if (existente) {
+    return res.status(409).json({ ok: false, error: 'Ya existe una cuenta con ese email.' });
+  }
+
+  const password_hash = bcrypt.hashSync(password, 10);
+  await crearUsuario(emailNorm, password_hash, nombre.trim(), 'starter');
+
+  console.log(`[CLIENTES] Registro: ${emailNorm}`);
+  res.status(201).json({ ok: true, mensaje: 'Usuario creado' });
+});
+
+/**
+ * POST /api/usuarios/login
+ * Recibe: { email, password }
+ * Devuelve JWT con rol: "cliente" — distinto al JWT de admins (rol: "admin")
+ */
+app.post('/api/usuarios/login', async (req, res) => {
+  const { email, password } = req.body;
+
+  if (!email || !password) {
+    return res.status(400).json({ ok: false, error: 'email y password son obligatorios.' });
+  }
+
+  const usuario = await buscarUsuarioPorEmail(email.trim().toLowerCase());
+
+  if (!usuario || !usuario.password_hash || !bcrypt.compareSync(password, usuario.password_hash)) {
+    return res.status(401).json({ ok: false, error: 'Email o contraseña incorrectos.' });
+  }
+
+  const token = jwt.sign(
+    { id: usuario.id, email: usuario.email, nombre: usuario.nombre, plan: usuario.plan, rol: 'cliente' },
+    JWT_SECRET,
+    { expiresIn: '8h' }
+  );
+
+  console.log(`[CLIENTES] Login: ${usuario.email}`);
+  res.json({ ok: true, token, usuario: { nombre: usuario.nombre, email: usuario.email, plan: usuario.plan } });
+});
+
+/**
+ * GET /api/usuarios/perfil
+ * Devuelve datos del cliente autenticado + sus conversaciones con el agente.
+ * PROTEGIDA: requiere JWT con rol "cliente"
+ */
+app.get('/api/usuarios/perfil', verificarToken, async (req, res) => {
+  // Solo clientes pueden acceder a este endpoint
+  if (req.usuario.rol !== 'cliente') {
+    return res.status(403).json({ ok: false, error: 'Acceso restringido a clientes.' });
+  }
+
+  const usuario = await buscarUsuarioPorId(req.usuario.id);
+  if (!usuario) {
+    return res.status(404).json({ ok: false, error: 'Usuario no encontrado.' });
+  }
+
+  // Busca conversaciones del agente vinculadas a su email
+  const contacto       = await buscarContactoPorEmail(usuario.email);
+  const conversaciones = contacto ? await obtenerConversaciones(contacto.id) : [];
+
+  res.json({
+    ok: true,
+    usuario: { id: usuario.id, nombre: usuario.nombre, email: usuario.email, plan: usuario.plan, estado: usuario.estado, fecha_registro: usuario.fecha_registro },
+    conversaciones
+  });
 });
 
 /**

@@ -173,4 +173,33 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 
+  /* -------------------------------------------
+     BOTÓN DE SESIÓN EN EL HEADER
+     Si hay un JWT en localStorage, cambia el botón
+     a "Mi cuenta" y ajusta el enlace según el rol
+  ------------------------------------------- */
+  const btnSesion = document.getElementById('btnSesion');
+  if (btnSesion) {
+    // Detecta si la página está dentro de /pages/ para usar rutas relativas correctas
+    const enPages = window.location.pathname.includes('/pages/');
+
+    // Decodifica el payload de un JWT sin librería externa
+    function decodificarPayload(token) {
+      try { return JSON.parse(atob(token.split('.')[1])); } catch { return null; }
+    }
+
+    const tokenCliente = localStorage.getItem('nexoai_cliente_token');
+    const tokenAdmin   = localStorage.getItem('nexoai_token');
+
+    if (tokenCliente) {
+      // Cliente autenticado → lleva al portal del cliente
+      btnSesion.textContent = 'Mi cuenta';
+      btnSesion.href = enPages ? 'dashboard.html' : 'pages/dashboard.html';
+    } else if (tokenAdmin) {
+      // Admin autenticado → lleva al panel de administración
+      btnSesion.textContent = 'Mi cuenta';
+      btnSesion.href = enPages ? 'admin.html' : 'pages/admin.html';
+    }
+  }
+
 });

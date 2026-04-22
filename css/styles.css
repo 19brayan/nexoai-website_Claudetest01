@@ -106,6 +106,33 @@ nav {
   transition: all 0.3s;
 }
 
+/* Botón de inicio de sesión / Mi cuenta en el header */
+.btn-sesion {
+  background: #6C63FF;
+  color: #ffffff !important;
+  text-decoration: none;
+  padding: 0.45rem 1.1rem;
+  border-radius: 8px;
+  font-size: 0.88rem;
+  font-weight: 700;
+  white-space: nowrap;
+  opacity: 1 !important;
+  transition: background 0.2s, transform 0.1s;
+}
+
+.btn-sesion:hover {
+  background: #8f88ff;
+  color: #ffffff !important;
+  transform: translateY(-1px);
+}
+
+/* En móvil se oculta el botón (el menú hamburguesa lo reemplaza) */
+@media (max-width: 768px) {
+  .btn-sesion {
+    display: none;
+  }
+}
+
 /* =============================================
    SECCIÓN HERO — PÁGINA PRINCIPAL
    Bloque grande de bienvenida con CTA

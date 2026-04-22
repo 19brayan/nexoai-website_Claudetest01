@@ -1,0 +1,666 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Mi Dashboard — NexoAI</title>
+
+  <link rel="stylesheet" href="../css/styles.css" />
+
+  <style>
+    /* =============================================
+       VARIABLES Y RESET DEL DASHBOARD
+    ============================================= */
+    :root {
+      --bg:       #1a1a2e;
+      --bg-card:  #16213e;
+      --bg-deep:  #0f0f1e;
+      --morado:   #6C63FF;
+      --morado-c: #8f88ff;
+      --blanco:   #ffffff;
+      --gris:     #a0a0c0;
+      --borde:    rgba(108, 99, 255, 0.2);
+      --verde:    #2ecc71;
+    }
+
+    *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      font-family: 'Segoe UI', Arial, sans-serif;
+      background: var(--bg-deep);
+      color: var(--blanco);
+      min-height: 100vh;
+      padding-bottom: 6rem; /* espacio para el botón flotante */
+    }
+
+    /* =============================================
+       HEADER DEL DASHBOARD
+    ============================================= */
+    .dash-header {
+      background: var(--bg-card);
+      border-bottom: 1px solid var(--borde);
+      padding: 0 1.5rem;
+      height: 60px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+    }
+
+    .dash-logo {
+      font-size: 1.2rem;
+      font-weight: 800;
+      color: var(--blanco);
+      text-decoration: none;
+    }
+
+    .dash-logo span { color: var(--morado); }
+
+    .btn-logout {
+      background: rgba(231, 76, 60, 0.12);
+      border: 1px solid rgba(231, 76, 60, 0.5);
+      color: #e74c3c;
+      padding: 0.35rem 0.9rem;
+      border-radius: 6px;
+      font-size: 0.82rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+
+    .btn-logout:hover {
+      background: #e74c3c;
+      color: var(--blanco);
+    }
+
+    /* =============================================
+       CONTENIDO PRINCIPAL
+    ============================================= */
+    .dash-main {
+      max-width: 900px;
+      margin: 0 auto;
+      padding: 2rem 1.5rem;
+    }
+
+    /* =============================================
+       BIENVENIDA
+    ============================================= */
+    .bienvenida {
+      margin-bottom: 2rem;
+    }
+
+    .bienvenida-badge {
+      display: inline-block;
+      background: rgba(108, 99, 255, 0.12);
+      color: var(--morado-c);
+      border: 1px solid var(--borde);
+      border-radius: 50px;
+      padding: 0.3rem 1rem;
+      font-size: 0.8rem;
+      font-weight: 600;
+      letter-spacing: 0.05em;
+      margin-bottom: 0.75rem;
+    }
+
+    .bienvenida h1 {
+      font-size: clamp(1.5rem, 3vw, 2rem);
+      font-weight: 800;
+      color: var(--blanco);
+      margin-bottom: 0.3rem;
+    }
+
+    .bienvenida h1 span { color: var(--morado); }
+
+    .bienvenida p {
+      color: var(--gris);
+      font-size: 0.95rem;
+    }
+
+    /* =============================================
+       TARJETA DE PLAN ACTIVO
+    ============================================= */
+    .plan-card {
+      background: var(--bg-card);
+      border: 1px solid var(--borde);
+      border-radius: 16px;
+      padding: 1.5rem;
+      margin-bottom: 2rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 1rem;
+      flex-wrap: wrap;
+      position: relative;
+      overflow: hidden;
+    }
+
+    /* Franja decorativa izquierda */
+    .plan-card::before {
+      content: '';
+      position: absolute;
+      left: 0; top: 0; bottom: 0;
+      width: 4px;
+      background: var(--morado);
+      border-radius: 4px 0 0 4px;
+    }
+
+    .plan-info { display: flex; flex-direction: column; gap: 0.3rem; }
+
+    .plan-label {
+      font-size: 0.72rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      color: var(--gris);
+    }
+
+    .plan-nombre {
+      font-size: 1.5rem;
+      font-weight: 800;
+      color: var(--blanco);
+      text-transform: capitalize;
+    }
+
+    .plan-precio {
+      font-size: 0.9rem;
+      color: var(--gris);
+    }
+
+    .plan-precio strong { color: var(--morado-c); font-size: 1.1rem; }
+
+    .btn-upgrade {
+      background: var(--morado);
+      color: var(--blanco);
+      border: none;
+      border-radius: 10px;
+      padding: 0.7rem 1.4rem;
+      font-size: 0.9rem;
+      font-weight: 700;
+      cursor: pointer;
+      text-decoration: none;
+      display: inline-block;
+      transition: background 0.2s, transform 0.15s;
+      white-space: nowrap;
+    }
+
+    .btn-upgrade:hover { background: #5a52e0; transform: translateY(-1px); }
+
+    /* =============================================
+       SECCIÓN DE CONVERSACIONES
+    ============================================= */
+    .seccion-titulo {
+      font-size: 1rem;
+      font-weight: 700;
+      margin-bottom: 1rem;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .seccion-titulo span {
+      font-size: 0.72rem;
+      font-weight: 600;
+      background: rgba(108,99,255,0.12);
+      color: var(--morado-c);
+      border: 1px solid var(--borde);
+      border-radius: 20px;
+      padding: 0.15rem 0.6rem;
+    }
+
+    /* Lista de sesiones */
+    .conv-lista {
+      display: flex;
+      flex-direction: column;
+      gap: 0.75rem;
+      margin-bottom: 2rem;
+    }
+
+    /* Tarjeta de una sesión */
+    .conv-card {
+      background: var(--bg-card);
+      border: 1px solid var(--borde);
+      border-radius: 12px;
+      padding: 1rem 1.2rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 1rem;
+      cursor: pointer;
+      transition: border-color 0.2s, background 0.2s;
+    }
+
+    .conv-card:hover {
+      border-color: var(--morado);
+      background: rgba(108,99,255,0.05);
+    }
+
+    .conv-meta { display: flex; flex-direction: column; gap: 0.25rem; }
+
+    .conv-fecha {
+      font-size: 0.78rem;
+      color: var(--gris);
+    }
+
+    .conv-resumen {
+      font-size: 0.9rem;
+      color: var(--blanco);
+      max-width: 520px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .conv-mensajes {
+      font-size: 0.75rem;
+      color: var(--gris);
+      white-space: nowrap;
+    }
+
+    .btn-ver-conv {
+      background: rgba(108,99,255,0.12);
+      border: 1px solid var(--borde);
+      color: var(--morado-c);
+      padding: 0.35rem 0.8rem;
+      border-radius: 8px;
+      font-size: 0.78rem;
+      font-weight: 600;
+      cursor: pointer;
+      white-space: nowrap;
+      transition: background 0.2s;
+    }
+
+    .btn-ver-conv:hover {
+      background: rgba(108,99,255,0.25);
+    }
+
+    /* Estado vacío */
+    .conv-vacia {
+      background: var(--bg-card);
+      border: 1px dashed var(--borde);
+      border-radius: 12px;
+      padding: 2.5rem;
+      text-align: center;
+      color: var(--gris);
+      font-size: 0.9rem;
+      margin-bottom: 2rem;
+    }
+
+    /* =============================================
+       MODAL DE DETALLE DE CONVERSACIÓN
+    ============================================= */
+    .modal-overlay {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.7);
+      z-index: 200;
+      align-items: center;
+      justify-content: center;
+      padding: 1rem;
+    }
+
+    .modal-overlay.visible { display: flex; }
+
+    .modal {
+      background: var(--bg-card);
+      border: 1px solid var(--borde);
+      border-radius: 16px;
+      width: 100%;
+      max-width: 600px;
+      max-height: 80vh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .modal-header {
+      padding: 1.2rem 1.5rem;
+      border-bottom: 1px solid var(--borde);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .modal-header h3 { font-size: 1rem; font-weight: 700; }
+
+    .modal-cerrar {
+      background: none;
+      border: none;
+      color: var(--gris);
+      font-size: 1.4rem;
+      cursor: pointer;
+      line-height: 1;
+    }
+
+    .modal-cerrar:hover { color: var(--blanco); }
+
+    .modal-body {
+      overflow-y: auto;
+      padding: 1.2rem 1.5rem;
+      display: flex;
+      flex-direction: column;
+      gap: 0.7rem;
+    }
+
+    .msg-burbuja {
+      max-width: 80%;
+      padding: 0.7rem 1rem;
+      border-radius: 14px;
+      font-size: 0.88rem;
+      line-height: 1.5;
+      word-break: break-word;
+    }
+
+    .msg-burbuja.user {
+      align-self: flex-end;
+      background: var(--morado);
+      color: var(--blanco);
+      border-bottom-right-radius: 4px;
+    }
+
+    .msg-burbuja.assistant {
+      align-self: flex-start;
+      background: #1a1a2e;
+      color: #e0e0e0;
+      border: 1px solid var(--borde);
+      border-bottom-left-radius: 4px;
+    }
+
+    /* =============================================
+       BOTÓN FLOTANTE "HABLAR CON EL AGENTE"
+    ============================================= */
+    .btn-flotante {
+      position: fixed;
+      bottom: 1.5rem;
+      right: 1.5rem;
+      background: var(--morado);
+      color: var(--blanco);
+      border: none;
+      border-radius: 50px;
+      padding: 0.9rem 1.5rem;
+      font-size: 0.95rem;
+      font-weight: 700;
+      cursor: pointer;
+      text-decoration: none;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      box-shadow: 0 4px 20px rgba(108,99,255,0.4);
+      transition: background 0.2s, transform 0.15s, box-shadow 0.2s;
+      z-index: 150;
+    }
+
+    .btn-flotante:hover {
+      background: #5a52e0;
+      transform: translateY(-2px);
+      box-shadow: 0 6px 28px rgba(108,99,255,0.55);
+    }
+
+    /* =============================================
+       FOOTER
+    ============================================= */
+    footer {
+      background: var(--bg-card);
+      border-top: 1px solid var(--borde);
+      padding: 1.5rem;
+      text-align: center;
+      color: var(--gris);
+      font-size: 0.82rem;
+      margin-top: 3rem;
+    }
+
+    footer .footer-logo {
+      font-weight: 800;
+      font-size: 1rem;
+      color: var(--blanco);
+      margin-bottom: 0.4rem;
+    }
+
+    footer .footer-logo span { color: var(--morado); }
+
+    /* =============================================
+       RESPONSIVE MÓVIL
+    ============================================= */
+    @media (max-width: 600px) {
+      .plan-card { flex-direction: column; align-items: flex-start; }
+      .conv-resumen { max-width: 180px; }
+      .btn-flotante span { display: none; }
+      .btn-flotante { border-radius: 50%; width: 54px; height: 54px; padding: 0; justify-content: center; }
+    }
+  </style>
+</head>
+
+<body>
+
+  <!-- =============================================
+       HEADER DEL DASHBOARD
+  ============================================= -->
+  <header class="dash-header">
+    <a href="../index.html" class="dash-logo">Nexo<span>AI</span></a>
+    <button class="btn-logout" id="btnLogout">Cerrar sesión</button>
+  </header>
+
+  <!-- =============================================
+       CONTENIDO PRINCIPAL DEL DASHBOARD
+  ============================================= -->
+  <main class="dash-main">
+
+    <!-- Bienvenida -->
+    <div class="bienvenida">
+      <span class="bienvenida-badge">✦ Portal del cliente</span>
+      <h1>Hola, <span id="nombreUsuario">...</span></h1>
+      <p>Bienvenido a tu panel personal de NexoAI</p>
+    </div>
+
+    <!-- Tarjeta del plan activo -->
+    <div class="plan-card">
+      <div class="plan-info">
+        <div class="plan-label">Tu plan activo</div>
+        <div class="plan-nombre" id="planNombre">—</div>
+        <div class="plan-precio" id="planPrecio">—</div>
+      </div>
+      <a href="precios.html" class="btn-upgrade">Actualizar plan →</a>
+    </div>
+
+    <!-- Sección de conversaciones con el agente -->
+    <div class="seccion-titulo">
+      Mis conversaciones
+      <span id="totalConversaciones">0</span>
+    </div>
+
+    <div class="conv-lista" id="convLista">
+      <!-- Se llena dinámicamente con JavaScript -->
+    </div>
+
+  </main>
+
+  <!-- Modal para ver el detalle de una conversación -->
+  <div class="modal-overlay" id="modalConv">
+    <div class="modal">
+      <div class="modal-header">
+        <h3 id="modalTitulo">Conversación</h3>
+        <button class="modal-cerrar" id="btnCerrarModal">✕</button>
+      </div>
+      <div class="modal-body" id="modalBody"></div>
+    </div>
+  </div>
+
+  <!-- Footer -->
+  <footer>
+    <div class="footer-logo">Nexo<span>AI</span></div>
+    <p>© 2026 NexoAI. Todos los derechos reservados.</p>
+  </footer>
+
+  <!-- Botón flotante para ir al agente IA -->
+  <a href="agente.html" class="btn-flotante">
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
+    </svg>
+    <span>Hablar con el agente</span>
+  </a>
+
+  <!-- Script global: menú hamburguesa -->
+  <script src="../js/main.js"></script>
+
+  <!-- =============================================
+       LÓGICA DEL DASHBOARD
+       - Verifica JWT al cargar
+       - Carga perfil del usuario desde /api/usuarios/perfil
+       - Muestra plan, conversaciones y permite ver el detalle
+  ============================================= -->
+  <script>
+    // Precios de cada plan para mostrar en la tarjeta
+    const PRECIOS_PLAN = {
+      starter:    '$1/mes',
+      pro:        '$10/mes',
+      enterprise: '$100/mes'
+    };
+
+    // Recupera el token del localStorage
+    const token = localStorage.getItem('nexoai_cliente_token');
+
+    // Si no hay token, redirige al login
+    if (!token) {
+      window.location.href = 'login-cliente.html';
+    }
+
+    /**
+     * Carga el perfil del usuario autenticado desde /api/usuarios/perfil
+     * y rellena todos los elementos del dashboard.
+     */
+    async function cargarPerfil() {
+      try {
+        const res = await fetch('/api/usuarios/perfil', {
+          headers: { 'Authorization': `Bearer ${token}` }
+        });
+
+        // Token inválido o expirado → redirige al login
+        if (res.status === 401 || res.status === 403) {
+          localStorage.removeItem('nexoai_cliente_token');
+          window.location.href = 'login-cliente.html';
+          return;
+        }
+
+        const data = await res.json();
+        if (!data.ok) return;
+
+        const { usuario, conversaciones } = data;
+
+        // — Bienvenida —
+        document.getElementById('nombreUsuario').textContent = usuario.nombre;
+
+        // — Tarjeta de plan —
+        const planNorm = usuario.plan || 'starter';
+        document.getElementById('planNombre').textContent = planNorm.charAt(0).toUpperCase() + planNorm.slice(1);
+        document.getElementById('planPrecio').innerHTML   = `Precio: <strong>${PRECIOS_PLAN[planNorm] || '—'}</strong>`;
+
+        // — Conversaciones —
+        document.getElementById('totalConversaciones').textContent = conversaciones.length;
+        renderizarConversaciones(conversaciones);
+
+      } catch (error) {
+        console.error('Error al cargar el perfil:', error);
+      }
+    }
+
+    /**
+     * Construye la lista de tarjetas de conversación.
+     * Cada sesión muestra su fecha, el primer mensaje del usuario y el total de turnos.
+     * @param {Array} sesiones - Array de sesiones [{ fecha, mensajes }]
+     */
+    function renderizarConversaciones(sesiones) {
+      const lista = document.getElementById('convLista');
+
+      if (!sesiones || sesiones.length === 0) {
+        lista.innerHTML = `
+          <div class="conv-vacia">
+            No tienes conversaciones aún.<br>
+            Usa el botón de abajo para hablar con el agente IA.
+          </div>`;
+        return;
+      }
+
+      // Ordena de más reciente a más antigua
+      const ordenadas = [...sesiones].sort((a, b) => b.fecha.localeCompare(a.fecha));
+
+      lista.innerHTML = '';
+      ordenadas.forEach((sesion, idx) => {
+        // Extrae el primer mensaje del usuario como resumen
+        const primerMensaje = sesion.mensajes?.find(m => m.role === 'user')?.content || 'Sin mensaje';
+        const totalTurnos   = sesion.mensajes?.length || 0;
+
+        const card = document.createElement('div');
+        card.classList.add('conv-card');
+        card.innerHTML = `
+          <div class="conv-meta">
+            <span class="conv-fecha">📅 ${sesion.fecha}</span>
+            <span class="conv-resumen">${escapeHtml(primerMensaje)}</span>
+          </div>
+          <div style="display:flex; align-items:center; gap:0.8rem;">
+            <span class="conv-mensajes">${totalTurnos} mensajes</span>
+            <button class="btn-ver-conv">Ver detalle</button>
+          </div>`;
+
+        // Clic en el botón o en la tarjeta → abre el modal con los mensajes
+        card.querySelector('.btn-ver-conv').addEventListener('click', (e) => {
+          e.stopPropagation();
+          abrirModal(sesion, idx + 1);
+        });
+
+        card.addEventListener('click', () => abrirModal(sesion, idx + 1));
+
+        lista.appendChild(card);
+      });
+    }
+
+    /**
+     * Abre el modal con las burbujas de una sesión.
+     * @param {object} sesion  - { fecha, mensajes }
+     * @param {number} numero  - Número de sesión para el título
+     */
+    function abrirModal(sesion, numero) {
+      document.getElementById('modalTitulo').textContent = `Sesión ${numero} — ${sesion.fecha}`;
+      const body = document.getElementById('modalBody');
+      body.innerHTML = '';
+
+      sesion.mensajes?.forEach(turno => {
+        const burbuja = document.createElement('div');
+        burbuja.classList.add('msg-burbuja', turno.role);
+        burbuja.textContent = turno.content;
+        body.appendChild(burbuja);
+      });
+
+      document.getElementById('modalConv').classList.add('visible');
+    }
+
+    // Cierra el modal al hacer clic en ✕ o en el overlay
+    document.getElementById('btnCerrarModal').addEventListener('click', () => {
+      document.getElementById('modalConv').classList.remove('visible');
+    });
+
+    document.getElementById('modalConv').addEventListener('click', (e) => {
+      if (e.target === e.currentTarget) e.currentTarget.classList.remove('visible');
+    });
+
+    // Cierra sesión: elimina el token y redirige al login
+    document.getElementById('btnLogout').addEventListener('click', () => {
+      if (confirm('¿Cerrar sesión?')) {
+        localStorage.removeItem('nexoai_cliente_token');
+        window.location.href = 'login-cliente.html';
+      }
+    });
+
+    // Función auxiliar para escapar HTML y prevenir XSS
+    function escapeHtml(texto) {
+      const div = document.createElement('div');
+      div.appendChild(document.createTextNode(texto));
+      return div.innerHTML;
+    }
+
+    // Carga el perfil al iniciar la página
+    cargarPerfil();
+  </script>
+
+</body>
+</html>

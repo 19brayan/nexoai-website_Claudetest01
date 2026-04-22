@@ -1,0 +1,551 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Acceso Clientes — NexoAI</title>
+  <link rel="stylesheet" href="../css/styles.css" />
+  <style>
+    /* =============================================
+       ESTILOS DE LA PÁGINA DE LOGIN/REGISTRO
+       Usa los colores de marca NexoAI
+       ============================================= */
+
+    body {
+      background: #1a1a2e;
+      color: #ffffff;
+      font-family: 'Inter', 'Segoe UI', sans-serif;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* Encabezado simple sin menú de navegación */
+    .header-simple {
+      background: rgba(255, 255, 255, 0.05);
+      border-bottom: 1px solid rgba(108, 99, 255, 0.2);
+      padding: 1rem 2rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .header-simple .logo {
+      font-size: 1.6rem;
+      font-weight: 800;
+      color: #ffffff;
+      text-decoration: none;
+      letter-spacing: -0.5px;
+    }
+
+    .header-simple .logo span {
+      color: #6C63FF;
+    }
+
+    /* Contenedor central de las tarjetas de login/registro */
+    .auth-container {
+      flex: 1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 2rem 1rem;
+    }
+
+    /* Tarjeta principal con las pestañas */
+    .auth-card {
+      background: rgba(255, 255, 255, 0.06);
+      border: 1px solid rgba(108, 99, 255, 0.25);
+      border-radius: 16px;
+      width: 100%;
+      max-width: 460px;
+      overflow: hidden;
+    }
+
+    /* Pestañas para alternar entre Login y Registro */
+    .auth-tabs {
+      display: flex;
+      border-bottom: 1px solid rgba(108, 99, 255, 0.25);
+    }
+
+    .auth-tab {
+      flex: 1;
+      padding: 1rem;
+      background: transparent;
+      border: none;
+      color: rgba(255, 255, 255, 0.5);
+      font-size: 0.95rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .auth-tab.activa {
+      background: rgba(108, 99, 255, 0.15);
+      color: #6C63FF;
+      border-bottom: 2px solid #6C63FF;
+    }
+
+    .auth-tab:hover:not(.activa) {
+      background: rgba(255, 255, 255, 0.05);
+      color: rgba(255, 255, 255, 0.8);
+    }
+
+    /* Contenido de cada pestaña */
+    .auth-panel {
+      padding: 2rem;
+      display: none;
+    }
+
+    .auth-panel.activo {
+      display: block;
+    }
+
+    .auth-panel h2 {
+      font-size: 1.4rem;
+      font-weight: 700;
+      margin: 0 0 0.4rem 0;
+    }
+
+    .auth-panel p.subtitulo {
+      color: rgba(255, 255, 255, 0.55);
+      font-size: 0.9rem;
+      margin: 0 0 1.8rem 0;
+    }
+
+    /* Campos del formulario */
+    .form-grupo {
+      margin-bottom: 1.2rem;
+    }
+
+    .form-grupo label {
+      display: block;
+      font-size: 0.85rem;
+      font-weight: 600;
+      color: rgba(255, 255, 255, 0.75);
+      margin-bottom: 0.4rem;
+    }
+
+    .form-grupo input {
+      width: 100%;
+      background: rgba(255, 255, 255, 0.08);
+      border: 1px solid rgba(255, 255, 255, 0.15);
+      border-radius: 8px;
+      padding: 0.75rem 1rem;
+      color: #ffffff;
+      font-size: 0.95rem;
+      outline: none;
+      transition: border-color 0.2s;
+      box-sizing: border-box;
+    }
+
+    .form-grupo input:focus {
+      border-color: #6C63FF;
+      background: rgba(108, 99, 255, 0.1);
+    }
+
+    .form-grupo input::placeholder {
+      color: rgba(255, 255, 255, 0.3);
+    }
+
+    /* Botón de acción principal */
+    .btn-auth {
+      width: 100%;
+      background: #6C63FF;
+      color: #ffffff;
+      border: none;
+      border-radius: 8px;
+      padding: 0.85rem;
+      font-size: 1rem;
+      font-weight: 700;
+      cursor: pointer;
+      transition: background 0.2s, transform 0.1s;
+      margin-top: 0.5rem;
+    }
+
+    .btn-auth:hover {
+      background: #5a52e0;
+    }
+
+    .btn-auth:active {
+      transform: scale(0.98);
+    }
+
+    .btn-auth:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+    }
+
+    /* Mensajes de error y éxito */
+    .mensaje-auth {
+      border-radius: 8px;
+      padding: 0.75rem 1rem;
+      font-size: 0.88rem;
+      margin-top: 1rem;
+      display: none;
+    }
+
+    .mensaje-auth.error {
+      background: rgba(255, 99, 99, 0.15);
+      border: 1px solid rgba(255, 99, 99, 0.4);
+      color: #ff8080;
+    }
+
+    .mensaje-auth.exito {
+      background: rgba(78, 205, 196, 0.15);
+      border: 1px solid rgba(78, 205, 196, 0.4);
+      color: #4ECDC4;
+    }
+
+    /* Separador visual */
+    .separador {
+      text-align: center;
+      color: rgba(255, 255, 255, 0.3);
+      font-size: 0.8rem;
+      margin: 1.2rem 0;
+      position: relative;
+    }
+
+    .separador::before,
+    .separador::after {
+      content: '';
+      position: absolute;
+      top: 50%;
+      width: 40%;
+      height: 1px;
+      background: rgba(255, 255, 255, 0.1);
+    }
+
+    .separador::before { left: 0; }
+    .separador::after  { right: 0; }
+
+    /* Enlace para ir al chat del agente desde la página de login */
+    .link-agente {
+      text-align: center;
+      margin-top: 1.5rem;
+      font-size: 0.85rem;
+      color: rgba(255, 255, 255, 0.5);
+    }
+
+    .link-agente a {
+      color: #6C63FF;
+      text-decoration: none;
+      font-weight: 600;
+    }
+
+    .link-agente a:hover {
+      text-decoration: underline;
+    }
+
+    /* Footer */
+    .footer-simple {
+      text-align: center;
+      padding: 1.5rem;
+      color: rgba(255, 255, 255, 0.3);
+      font-size: 0.8rem;
+      border-top: 1px solid rgba(255, 255, 255, 0.07);
+    }
+  </style>
+</head>
+<body>
+
+  <!-- =============================================
+       ENCABEZADO SIMPLE (solo logo, sin navegación)
+       ============================================= -->
+  <header class="header-simple">
+    <a href="../index.html" class="logo">Nexo<span>AI</span></a>
+  </header>
+
+  <!-- =============================================
+       CONTENEDOR PRINCIPAL DE AUTENTICACIÓN
+       Permite al usuario hacer login o registrarse
+       ============================================= -->
+  <main class="auth-container">
+    <div class="auth-card">
+
+      <!-- Pestañas para alternar entre formularios -->
+      <div class="auth-tabs">
+        <button class="auth-tab activa" id="tab-login" onclick="mostrarPanel('login')">
+          Iniciar sesión
+        </button>
+        <button class="auth-tab" id="tab-registro" onclick="mostrarPanel('registro')">
+          Crear cuenta
+        </button>
+      </div>
+
+      <!-- =============================================
+           PANEL DE LOGIN
+           ============================================= -->
+      <div class="auth-panel activo" id="panel-login">
+        <h2>Bienvenido de vuelta</h2>
+        <p class="subtitulo">Accede a tu portal de cliente NexoAI</p>
+
+        <form id="form-login" onsubmit="iniciarSesion(event)">
+          <div class="form-grupo">
+            <label for="login-email">Correo electrónico</label>
+            <input
+              type="email"
+              id="login-email"
+              placeholder="tu@correo.com"
+              required
+              autocomplete="email"
+            />
+          </div>
+
+          <div class="form-grupo">
+            <label for="login-password">Contraseña</label>
+            <input
+              type="password"
+              id="login-password"
+              placeholder="Tu contraseña"
+              required
+              autocomplete="current-password"
+            />
+          </div>
+
+          <button type="submit" class="btn-auth" id="btn-login">
+            Iniciar sesión
+          </button>
+        </form>
+
+        <!-- Mensaje de respuesta del servidor (error o éxito) -->
+        <div class="mensaje-auth" id="msg-login"></div>
+
+        <div class="separador">o</div>
+
+        <div class="link-agente">
+          ¿No tienes cuenta? <a href="#" onclick="mostrarPanel('registro'); return false;">Regístrate gratis</a>
+        </div>
+      </div>
+
+      <!-- =============================================
+           PANEL DE REGISTRO
+           ============================================= -->
+      <div class="auth-panel" id="panel-registro">
+        <h2>Crea tu cuenta</h2>
+        <p class="subtitulo">Empieza gratis con el plan Starter</p>
+
+        <form id="form-registro" onsubmit="registrarCuenta(event)">
+          <div class="form-grupo">
+            <label for="reg-nombre">Nombre completo</label>
+            <input
+              type="text"
+              id="reg-nombre"
+              placeholder="Tu nombre"
+              required
+              autocomplete="name"
+            />
+          </div>
+
+          <div class="form-grupo">
+            <label for="reg-email">Correo electrónico</label>
+            <input
+              type="email"
+              id="reg-email"
+              placeholder="tu@correo.com"
+              required
+              autocomplete="email"
+            />
+          </div>
+
+          <div class="form-grupo">
+            <label for="reg-password">Contraseña</label>
+            <input
+              type="password"
+              id="reg-password"
+              placeholder="Mínimo 6 caracteres"
+              required
+              minlength="6"
+              autocomplete="new-password"
+            />
+          </div>
+
+          <div class="form-grupo">
+            <label for="reg-password2">Confirmar contraseña</label>
+            <input
+              type="password"
+              id="reg-password2"
+              placeholder="Repite la contraseña"
+              required
+              autocomplete="new-password"
+            />
+          </div>
+
+          <button type="submit" class="btn-auth" id="btn-registro">
+            Crear cuenta
+          </button>
+        </form>
+
+        <!-- Mensaje de respuesta del servidor (error o éxito) -->
+        <div class="mensaje-auth" id="msg-registro"></div>
+
+        <div class="separador">o</div>
+
+        <div class="link-agente">
+          ¿Ya tienes cuenta? <a href="#" onclick="mostrarPanel('login'); return false;">Inicia sesión</a>
+        </div>
+      </div>
+
+    </div>
+  </main>
+
+  <!-- =============================================
+       FOOTER
+       ============================================= -->
+  <footer class="footer-simple">
+    © NexoAI. Todos los derechos reservados.
+  </footer>
+
+  <script>
+    // =============================================
+    // LÓGICA DE AUTENTICACIÓN DE CLIENTES
+    // Gestiona login y registro contra /api/usuarios
+    // =============================================
+
+    // Si el cliente ya tiene token válido, redirige directo al dashboard
+    (function verificarSesionActiva() {
+      const token = localStorage.getItem('nexoai_cliente_token');
+      if (token) {
+        window.location.href = 'dashboard.html';
+      }
+    })();
+
+    // Alterna entre el panel de login y el de registro
+    function mostrarPanel(nombre) {
+      // Desactiva ambas pestañas y paneles
+      document.querySelectorAll('.auth-tab').forEach(t => t.classList.remove('activa'));
+      document.querySelectorAll('.auth-panel').forEach(p => p.classList.remove('activo'));
+
+      // Activa la pestaña y el panel correspondiente
+      document.getElementById(`tab-${nombre}`).classList.add('activa');
+      document.getElementById(`panel-${nombre}`).classList.add('activo');
+    }
+
+    // Muestra un mensaje de error o éxito debajo del formulario
+    function mostrarMensaje(idElemento, texto, tipo) {
+      const el = document.getElementById(idElemento);
+      el.textContent = texto;
+      el.className = `mensaje-auth ${tipo}`;
+      el.style.display = 'block';
+    }
+
+    // Oculta el mensaje del formulario indicado
+    function ocultarMensaje(idElemento) {
+      document.getElementById(idElemento).style.display = 'none';
+    }
+
+    // =============================================
+    // INICIAR SESIÓN
+    // Llama a POST /api/usuarios/login y guarda el token
+    // =============================================
+    async function iniciarSesion(evento) {
+      evento.preventDefault();
+      ocultarMensaje('msg-login');
+
+      const email    = document.getElementById('login-email').value.trim();
+      const password = document.getElementById('login-password').value;
+      const btn      = document.getElementById('btn-login');
+
+      btn.disabled    = true;
+      btn.textContent = 'Verificando...';
+
+      try {
+        const respuesta = await fetch('/api/usuarios/login', {
+          method:  'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body:    JSON.stringify({ email, password })
+        });
+
+        const datos = await respuesta.json();
+
+        if (respuesta.ok && datos.ok) {
+          // Guarda el token y redirige al portal del cliente
+          localStorage.setItem('nexoai_cliente_token', datos.token);
+          mostrarMensaje('msg-login', '¡Bienvenido! Redirigiendo...', 'exito');
+          setTimeout(() => { window.location.href = 'dashboard.html'; }, 800);
+        } else {
+          mostrarMensaje('msg-login', datos.error || 'Credenciales incorrectas.', 'error');
+          btn.disabled    = false;
+          btn.textContent = 'Iniciar sesión';
+        }
+      } catch {
+        mostrarMensaje('msg-login', 'Error de conexión. Inténtalo de nuevo.', 'error');
+        btn.disabled    = false;
+        btn.textContent = 'Iniciar sesión';
+      }
+    }
+
+    // =============================================
+    // REGISTRAR CUENTA
+    // Llama a POST /api/usuarios/registro y luego hace login automático
+    // =============================================
+    async function registrarCuenta(evento) {
+      evento.preventDefault();
+      ocultarMensaje('msg-registro');
+
+      const nombre    = document.getElementById('reg-nombre').value.trim();
+      const email     = document.getElementById('reg-email').value.trim();
+      const password  = document.getElementById('reg-password').value;
+      const password2 = document.getElementById('reg-password2').value;
+      const btn       = document.getElementById('btn-registro');
+
+      // Validación local: las contraseñas deben coincidir
+      if (password !== password2) {
+        mostrarMensaje('msg-registro', 'Las contraseñas no coinciden.', 'error');
+        return;
+      }
+
+      btn.disabled    = true;
+      btn.textContent = 'Creando cuenta...';
+
+      try {
+        const respuesta = await fetch('/api/usuarios/registro', {
+          method:  'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body:    JSON.stringify({ nombre, email, password })
+        });
+
+        const datos = await respuesta.json();
+
+        if (respuesta.ok && datos.ok) {
+          // Registro exitoso — hace login automático para obtener el token
+          mostrarMensaje('msg-registro', 'Cuenta creada. Iniciando sesión...', 'exito');
+          await loginAutomatico(email, password);
+        } else {
+          mostrarMensaje('msg-registro', datos.error || 'No se pudo crear la cuenta.', 'error');
+          btn.disabled    = false;
+          btn.textContent = 'Crear cuenta';
+        }
+      } catch {
+        mostrarMensaje('msg-registro', 'Error de conexión. Inténtalo de nuevo.', 'error');
+        btn.disabled    = false;
+        btn.textContent = 'Crear cuenta';
+      }
+    }
+
+    // Login automático tras un registro exitoso
+    async function loginAutomatico(email, password) {
+      try {
+        const respuesta = await fetch('/api/usuarios/login', {
+          method:  'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body:    JSON.stringify({ email, password })
+        });
+
+        const datos = await respuesta.json();
+
+        if (respuesta.ok && datos.ok) {
+          localStorage.setItem('nexoai_cliente_token', datos.token);
+          setTimeout(() => { window.location.href = 'dashboard.html'; }, 600);
+        } else {
+          // El registro funcionó pero el login falló; pide que el usuario inicie sesión
+          mostrarMensaje('msg-registro', 'Cuenta creada. Por favor inicia sesión.', 'exito');
+          setTimeout(() => mostrarPanel('login'), 1500);
+        }
+      } catch {
+        mostrarMensaje('msg-registro', 'Cuenta creada. Por favor inicia sesión.', 'exito');
+        setTimeout(() => mostrarPanel('login'), 1500);
+      }
+    }
+  </script>
+</body>
+</html>
