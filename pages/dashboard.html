@@ -529,11 +529,19 @@
       enterprise: '$100/mes'
     };
 
-    // Recupera el token del localStorage
+    // Verifica token y rol antes de cargar cualquier dato
     const token = localStorage.getItem('nexoai_cliente_token');
 
-    // Si no hay token, redirige al login
     if (!token) {
+      window.location.href = 'login-cliente.html';
+    }
+
+    try {
+      const payload = JSON.parse(atob(token.split('.')[1]));
+      if (payload.rol === 'admin') {
+        window.location.href = 'admin.html';
+      }
+    } catch (e) {
       window.location.href = 'login-cliente.html';
     }
 

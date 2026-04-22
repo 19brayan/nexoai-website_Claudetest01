@@ -869,13 +869,20 @@
 
     // -----------------------------------------------
     // AUTENTICACIÓN
-    // Obtiene el token del localStorage y redirige
-    // al login si no existe o es inválido
+    // Verifica token y rol antes de cargar cualquier dato
     // -----------------------------------------------
     const TOKEN = localStorage.getItem('nexoai_token');
 
-    // Si no hay token, redirige inmediatamente al login
     if (!TOKEN) {
+      window.location.href = 'login.html';
+    }
+
+    try {
+      const payload = JSON.parse(atob(TOKEN.split('.')[1]));
+      if (payload.rol !== 'admin') {
+        window.location.href = 'dashboard.html';
+      }
+    } catch (e) {
       window.location.href = 'login.html';
     }
 
