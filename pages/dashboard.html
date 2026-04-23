@@ -410,6 +410,250 @@
     }
 
     /* =============================================
+       ONBOARDING PANTALLA COMPLETA (4 pasos)
+       Ocupa toda la pantalla y bloquea el dashboard
+    ============================================= */
+    .onb-screen {
+      position: fixed;
+      inset: 0;
+      z-index: 500;
+      background: var(--bg-deep);
+      flex-direction: column;
+      overflow-y: auto;
+    }
+
+    .onb-header {
+      background: var(--bg-card);
+      border-bottom: 1px solid var(--borde);
+      padding: 0 1.5rem;
+      height: 60px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-shrink: 0;
+      position: sticky;
+      top: 0;
+      z-index: 10;
+    }
+
+    .onb-header-paso {
+      font-size: 0.82rem;
+      color: var(--gris);
+      font-weight: 600;
+    }
+
+    .onb-progress-bg {
+      height: 3px;
+      background: rgba(255, 255, 255, 0.08);
+      flex-shrink: 0;
+    }
+
+    .onb-progress-fill {
+      height: 3px;
+      background: var(--morado);
+      transition: width 0.4s ease;
+    }
+
+    .onb-contenido {
+      flex: 1;
+      display: flex;
+      justify-content: center;
+      padding: 2.5rem 1rem 4rem;
+    }
+
+    .onb-panel { width: 100%; max-width: 560px; }
+
+    .onb-titulo { font-size: 1.5rem; font-weight: 800; margin-bottom: 0.4rem; }
+    .onb-subtitulo { font-size: 0.9rem; color: var(--gris); margin-bottom: 1.8rem; }
+
+    .onb-grupo { display: flex; flex-direction: column; gap: 0.4rem; margin-bottom: 1rem; }
+
+    .onb-grupo label {
+      font-size: 0.8rem;
+      font-weight: 600;
+      color: var(--gris);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .onb-grupo input,
+    .onb-grupo select {
+      background: rgba(255, 255, 255, 0.06);
+      border: 1.5px solid rgba(255, 255, 255, 0.1);
+      border-radius: 8px;
+      padding: 0.75rem 1rem;
+      color: var(--blanco);
+      font-size: 0.95rem;
+      font-family: inherit;
+      outline: none;
+      transition: border-color 0.2s;
+    }
+
+    .onb-grupo input:focus,
+    .onb-grupo select:focus { border-color: var(--morado); }
+    .onb-grupo input::placeholder { color: rgba(255, 255, 255, 0.25); }
+    .onb-grupo select option { background: #13132a; }
+
+    /* Chat embebido — Paso 2 */
+    .onb-chat {
+      background: rgba(255, 255, 255, 0.03);
+      border: 1px solid var(--borde);
+      border-radius: 12px;
+      height: 320px;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+      margin-bottom: 1rem;
+    }
+
+    .onb-chat-msgs {
+      flex: 1;
+      overflow-y: auto;
+      padding: 1rem;
+      display: flex;
+      flex-direction: column;
+      gap: 0.6rem;
+    }
+
+    .onb-chat-row {
+      display: flex;
+      gap: 0.5rem;
+      padding: 0.75rem;
+      border-top: 1px solid var(--borde);
+    }
+
+    .onb-chat-input {
+      flex: 1;
+      background: rgba(255, 255, 255, 0.06);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 8px;
+      padding: 0.6rem 0.9rem;
+      color: var(--blanco);
+      font-size: 0.88rem;
+      font-family: inherit;
+      outline: none;
+      transition: border-color 0.2s;
+    }
+
+    .onb-chat-input:focus { border-color: var(--morado); }
+
+    .btn-onb-enviar {
+      background: var(--morado);
+      color: var(--blanco);
+      border: none;
+      border-radius: 8px;
+      padding: 0.6rem 1rem;
+      font-size: 0.82rem;
+      font-weight: 700;
+      cursor: pointer;
+      white-space: nowrap;
+      transition: background 0.2s;
+    }
+
+    .btn-onb-enviar:hover { background: #5a52e0; }
+    .btn-onb-enviar:disabled { opacity: 0.5; cursor: not-allowed; }
+
+    .onb-burbuja {
+      max-width: 80%;
+      padding: 0.6rem 0.9rem;
+      border-radius: 12px;
+      font-size: 0.88rem;
+      line-height: 1.5;
+      word-break: break-word;
+    }
+
+    .onb-burbuja.user {
+      align-self: flex-end;
+      background: var(--morado);
+      color: var(--blanco);
+      border-bottom-right-radius: 3px;
+    }
+
+    .onb-burbuja.agent {
+      align-self: flex-start;
+      background: rgba(255, 255, 255, 0.06);
+      border: 1px solid var(--borde);
+      color: #e0e0e0;
+      border-bottom-left-radius: 3px;
+    }
+
+    /* Planes — Paso 3 */
+    .onb-planes { display: flex; flex-direction: column; gap: 0.7rem; margin-bottom: 1.2rem; }
+
+    .onb-plan {
+      background: rgba(255, 255, 255, 0.04);
+      border: 1.5px solid rgba(255, 255, 255, 0.1);
+      border-radius: 10px;
+      padding: 1rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .onb-plan.destacado { border-color: var(--morado); background: rgba(108, 99, 255, 0.08); }
+    .onb-plan-nombre { font-weight: 700; font-size: 0.95rem; }
+    .onb-plan-desc { font-size: 0.78rem; color: var(--gris); margin-top: 0.15rem; }
+    .onb-plan-precio { font-size: 1rem; font-weight: 800; color: var(--morado-c); white-space: nowrap; }
+
+    .onb-plan-activo {
+      background: rgba(46, 204, 113, 0.1);
+      border: 1px solid rgba(46, 204, 113, 0.4);
+      border-radius: 12px;
+      padding: 1.5rem;
+      text-align: center;
+      margin-bottom: 1.2rem;
+    }
+
+    .onb-plan-activo-icon { font-size: 2.2rem; margin-bottom: 0.5rem; }
+    .onb-plan-activo p { font-size: 1rem; font-weight: 600; color: #2ecc71; }
+
+    /* Completado — Paso 4 */
+    .onb-completado { text-align: center; padding: 2rem 0 1.5rem; }
+    .onb-completado-icon { font-size: 3.5rem; margin-bottom: 1rem; }
+
+    /* Botones */
+    .onb-acciones { display: flex; flex-direction: column; gap: 0.6rem; margin-top: 1.5rem; }
+
+    .btn-onb-primary {
+      width: 100%;
+      background: var(--morado);
+      color: var(--blanco);
+      border: none;
+      border-radius: 10px;
+      padding: 0.85rem;
+      font-size: 0.95rem;
+      font-weight: 700;
+      cursor: pointer;
+      transition: background 0.2s, transform 0.1s;
+    }
+
+    .btn-onb-primary:hover { background: #5a52e0; transform: translateY(-1px); }
+    .btn-onb-primary:disabled { opacity: 0.6; cursor: not-allowed; transform: none; }
+
+    .btn-onb-secondary {
+      display: block;
+      width: 100%;
+      background: transparent;
+      color: var(--gris);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 10px;
+      padding: 0.7rem;
+      font-size: 0.88rem;
+      font-weight: 600;
+      cursor: pointer;
+      text-decoration: none;
+      text-align: center;
+      transition: border-color 0.2s, color 0.2s;
+    }
+
+    .btn-onb-secondary:hover { border-color: var(--morado); color: var(--blanco); }
+
+    @media (max-width: 600px) {
+      .onb-header-paso { display: none; }
+      .onb-titulo { font-size: 1.2rem; }
+    }
+
+    /* =============================================
        FOOTER
     ============================================= */
     footer {
@@ -486,6 +730,139 @@
     </div>
 
   </main>
+
+  <!-- =============================================
+       ONBOARDING PANTALLA COMPLETA (4 pasos)
+       Bloquea el dashboard hasta que el usuario lo completa
+  ============================================= -->
+  <div class="onb-screen" id="onbScreen" style="display: none;">
+
+    <!-- Header con número de paso -->
+    <div class="onb-header">
+      <a href="../index.html" class="dash-logo">Nexo<span>AI</span></a>
+      <span class="onb-header-paso" id="onbHeaderPaso">Configuración de cuenta · Paso 1 de 4</span>
+    </div>
+
+    <!-- Barra de progreso horizontal (25% → 50% → 75% → 100%) -->
+    <div class="onb-progress-bg">
+      <div class="onb-progress-fill" id="onbProgressFill" style="width: 25%"></div>
+    </div>
+
+    <div class="onb-contenido">
+      <div class="onb-panel">
+
+        <!-- ── PASO 1: Perfil del negocio ── -->
+        <div id="onbStep1">
+          <h2 class="onb-titulo">Cuéntanos sobre tu negocio</h2>
+          <p class="onb-subtitulo">Personaliza tu experiencia con unos datos básicos</p>
+
+          <div class="onb-grupo">
+            <label for="onbEmpresa">Nombre de tu empresa</label>
+            <input type="text" id="onbEmpresa" placeholder="Ej: Acme Corp" />
+          </div>
+
+          <div class="onb-grupo">
+            <label for="onbIndustria">¿En qué industria trabajas?</label>
+            <select id="onbIndustria">
+              <option value="">Selecciona una opción</option>
+              <option value="marketing">Marketing</option>
+              <option value="ecommerce">E-commerce</option>
+              <option value="educacion">Educación</option>
+              <option value="salud">Salud</option>
+              <option value="tecnologia">Tecnología</option>
+              <option value="creadores">Creadores de contenido</option>
+              <option value="otro">Otro</option>
+            </select>
+          </div>
+
+          <div class="onb-grupo">
+            <label for="onbColaboradores">Número de colaboradores</label>
+            <select id="onbColaboradores">
+              <option value="">Selecciona una opción</option>
+              <option value="1">1</option>
+              <option value="2-5">2–5</option>
+              <option value="6-20">6–20</option>
+              <option value="21-50">21–50</option>
+              <option value="50+">50+</option>
+            </select>
+          </div>
+
+          <div class="onb-grupo">
+            <label for="onbFacturacion">Facturación mensual actual</label>
+            <select id="onbFacturacion">
+              <option value="">Selecciona una opción</option>
+              <option value="<10k">Menos de $10k</option>
+              <option value="10k-50k">$10k – $50k</option>
+              <option value="50k-200k">$50k – $200k</option>
+              <option value=">200k">Más de $200k</option>
+            </select>
+          </div>
+
+          <div class="onb-grupo">
+            <label for="onbMeta">Meta principal</label>
+            <select id="onbMeta">
+              <option value="">Selecciona una opción</option>
+              <option value="ventas">Aumentar ventas</option>
+              <option value="costos">Reducir costos</option>
+              <option value="automatizar">Automatizar procesos</option>
+              <option value="atencion">Mejorar atención al cliente</option>
+              <option value="audiencia">Crecer audiencia</option>
+            </select>
+          </div>
+
+          <div class="onb-grupo">
+            <label for="onbClientesNuevos">Clientes nuevos que quieres al mes</label>
+            <input type="number" id="onbClientesNuevos" placeholder="Ej: 20" min="0" />
+          </div>
+
+          <div class="onb-acciones">
+            <button class="btn-onb-primary" id="btnOnbPaso1">Continuar →</button>
+          </div>
+        </div>
+
+        <!-- ── PASO 2: Chat embebido con el agente ── -->
+        <div id="onbStep2" style="display: none;">
+          <h2 class="onb-titulo">Conoce a tu agente IA</h2>
+          <p class="onb-subtitulo">Habla con el agente para ver cómo puede ayudar a tu negocio</p>
+
+          <div class="onb-chat">
+            <div class="onb-chat-msgs" id="onbChatMsgs"></div>
+            <div class="onb-chat-row">
+              <input type="text" class="onb-chat-input" id="onbChatInput" placeholder="Escribe tu mensaje..." />
+              <button class="btn-onb-enviar" id="btnOnbEnviar">Enviar</button>
+            </div>
+          </div>
+
+          <div class="onb-acciones">
+            <!-- Se muestra tras el primer intercambio -->
+            <button class="btn-onb-primary" id="btnOnbPaso2" style="display: none;">Continuar →</button>
+          </div>
+        </div>
+
+        <!-- ── PASO 3: Plan (inteligente) ── -->
+        <div id="onbStep3" style="display: none;">
+          <h2 class="onb-titulo">Tu plan en NexoAI</h2>
+          <p class="onb-subtitulo">Elige el plan que mejor se adapte a tu negocio</p>
+          <!-- Relleno dinámicamente por JS: plan activo o lista de planes -->
+          <div id="onbPlanContenido"></div>
+          <div class="onb-acciones" id="onbPlanAcciones"></div>
+        </div>
+
+        <!-- ── PASO 4: ¡Todo listo! ── -->
+        <div id="onbStep4" style="display: none;">
+          <div class="onb-completado">
+            <div class="onb-completado-icon">🎉</div>
+            <h2 class="onb-titulo">¡Todo listo!</h2>
+            <p class="onb-subtitulo">Tu cuenta está configurada. Empieza a aprovechar NexoAI al máximo.</p>
+          </div>
+          <div class="onb-acciones">
+            <button class="btn-onb-primary" id="btnEntrarDashboard">Entrar al dashboard →</button>
+          </div>
+        </div>
+
+      </div><!-- /.onb-panel -->
+    </div><!-- /.onb-contenido -->
+  </div>
 
   <!-- Modal para ver el detalle de una conversación -->
   <div class="modal-overlay" id="modalConv">
@@ -566,6 +943,9 @@
         if (!data.ok) return;
 
         const { usuario, conversaciones } = data;
+
+        // — Onboarding: muestra la pantalla si aún no fue completado —
+        verificarOnboarding(data);
 
         // — Bienvenida —
         document.getElementById('nombreUsuario').textContent = usuario.nombre;
@@ -677,6 +1057,183 @@
       div.appendChild(document.createTextNode(texto));
       return div.innerHTML;
     }
+
+    // =============================================
+    // ONBOARDING PANTALLA COMPLETA (4 pasos)
+    // =============================================
+
+    let onbNombreUsuario    = '';
+    let onbSuscripcion      = null;
+    let onbChatHistorial    = [];
+    let onbChatInteractuado = false;
+
+    // Navega al paso indicado (1-4) actualizando header y barra de progreso
+    function onbIrPaso(paso) {
+      [1, 2, 3, 4].forEach(n => {
+        document.getElementById(`onbStep${n}`).style.display = n === paso ? 'block' : 'none';
+      });
+      document.getElementById('onbProgressFill').style.width = `${paso * 25}%`;
+      document.getElementById('onbHeaderPaso').textContent =
+        `Configuración de cuenta · Paso ${paso} de 4`;
+    }
+
+    // Muestra la pantalla completa de onboarding si el usuario no lo completó
+    function verificarOnboarding(datos) {
+      if (!datos.usuario.onboarding_completo) {
+        onbNombreUsuario = datos.usuario.nombre;
+        onbSuscripcion   = datos.suscripcion || null;
+        onbIrPaso(1);
+        document.getElementById('onbScreen').style.display = 'flex';
+      }
+    }
+
+    // ── Paso 1: guarda el perfil de negocio ──
+    document.getElementById('btnOnbPaso1').addEventListener('click', async () => {
+      const btn = document.getElementById('btnOnbPaso1');
+      btn.disabled    = true;
+      btn.textContent = 'Guardando...';
+
+      try {
+        await fetch('/api/usuarios/perfil-negocio', {
+          method:  'POST',
+          headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+          body: JSON.stringify({
+            empresa:          document.getElementById('onbEmpresa').value.trim(),
+            industria:        document.getElementById('onbIndustria').value,
+            colaboradores:    document.getElementById('onbColaboradores').value,
+            facturacion:      document.getElementById('onbFacturacion').value,
+            meta:             document.getElementById('onbMeta').value,
+            clientes_nuevos:  document.getElementById('onbClientesNuevos').value
+          })
+        });
+      } catch { /* continúa aunque falle el guardado */ }
+
+      btn.disabled    = false;
+      btn.textContent = 'Continuar →';
+      onbIrPaso(2);
+      onbIniciarChat();
+    });
+
+    // ── Paso 2: chat embebido con el orquestador ──
+
+    function onbAgregarBurbuja(texto, rol) {
+      const msgs = document.getElementById('onbChatMsgs');
+      const b = document.createElement('div');
+      b.classList.add('onb-burbuja', rol);
+      b.textContent = texto;
+      msgs.appendChild(b);
+      msgs.scrollTop = msgs.scrollHeight;
+    }
+
+    function onbIniciarChat() {
+      const saludo = `Hola ${onbNombreUsuario}, cuéntame sobre tu negocio para mostrarte cómo puedo ayudarte`;
+      onbAgregarBurbuja(saludo, 'agent');
+      onbChatHistorial = [{ role: 'assistant', content: saludo }];
+    }
+
+    async function onbEnviarMensaje() {
+      const input = document.getElementById('onbChatInput');
+      const texto = input.value.trim();
+      if (!texto) return;
+      input.value = '';
+
+      onbAgregarBurbuja(texto, 'user');
+      onbChatHistorial.push({ role: 'user', content: texto });
+
+      const btnEnv = document.getElementById('btnOnbEnviar');
+      btnEnv.disabled = true;
+
+      try {
+        const res  = await fetch('/api/orquestador', {
+          method:  'POST',
+          headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+          body:    JSON.stringify({ mensajes: onbChatHistorial })
+        });
+        const data = await res.json();
+
+        if (data.ok) {
+          onbAgregarBurbuja(data.respuesta, 'agent');
+          onbChatHistorial.push({ role: 'assistant', content: data.respuesta });
+        }
+      } catch {
+        onbAgregarBurbuja('No se pudo conectar con el agente. Puedes continuar.', 'agent');
+      }
+
+      btnEnv.disabled = false;
+
+      // Muestra "Continuar" después del primer intercambio
+      if (!onbChatInteractuado) {
+        onbChatInteractuado = true;
+        document.getElementById('btnOnbPaso2').style.display = 'block';
+      }
+    }
+
+    document.getElementById('btnOnbEnviar').addEventListener('click', onbEnviarMensaje);
+    document.getElementById('onbChatInput').addEventListener('keydown', e => {
+      if (e.key === 'Enter') onbEnviarMensaje();
+    });
+
+    document.getElementById('btnOnbPaso2').addEventListener('click', () => {
+      onbIrPaso(3);
+      onbRenderizarPlan();
+    });
+
+    // ── Paso 3: plan inteligente ──
+    function onbRenderizarPlan() {
+      const contenido = document.getElementById('onbPlanContenido');
+      const acciones  = document.getElementById('onbPlanAcciones');
+
+      if (onbSuscripcion && onbSuscripcion.estado === 'activo') {
+        // Ya tiene suscripción pagada — muestra estado activo
+        const nombre = (onbSuscripcion.plan || 'activo').charAt(0).toUpperCase() +
+                       (onbSuscripcion.plan || '').slice(1);
+        contenido.innerHTML = `
+          <div class="onb-plan-activo">
+            <div class="onb-plan-activo-icon">✅</div>
+            <p>Tu plan <strong>${escapeHtml(nombre)}</strong> está activo</p>
+          </div>`;
+        acciones.innerHTML = `<button class="btn-onb-primary" onclick="onbIrPaso(4)">Continuar →</button>`;
+      } else {
+        // Sin plan pagado — muestra los 3 planes
+        contenido.innerHTML = `
+          <div class="onb-planes">
+            <div class="onb-plan">
+              <div><div class="onb-plan-nombre">Starter</div>
+                   <div class="onb-plan-desc">Ideal para emprendedores</div></div>
+              <div class="onb-plan-precio">$1/mes</div>
+            </div>
+            <div class="onb-plan destacado">
+              <div><div class="onb-plan-nombre">Pro ⭐</div>
+                   <div class="onb-plan-desc">Para empresas en crecimiento</div></div>
+              <div class="onb-plan-precio">$10/mes</div>
+            </div>
+            <div class="onb-plan">
+              <div><div class="onb-plan-nombre">Enterprise</div>
+                   <div class="onb-plan-desc">Solución completa a medida</div></div>
+              <div class="onb-plan-precio">$100/mes</div>
+            </div>
+          </div>`;
+        acciones.innerHTML = `
+          <button class="btn-onb-primary" onclick="onbIrPaso(4)">Empezar con Starter</button>
+          <a href="precios.html" class="btn-onb-secondary">Ver todos los planes</a>`;
+      }
+    }
+
+    // ── Paso 4: completa el onboarding y entra al dashboard ──
+    document.getElementById('btnEntrarDashboard').addEventListener('click', async () => {
+      const btn = document.getElementById('btnEntrarDashboard');
+      btn.disabled    = true;
+      btn.textContent = 'Cargando...';
+
+      try {
+        await fetch('/api/usuarios/onboarding-completo', {
+          method:  'POST',
+          headers: { 'Authorization': `Bearer ${token}` }
+        });
+      } catch { /* continúa aunque falle */ }
+
+      document.getElementById('onbScreen').style.display = 'none';
+    });
 
     // Carga el perfil al iniciar la página
     cargarPerfil();

@@ -37,7 +37,10 @@ const {
   actualizarPlanUsuario,
   crearUsuario,
   buscarUsuarioPorEmail,
-  buscarUsuarioPorId
+  buscarUsuarioPorId,
+  completarOnboarding,
+  guardarPerfilNegocio,
+  buscarSuscripcionActivaPorEmail
 } = require('./db/database');
 
 // Clave secreta para firmar los tokens JWT
@@ -436,11 +439,47 @@ app.get('/api/usuarios/perfil', verificarToken, verificarCliente, async (req, re
   const contacto       = await buscarContactoPorEmail(usuario.email);
   const conversaciones = contacto ? await obtenerConversaciones(contacto.id) : [];
 
+  // Verifica si tiene suscripción activa (para el paso de plan en onboarding)
+  const suscripcion = await buscarSuscripcionActivaPorEmail(usuario.email);
+
   res.json({
     ok: true,
-    usuario: { id: usuario.id, nombre: usuario.nombre, email: usuario.email, plan: usuario.plan, estado: usuario.estado, fecha_registro: usuario.fecha_registro },
-    conversaciones
+    usuario: { id: usuario.id, nombre: usuario.nombre, email: usuario.email, plan: usuario.plan, estado: usuario.estado, onboarding_completo: usuario.onboarding_completo, fecha_registro: usuario.fecha_registro },
+    conversaciones,
+    suscripcion: suscripcion || null
   });
+});
+
+/**
+ * POST /api/usuarios/perfil-negocio
+ * Guarda el JSON del perfil de negocio del cliente autenticado.
+ * PROTEGIDA: requiere JWT con rol "cliente"
+ */
+app.post('/api/usuarios/perfil-negocio', verificarToken, verificarCliente, async (req, res) => {
+  try {
+    await guardarPerfilNegocio(req.usuario.id, req.body);
+    console.log(`[CLIENTES] Perfil de negocio guardado: id ${req.usuario.id}`);
+    res.json({ ok: true });
+  } catch (error) {
+    console.error('[CLIENTES] Error al guardar perfil:', error.message);
+    res.status(500).json({ ok: false, error: 'No se pudo guardar el perfil.' });
+  }
+});
+
+/**
+ * POST /api/usuarios/onboarding-completo
+ * Marca el onboarding del cliente autenticado como completado.
+ * PROTEGIDA: requiere JWT con rol "cliente"
+ */
+app.post('/api/usuarios/onboarding-completo', verificarToken, verificarCliente, async (req, res) => {
+  try {
+    const usuario = await completarOnboarding(req.usuario.id);
+    console.log(`[CLIENTES] Onboarding completado: id ${req.usuario.id}`);
+    res.json({ ok: true, usuario });
+  } catch (error) {
+    console.error('[CLIENTES] Error al completar onboarding:', error.message);
+    res.status(500).json({ ok: false, error: 'No se pudo actualizar el onboarding.' });
+  }
 });
 
 /**

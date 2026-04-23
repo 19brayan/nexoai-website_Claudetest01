@@ -87,15 +87,33 @@ async function inicializarDB() {
   // Tabla clientes — usuarios registrados desde el portal o Stripe
   await db.execute(`
     CREATE TABLE IF NOT EXISTS clientes (
-      id              INTEGER PRIMARY KEY AUTOINCREMENT,
-      email           TEXT    NOT NULL UNIQUE,
-      password_hash   TEXT,
-      nombre          TEXT    NOT NULL,
-      plan            TEXT    NOT NULL DEFAULT 'starter',
-      estado          TEXT    NOT NULL DEFAULT 'activo',
-      fecha_registro  TEXT    NOT NULL DEFAULT (datetime('now', 'localtime'))
+      id                   INTEGER PRIMARY KEY AUTOINCREMENT,
+      email                TEXT    NOT NULL UNIQUE,
+      password_hash        TEXT,
+      nombre               TEXT    NOT NULL,
+      plan                 TEXT    NOT NULL DEFAULT 'starter',
+      estado               TEXT    NOT NULL DEFAULT 'activo',
+      onboarding_completo  INTEGER NOT NULL DEFAULT 0,
+      perfil_negocio       TEXT,
+      fecha_registro       TEXT    NOT NULL DEFAULT (datetime('now', 'localtime'))
     )
   `);
+
+  // Agrega onboarding_completo si la tabla ya existía sin esa columna (backward compat)
+  try {
+    await db.execute(`ALTER TABLE clientes ADD COLUMN onboarding_completo INTEGER NOT NULL DEFAULT 0`);
+    console.log('[DB] Columna "onboarding_completo" agregada a clientes.');
+  } catch {
+    // La columna ya existe — ignorar
+  }
+
+  // Agrega perfil_negocio si la tabla ya existía sin esa columna (backward compat)
+  try {
+    await db.execute(`ALTER TABLE clientes ADD COLUMN perfil_negocio TEXT`);
+    console.log('[DB] Columna "perfil_negocio" agregada a clientes.');
+  } catch {
+    // La columna ya existe — ignorar
+  }
 
   // Tabla conversaciones — historial acumulado por contacto (array JSON de sesiones)
   await db.execute(`
@@ -398,6 +416,44 @@ async function buscarUsuarioPorId(id) {
 }
 
 /**
+ * Marca el onboarding como completado para un cliente.
+ * @param {number} usuario_id - Id del cliente en la tabla clientes
+ */
+async function completarOnboarding(usuario_id) {
+  await db.execute({
+    sql:  `UPDATE clientes SET onboarding_completo = 1 WHERE id = ?`,
+    args: [usuario_id]
+  });
+  return buscarUsuarioPorId(usuario_id);
+}
+
+/**
+ * Guarda el perfil de negocio del cliente como JSON en la columna perfil_negocio.
+ * @param {number} usuario_id - Id del cliente en la tabla clientes
+ * @param {object} perfil     - Datos del negocio (empresa, industria, etc.)
+ */
+async function guardarPerfilNegocio(usuario_id, perfil) {
+  await db.execute({
+    sql:  `UPDATE clientes SET perfil_negocio = ? WHERE id = ?`,
+    args: [JSON.stringify(perfil), usuario_id]
+  });
+  return buscarUsuarioPorId(usuario_id);
+}
+
+/**
+ * Busca la suscripción activa más reciente de un cliente por email.
+ * @param {string} email
+ * @returns {object|null}
+ */
+async function buscarSuscripcionActivaPorEmail(email) {
+  const result = await db.execute({
+    sql:  `SELECT * FROM suscripciones WHERE email = ? AND estado = 'activo' ORDER BY fecha_creacion DESC LIMIT 1`,
+    args: [email.trim().toLowerCase()]
+  });
+  return result.rows[0] || null;
+}
+
+/**
  * Actualiza el plan de un cliente por email.
  * Si el cliente no existe, lo crea con los datos mínimos disponibles.
  * @returns {object} El cliente actualizado
@@ -453,5 +509,8 @@ module.exports = {
   crearUsuario,
   buscarUsuarioPorEmail,
   buscarUsuarioPorId,
-  actualizarPlanUsuario
+  actualizarPlanUsuario,
+  completarOnboarding,
+  guardarPerfilNegocio,
+  buscarSuscripcionActivaPorEmail
 };
