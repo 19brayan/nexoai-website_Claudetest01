@@ -47,9 +47,26 @@ const {
 const JWT_SECRET = 'nexoai_secret_2026';
 
 // Inicialización de la aplicación Express
-const app  = express();
+const app = express();
+const http = require('http');
+const { Server } = require('socket.io');
+const httpServer = http.createServer(app);
+const io = new Server(httpServer, {
+  cors: { origin: "*" }
+});
 // En Render, el puerto lo asigna la plataforma via variable de entorno PORT.
 const PORT = process.env.PORT || 3001;
+
+// =============================================
+// WEBSOCKET — Notificaciones en tiempo real
+// =============================================
+io.on('connection', (socket) => {
+  console.log(`[SOCKET] Cliente conectado: ${socket.id}`);
+
+  socket.on('disconnect', () => {
+    console.log(`[SOCKET] Cliente desconectado: ${socket.id}`);
+  });
+});
 
 // =============================================
 // MIDDLEWARE
@@ -272,6 +289,11 @@ app.post('/api/contacto', async (req, res) => {
   );
 
   console.log(`[API] Nuevo mensaje de ${nuevoMensaje.nombre} (${nuevoMensaje.email})`);
+  io.emit('nuevo_mensaje', {
+    nombre:  nuevoMensaje.nombre,
+    email:   nuevoMensaje.email,
+    mensaje: nuevoMensaje.mensaje
+  });
 
   res.status(201).json({
     exito:   true,
@@ -843,9 +865,8 @@ app.post('/api/orquestador', verificarToken, verificarCliente, async (req, res) 
 // =============================================
 inicializarDB()
   .then(() => {
-    app.listen(PORT, () => {
-      console.log(`✓ Servidor NexoAI corriendo en http://localhost:${PORT}`);
-      console.log(`✓ API disponible en http://localhost:${PORT}/api/contacto`);
+    httpServer.listen(PORT, () => {
+      console.log(`Servidor corriendo en puerto ${PORT}`);
     });
   })
   .catch((err) => {

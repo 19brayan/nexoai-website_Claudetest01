@@ -1055,7 +1055,9 @@
 
       try {
         // La ruta GET /api/contacto no requiere token (es pública)
-        const res  = await fetch('/api/contacto');
+        const res  = await fetch('/api/contacto', {
+          headers: { 'Authorization': `Bearer ${TOKEN}` }
+        });
         const data = await res.json();
 
         cargando.style.display = 'none';
@@ -1286,6 +1288,35 @@
       });
     });
 
+  </script>
+
+  <!-- Socket.io cliente -->
+  <script src="/socket.io/socket.io.js"></script>
+  <script>
+    const socket = io();
+
+    socket.on('connect', () => {
+      console.log('[SOCKET] Conectado al servidor:', socket.id);
+    });
+
+    socket.on('nuevo_mensaje', (datos) => {
+      console.log('[SOCKET] Nuevo mensaje recibido:', datos);
+
+      // Muestra notificación visual
+      const notif = document.createElement('div');
+      notif.style.cssText = `
+        position:fixed; top:20px; right:20px; z-index:9999;
+        background:#6C63FF; color:white; padding:16px 24px;
+        border-radius:12px; font-weight:bold; font-size:1rem;
+        box-shadow: 0 4px 20px rgba(108,99,255,0.4);
+      `;
+      notif.textContent = `📩 Nuevo mensaje de ${datos.nombre}`;
+      document.body.appendChild(notif);
+      setTimeout(() => notif.remove(), 4000);
+
+      // Recarga los mensajes automáticamente
+      cargarMensajes();
+    });
   </script>
 
 </body>
