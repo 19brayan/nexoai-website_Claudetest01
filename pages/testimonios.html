@@ -5,6 +5,11 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Testimonios — NexoAI</title>
 
+  <!-- Fuente Plus Jakarta Sans -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+
   <!-- Hoja de estilos global; ../ sube un nivel desde pages/ -->
   <link rel="stylesheet" href="../css/styles.css" />
 </head>
@@ -16,29 +21,33 @@
   ============================================= -->
   <header>
     <nav>
-      <a href="../index.html" class="logo">Nexo<span>AI</span></a>
+      <a href="../index.html" class="logo">
+        <span class="logo-mark">
+          <svg viewBox="0 0 12 12"><path d="M2 2 L6 10 L10 2" stroke="white" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </span>
+        Nexo<span>AI</span>
+      </a>
 
-      <!-- Menú de navegación con enlace activo en Testimonios -->
       <ul class="nav-links" id="navLinks">
         <li><a href="../index.html">Inicio</a></li>
         <li><a href="servicios.html">Servicios</a></li>
         <li><a href="nosotros.html">Nosotros</a></li>
         <li><a href="blog.html">Blog</a></li>
-        <li><a href="testimonios.html" style="color: var(--morado-claro);">Testimonios</a></li>
+        <li><a href="testimonios.html">Testimonios</a></li>
         <li><a href="precios.html">Precios</a></li>
         <li><a href="agente.html">Agente IA</a></li>
         <li><a href="../index.html#contacto">Contacto</a></li>
       </ul>
 
-      <!-- Botón de acceso al portal (cambia a "Mi cuenta" si hay sesión activa) -->
-      <a id="btnSesion" href="login.html" class="btn-sesion">Iniciar sesión</a>
-
-      <!-- Botón hamburguesa visible solo en móvil -->
-      <button class="menu-toggle" id="menuToggle" aria-label="Abrir menú">
-        <span></span>
-        <span></span>
-        <span></span>
-      </button>
+      <div class="nav-right">
+        <a id="btnSesion" href="login.html" class="btn-sesion">Iniciar sesión</a>
+        <a href="../index.html#contacto" class="btn-cta">Contáctanos</a>
+        <button class="menu-toggle" id="menuToggle" aria-label="Abrir menú">
+          <span></span>
+          <span></span>
+          <span></span>
+        </button>
+      </div>
     </nav>
   </header>
 
@@ -146,11 +155,11 @@
   <!-- =============================================
        CTA FINAL — Invitación a contactar
   ============================================= -->
-  <section style="padding: 4rem 1.5rem; background: var(--gris-suave); text-align: center;">
-    <h2 style="font-size: 1.8rem; font-weight: 800; color: var(--azul-oscuro); margin-bottom: 0.8rem;">
+  <section style="padding: 80px 32px; background: var(--bg); border-top: 1px solid var(--border); text-align: center;">
+    <h2 style="font-size: clamp(28px, 3vw, 40px); font-weight: 800; letter-spacing: -0.03em; color: var(--black); margin-bottom: 16px;">
       ¿Listo para ser el próximo caso de éxito?
     </h2>
-    <p style="color: var(--texto-gris); margin-bottom: 2rem; max-width: 480px; margin-left: auto; margin-right: auto;">
+    <p style="color: var(--mid-gray); margin-bottom: 32px; max-width: 480px; margin-left: auto; margin-right: auto; font-size: 17px; line-height: 1.6;">
       Conversemos sobre tu proyecto y te mostramos cómo la IA puede transformar tu negocio.
     </p>
     <a href="../index.html#contacto" class="btn-primary">Contáctanos ahora</a>

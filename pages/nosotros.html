@@ -5,6 +5,11 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Nosotros — NexoAI</title>
 
+  <!-- Fuente Plus Jakarta Sans -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+
   <!-- CSS global compartido; el prefijo ../ sube un nivel desde pages/ -->
   <link rel="stylesheet" href="../css/styles.css" />
 </head>
@@ -16,7 +21,12 @@
   ============================================= -->
   <header>
     <nav>
-      <a href="../index.html" class="logo">Nexo<span>AI</span></a>
+      <a href="../index.html" class="logo">
+        <span class="logo-mark">
+          <svg viewBox="0 0 12 12"><path d="M2 2 L6 10 L10 2" stroke="white" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </span>
+        Nexo<span>AI</span>
+      </a>
 
       <ul class="nav-links" id="navLinks">
         <li><a href="../index.html">Inicio</a></li>
@@ -29,14 +39,15 @@
         <li><a href="../index.html#contacto">Contacto</a></li>
       </ul>
 
-      <!-- Botón de acceso al portal (cambia a "Mi cuenta" si hay sesión activa) -->
-      <a id="btnSesion" href="login.html" class="btn-sesion">Iniciar sesión</a>
-
-      <button class="menu-toggle" id="menuToggle" aria-label="Abrir menú">
-        <span></span>
-        <span></span>
-        <span></span>
-      </button>
+      <div class="nav-right">
+        <a id="btnSesion" href="login.html" class="btn-sesion">Iniciar sesión</a>
+        <a href="../index.html#contacto" class="btn-cta">Contáctanos</a>
+        <button class="menu-toggle" id="menuToggle" aria-label="Abrir menú">
+          <span></span>
+          <span></span>
+          <span></span>
+        </button>
+      </div>
     </nav>
   </header>
 
@@ -54,37 +65,35 @@
        Dos bloques de texto centrados con el propósito
        y la dirección estratégica de la empresa
   ============================================= -->
-  <section style="padding: 5rem 1.5rem; background: var(--blanco);">
-    <div style="max-width: 900px; margin: 0 auto; display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 2.5rem;">
+  <section style="padding: 80px 32px; background: var(--bg); border-top: 1px solid var(--border);">
+    <div style="max-width: 900px; margin: 0 auto; display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 40px;">
 
       <!-- Bloque Misión -->
-      <div style="text-align: center; padding: 2rem;">
-        <!-- Ícono de cohete para Misión -->
-        <div class="card-icon" style="margin: 0 auto 1.2rem;">
-          <svg viewBox="0 0 24 24" style="width:32px;height:32px;stroke:#6C63FF;fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round;">
+      <div style="text-align: center; padding: 32px;">
+        <div class="card-icon" style="margin: 0 auto 20px;">
+          <svg viewBox="0 0 24 24" style="width:22px;height:22px;stroke:white;fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round;">
             <path d="M12 2L2 7l10 5 10-5-10-5z"/>
             <path d="M2 17l10 5 10-5"/>
             <path d="M2 12l10 5 10-5"/>
           </svg>
         </div>
-        <h3 style="font-size:1.2rem;font-weight:800;color:var(--azul-oscuro);margin-bottom:0.8rem;">Nuestra Misión</h3>
-        <p style="color:var(--texto-gris);font-size:0.95rem;line-height:1.8;">
+        <h3 style="font-size:18px;font-weight:800;color:var(--black);margin-bottom:12px;">Nuestra Misión</h3>
+        <p style="color:var(--mid-gray);font-size:15px;line-height:1.8;">
           Democratizar el acceso a la inteligencia artificial, creando soluciones de software accesibles,
           escalables y de alto impacto para empresas de todos los tamaños en Latinoamérica.
         </p>
       </div>
 
       <!-- Bloque Visión -->
-      <div style="text-align: center; padding: 2rem;">
-        <!-- Ícono de ojo para Visión -->
-        <div class="card-icon" style="margin: 0 auto 1.2rem;">
-          <svg viewBox="0 0 24 24" style="width:32px;height:32px;stroke:#6C63FF;fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round;">
+      <div style="text-align: center; padding: 32px;">
+        <div class="card-icon" style="margin: 0 auto 20px;">
+          <svg viewBox="0 0 24 24" style="width:22px;height:22px;stroke:white;fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round;">
             <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
             <circle cx="12" cy="12" r="3"/>
           </svg>
         </div>
-        <h3 style="font-size:1.2rem;font-weight:800;color:var(--azul-oscuro);margin-bottom:0.8rem;">Nuestra Visión</h3>
-        <p style="color:var(--texto-gris);font-size:0.95rem;line-height:1.8;">
+        <h3 style="font-size:18px;font-weight:800;color:var(--black);margin-bottom:12px;">Nuestra Visión</h3>
+        <p style="color:var(--mid-gray);font-size:15px;line-height:1.8;">
           Ser la empresa de referencia en soluciones de IA para LATAM en 2030, reconocida por transformar
           negocios con tecnología innovadora, ética y centrada en las personas.
         </p>
@@ -166,7 +175,7 @@
        EQUIPO — 4 personas ficticias con nombre,
        cargo, descripción e iniciales como avatar
   ============================================= -->
-  <section style="padding: 5rem 1.5rem; background: var(--blanco);">
+  <section style="padding: 80px 32px; background: var(--bg); border-top: 1px solid var(--border);">
     <div class="section-header">
       <h2>Nuestro Equipo</h2>
       <p>Las personas detrás de cada solución que construimos.</p>
@@ -225,11 +234,11 @@
   <!-- =============================================
        CTA FINAL — Invitación a contactar al equipo
   ============================================= -->
-  <section style="padding: 4rem 1.5rem; background: linear-gradient(135deg, var(--azul-oscuro), #0f3460); text-align: center; color: var(--blanco);">
-    <h2 style="font-size: clamp(1.5rem, 3vw, 2rem); font-weight: 800; margin-bottom: 1rem;">
+  <section style="padding: 80px 32px; background: var(--bg-subtle); border-top: 1px solid var(--border); text-align: center;">
+    <h2 style="font-size: clamp(28px, 3vw, 40px); font-weight: 800; letter-spacing: -0.03em; margin-bottom: 16px; color: var(--black);">
       ¿Listo para trabajar con nosotros?
     </h2>
-    <p style="opacity: 0.75; margin-bottom: 2rem; max-width: 480px; margin-left: auto; margin-right: auto;">
+    <p style="color: var(--mid-gray); margin-bottom: 32px; max-width: 480px; margin-left: auto; margin-right: auto; font-size: 17px; line-height: 1.6;">
       Cuéntanos tu proyecto y construyamos juntos la solución perfecta.
     </p>
     <a href="../index.html#contacto" class="btn-primary">Contáctanos ahora</a>

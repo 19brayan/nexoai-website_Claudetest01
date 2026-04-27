@@ -1,15 +1,15 @@
 /* =============================================
    VARIABLES Y RESET GLOBAL
-   Define los colores de marca y elimina estilos
-   predeterminados del navegador
+   Nueva paleta minimalista negro/blanco/gris
 ============================================= */
 :root {
-  --azul-oscuro:  #1a1a2e;
-  --morado:       #6C63FF;
-  --blanco:       #ffffff;
-  --morado-claro: #8f88ff;
-  --gris-suave:   #f4f4f8;
-  --texto-gris:   #555;
+  --black:      #0e0e0e;
+  --gray-text:  #9a9a9a;
+  --mid-gray:   #555555;
+  --border:     #e5e5e5;
+  --bg:         #ffffff;
+  --bg-subtle:  #fafafa;
+  --font:       'Plus Jakarta Sans', 'Helvetica Neue', Helvetica, Arial, sans-serif;
 }
 
 *, *::before, *::after {
@@ -23,70 +23,134 @@ html {
 }
 
 body {
-  font-family: 'Segoe UI', Arial, sans-serif;
-  background-color: var(--blanco);
-  color: var(--azul-oscuro);
-  line-height: 1.6;
+  font-family: var(--font);
+  background: var(--bg);
+  color: var(--black);
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
 }
 
 /* =============================================
    HEADER Y NAVEGACIÓN
-   Barra superior fija con logo y menú de links
+   Barra fija con fondo blanco translúcido y blur
 ============================================= */
 header {
-  background-color: var(--azul-oscuro);
   position: sticky;
   top: 0;
   z-index: 100;
-  box-shadow: 0 2px 12px rgba(0,0,0,0.3);
+  background: rgba(255, 255, 255, 0.92);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border-bottom: 1px solid var(--border);
 }
 
 nav {
-  max-width: 1100px;
+  max-width: 1200px;
   margin: 0 auto;
-  padding: 0 1.5rem;
+  padding: 0 32px;
   display: flex;
   align-items: center;
   justify-content: space-between;
-  height: 68px;
+  height: 60px;
 }
 
-/* Logo en texto con acento de color morado */
+/* Logo principal */
 .logo {
-  font-size: 1.6rem;
+  font-size: 20px;
   font-weight: 800;
-  color: var(--blanco);
-  letter-spacing: -0.5px;
+  color: var(--black);
   text-decoration: none;
+  letter-spacing: -0.5px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+/* Cuadrado negro del logo */
+.logo-mark {
+  width: 22px;
+  height: 22px;
+  background: var(--black);
+  border-radius: 4px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.logo-mark svg {
+  width: 14px;
+  height: 14px;
+  fill: white;
 }
 
 .logo span {
-  color: var(--morado);
+  color: var(--black);
 }
 
 /* Lista de enlaces del menú */
 .nav-links {
   list-style: none;
   display: flex;
-  gap: 2rem;
+  gap: 32px;
 }
 
 .nav-links a {
-  color: var(--blanco);
   text-decoration: none;
-  font-size: 0.95rem;
+  font-size: 14px;
   font-weight: 500;
-  opacity: 0.85;
-  transition: opacity 0.2s, color 0.2s;
+  color: var(--mid-gray);
+  transition: color 0.2s;
 }
 
 .nav-links a:hover,
 .nav-links a.activo {
-  opacity: 1;
-  color: var(--morado-claro);
+  color: var(--black);
 }
 
-/* Botón hamburguesa para móvil (oculto por defecto) */
+/* Contenedor derecho del nav */
+.nav-right {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+/* Enlace de sesión discreto */
+.btn-nav-outline,
+.btn-sesion {
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--mid-gray);
+  text-decoration: none;
+  transition: color 0.2s;
+  background: none;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+}
+
+.btn-nav-outline:hover,
+.btn-sesion:hover {
+  color: var(--black);
+}
+
+/* Botón CTA del header */
+.btn-cta {
+  background: var(--black);
+  color: white;
+  padding: 9px 20px;
+  border-radius: 100px;
+  font-size: 14px;
+  font-weight: 600;
+  text-decoration: none;
+  transition: opacity 0.2s;
+}
+
+.btn-cta:hover {
+  opacity: 0.75;
+}
+
+/* Botón hamburguesa para móvil */
 .menu-toggle {
   display: none;
   flex-direction: column;
@@ -99,277 +163,346 @@ nav {
 
 .menu-toggle span {
   display: block;
-  width: 25px;
+  width: 22px;
   height: 2px;
-  background: var(--blanco);
+  background: var(--black);
   border-radius: 2px;
   transition: all 0.3s;
 }
 
-/* Botón de inicio de sesión / Mi cuenta en el header */
-.btn-sesion {
-  background: #6C63FF;
-  color: #ffffff !important;
-  text-decoration: none;
-  padding: 0.45rem 1.1rem;
-  border-radius: 8px;
-  font-size: 0.88rem;
-  font-weight: 700;
-  white-space: nowrap;
-  opacity: 1 !important;
-  transition: background 0.2s, transform 0.1s;
-}
-
-.btn-sesion:hover {
-  background: #8f88ff;
-  color: #ffffff !important;
-  transform: translateY(-1px);
-}
-
-/* En móvil se oculta el botón (el menú hamburguesa lo reemplaza) */
-@media (max-width: 768px) {
-  .btn-sesion {
-    display: none;
-  }
-}
-
 /* =============================================
    SECCIÓN HERO — PÁGINA PRINCIPAL
-   Bloque grande de bienvenida con CTA
+   Bloque de bienvenida limpio sobre fondo blanco
 ============================================= */
 #inicio {
-  background: linear-gradient(135deg, var(--azul-oscuro) 0%, #16213e 60%, #0f3460 100%);
-  color: var(--blanco);
-  text-align: center;
-  padding: 7rem 1.5rem 6rem;
-  position: relative;
-  overflow: hidden;
-}
-
-/* Círculo decorativo de fondo */
-#inicio::before {
-  content: '';
-  position: absolute;
-  width: 600px;
-  height: 600px;
-  border-radius: 50%;
-  background: rgba(108, 99, 255, 0.08);
-  top: -150px;
-  right: -150px;
-  pointer-events: none;
-}
-
-.hero-content {
-  max-width: 740px;
+  max-width: 860px;
   margin: 0 auto;
-  position: relative;
+  padding: 80px 32px 64px;
+  text-align: center;
 }
 
-/* Etiqueta pequeña sobre el título */
+/* Etiqueta superior del hero */
 .hero-badge {
-  display: inline-block;
-  background: rgba(108, 99, 255, 0.2);
-  border: 1px solid var(--morado);
-  color: var(--morado-claro);
-  border-radius: 50px;
-  padding: 0.3rem 1rem;
-  font-size: 0.82rem;
-  font-weight: 600;
-  letter-spacing: 1px;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  border: 1px solid var(--border);
+  border-radius: 100px;
+  padding: 6px 14px;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
   text-transform: uppercase;
-  margin-bottom: 1.5rem;
+  color: var(--mid-gray);
+  margin-bottom: 32px;
+}
+
+/* Punto/ícono dentro del badge */
+.hero-badge-dot {
+  width: 16px;
+  height: 16px;
+  background: var(--black);
+  border-radius: 3px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.hero-badge-dot svg {
+  width: 10px;
+  height: 10px;
+  fill: white;
 }
 
 #inicio h1 {
-  font-size: clamp(2rem, 5vw, 3.2rem);
+  font-size: clamp(52px, 8vw, 96px);
   font-weight: 800;
-  line-height: 1.2;
-  margin-bottom: 1.2rem;
+  line-height: 1.03;
+  letter-spacing: -0.03em;
+  margin-bottom: 28px;
 }
 
+/* Línea oscura del h1 del hero */
+#inicio h1 .line-dark {
+  color: var(--black);
+  display: block;
+}
+
+/* Línea gris del h1 del hero */
+#inicio h1 .line-gray {
+  color: var(--gray-text);
+  display: block;
+}
+
+/* Para compatibilidad con el em del hero anterior */
 #inicio h1 em {
   font-style: normal;
-  color: var(--morado-claro);
+  color: var(--gray-text);
 }
 
+.hero-sub,
 #inicio p {
-  font-size: clamp(1rem, 2.5vw, 1.2rem);
-  opacity: 0.8;
-  margin-bottom: 2.5rem;
+  font-size: 17px;
+  color: var(--mid-gray);
   max-width: 520px;
-  margin-left: auto;
-  margin-right: auto;
+  margin: 0 auto 40px;
+  line-height: 1.6;
+  font-weight: 400;
+}
+
+/* Contenedor del hero (compatibilidad con .hero-content) */
+.hero-content {
+  max-width: 740px;
+  margin: 0 auto;
+}
+
+/* =============================================
+   VIDEO PLACEHOLDER
+   Sección oscura con botón de play para demo
+============================================= */
+.video-section {
+  max-width: 860px;
+  margin: 56px auto 80px;
+  padding: 0 32px;
+}
+
+.video-wrapper {
+  border-radius: 20px;
+  overflow: hidden;
+  background: #111;
+  aspect-ratio: 16/9;
+  position: relative;
+  cursor: pointer;
+}
+
+.video-inner {
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(135deg, #1a1a1a 0%, #2d2d2d 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.video-play {
+  width: 64px;
+  height: 64px;
+  background: rgba(255, 255, 255, 0.15);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  backdrop-filter: blur(8px);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  transition: background 0.2s;
+}
+
+.video-wrapper:hover .video-play {
+  background: rgba(255, 255, 255, 0.25);
+}
+
+.video-play svg {
+  width: 24px;
+  height: 24px;
+  fill: white;
+  margin-left: 3px;
+}
+
+.video-label {
+  color: rgba(255, 255, 255, 0.5);
+  font-size: 14px;
+  font-weight: 500;
+}
+
+/* Patrón de rayas sobre el video placeholder */
+.video-inner::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background-image: repeating-linear-gradient(
+    -45deg, transparent 0px, transparent 8px,
+    rgba(255, 255, 255, 0.025) 8px, rgba(255, 255, 255, 0.025) 16px
+  );
+  pointer-events: none;
 }
 
 /* =============================================
    HERO DE PÁGINAS INTERNAS
    Banner compacto para páginas como Servicios
-   y Nosotros (sin la altura del hero principal)
 ============================================= */
 .page-hero {
-  background: linear-gradient(135deg, var(--azul-oscuro) 0%, #16213e 60%, #0f3460 100%);
-  color: var(--blanco);
+  background: var(--bg-subtle);
+  border-bottom: 1px solid var(--border);
   text-align: center;
-  padding: 5rem 1.5rem 4rem;
-  position: relative;
-  overflow: hidden;
+  padding: 64px 32px 56px;
 }
 
-.page-hero::before {
-  content: '';
-  position: absolute;
-  width: 400px;
-  height: 400px;
-  border-radius: 50%;
-  background: rgba(108, 99, 255, 0.08);
-  top: -100px;
-  right: -80px;
-  pointer-events: none;
+.page-hero .hero-badge {
+  margin-bottom: 20px;
 }
 
 .page-hero h1 {
-  font-size: clamp(1.8rem, 4vw, 2.8rem);
+  font-size: clamp(32px, 5vw, 56px);
   font-weight: 800;
-  margin-bottom: 0.8rem;
-  position: relative;
+  letter-spacing: -0.03em;
+  line-height: 1.1;
+  color: var(--black);
+  margin-bottom: 16px;
 }
 
 .page-hero p {
-  font-size: 1.05rem;
-  opacity: 0.75;
+  font-size: 17px;
+  color: var(--mid-gray);
   max-width: 500px;
   margin: 0 auto;
-  position: relative;
+  line-height: 1.6;
 }
 
 /* =============================================
    BOTONES REUTILIZABLES
-   Estilos compartidos para todos los botones
 ============================================= */
 
-/* Botón principal con degradado (CTA hero) */
-.btn-primary {
+/* Botón principal negro */
+.btn-primary,
+.btn-hero {
   display: inline-block;
-  background: linear-gradient(135deg, #6C63FF, #4facfe);
-  color: var(--blanco);
-  padding: 0.9rem 2.4rem;
-  border-radius: 50px;
+  background: var(--black);
+  color: white;
+  padding: 14px 32px;
+  border-radius: 100px;
+  font-size: 16px;
+  font-weight: 600;
   text-decoration: none;
-  font-weight: 700;
-  font-size: 1rem;
-  transition: opacity 0.25s, transform 0.2s, box-shadow 0.2s;
-  box-shadow: 0 4px 20px rgba(108, 99, 255, 0.4);
+  transition: opacity 0.2s;
+  font-family: var(--font);
 }
 
-.btn-primary:hover {
-  opacity: 0.9;
-  transform: translateY(-2px);
-  box-shadow: 0 8px 28px rgba(108, 99, 255, 0.5);
+.btn-primary:hover,
+.btn-hero:hover {
+  opacity: 0.75;
 }
 
-/* Botón secundario con borde (para tarjetas de servicio) */
+/* Botón secundario con flecha */
 .btn-secondary {
-  display: inline-block;
-  background: transparent;
-  color: var(--morado);
-  border: 2px solid var(--morado);
-  padding: 0.65rem 1.6rem;
-  border-radius: 50px;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--black);
   text-decoration: none;
-  font-weight: 700;
-  font-size: 0.9rem;
-  transition: background 0.2s, color 0.2s, transform 0.2s;
-  margin-top: 1.2rem;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  border: none;
+  background: none;
+  padding: 0;
+  margin-top: 0;
+  border-radius: 0;
+  transition: opacity 0.2s;
+}
+
+.btn-secondary::after {
+  content: '→';
 }
 
 .btn-secondary:hover {
-  background: var(--morado);
-  color: var(--blanco);
-  transform: translateY(-2px);
+  opacity: 0.6;
 }
 
 /* =============================================
    ENCABEZADO DE SECCIÓN REUTILIZABLE
-   Título centrado con línea decorativa morada
 ============================================= */
+.section-header,
+.section-header-block {
+  margin-bottom: 56px;
+}
+
 .section-header {
   text-align: center;
-  margin-bottom: 3rem;
 }
 
-.section-header h2 {
-  font-size: clamp(1.6rem, 3.5vw, 2.2rem);
+/* Etiqueta pequeña de sección */
+.section-label {
+  display: inline-block;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--mid-gray);
+  margin-bottom: 16px;
+}
+
+.section-header h2,
+.section-title {
+  font-size: clamp(32px, 4vw, 52px);
   font-weight: 800;
-  color: var(--azul-oscuro);
-  margin-bottom: 0.6rem;
+  letter-spacing: -0.03em;
+  line-height: 1.1;
+  color: var(--black);
+  margin-bottom: 16px;
 }
 
-.section-header p {
-  color: var(--texto-gris);
-  font-size: 1rem;
-  max-width: 480px;
-  margin: 0 auto;
-}
-
-/* Línea decorativa bajo el título */
+/* Sin línea decorativa morada — estilo limpio */
 .section-header h2::after {
-  content: '';
-  display: block;
-  width: 50px;
-  height: 4px;
-  background: var(--morado);
-  border-radius: 4px;
-  margin: 0.6rem auto 0;
+  display: none;
+}
+
+.section-header p,
+.section-sub {
+  font-size: 17px;
+  color: var(--mid-gray);
+  max-width: 540px;
+  line-height: 1.6;
+  margin: 0 auto;
 }
 
 /* =============================================
    TARJETAS DE SERVICIOS
-   Grid de tarjetas con ícono, título y descripción
 ============================================= */
 
-/* Contenedor en cuadrícula responsive */
+/* Grid responsive de tarjetas */
 .cards-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(270px, 1fr));
-  gap: 1.8rem;
-  max-width: 1100px;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 24px;
+  max-width: 1200px;
   margin: 0 auto;
 }
 
 /* Tarjeta individual */
 .card {
-  background: var(--blanco);
+  background: white;
+  border: 1px solid var(--border);
   border-radius: 16px;
-  padding: 2.2rem 1.8rem;
-  text-align: center;
-  box-shadow: 0 2px 16px rgba(26, 26, 46, 0.07);
-  transition: transform 0.25s, box-shadow 0.25s;
+  padding: 32px;
+  text-align: left;
   display: flex;
   flex-direction: column;
-  align-items: center;
+  align-items: flex-start;
+  transition: box-shadow 0.2s, transform 0.2s;
 }
 
 .card:hover {
-  transform: translateY(-6px);
-  box-shadow: 0 8px 32px rgba(108, 99, 255, 0.15);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.07);
+  transform: translateY(-2px);
 }
 
-/* Contenedor del ícono SVG */
+/* Ícono negro cuadrado de tarjeta */
 .card-icon {
-  width: 64px;
-  height: 64px;
-  background: rgba(108, 99, 255, 0.1);
-  border-radius: 16px;
+  width: 44px;
+  height: 44px;
+  background: var(--black);
+  border-radius: 10px;
   display: flex;
   align-items: center;
   justify-content: center;
-  margin: 0 auto 1.2rem;
+  margin: 0 0 20px 0;
 }
 
 .card-icon svg {
-  width: 32px;
-  height: 32px;
-  stroke: var(--morado);
+  width: 22px;
+  height: 22px;
+  stroke: white;
   fill: none;
   stroke-width: 1.8;
   stroke-linecap: round;
@@ -377,603 +510,731 @@ nav {
 }
 
 .card h3 {
-  font-size: 1.15rem;
+  font-size: 18px;
   font-weight: 700;
-  color: var(--azul-oscuro);
-  margin-bottom: 0.7rem;
+  color: var(--black);
+  margin-bottom: 10px;
+  letter-spacing: -0.02em;
 }
 
 .card p {
-  color: var(--texto-gris);
-  font-size: 0.93rem;
-  line-height: 1.7;
+  font-size: 15px;
+  color: var(--mid-gray);
+  line-height: 1.6;
   flex: 1;
+  margin-bottom: 20px;
 }
 
-/* Lista de características dentro de una tarjeta de servicio */
+/* Lista de características de tarjeta */
 .card-features {
   list-style: none;
   text-align: left;
-  margin: 1rem 0 0.5rem;
+  margin: 0 0 16px 0;
   width: 100%;
 }
 
 .card-features li {
-  color: var(--texto-gris);
-  font-size: 0.88rem;
-  padding: 0.3rem 0;
-  padding-left: 1.4rem;
+  color: var(--mid-gray);
+  font-size: 14px;
+  padding: 4px 0 4px 20px;
   position: relative;
 }
 
-/* Checkmark morado antes de cada ítem */
+/* Checkmark negro antes de cada ítem */
 .card-features li::before {
   content: '✓';
   position: absolute;
   left: 0;
-  color: var(--morado);
+  color: var(--black);
   font-weight: 700;
 }
 
 /* =============================================
    SECCIÓN DE SERVICIOS (HOME)
-   Fondo gris suave para contraste con el hero
 ============================================= */
 #servicios {
-  padding: 5rem 1.5rem;
-  background: var(--gris-suave);
+  padding: 80px 32px;
+  background: var(--bg-subtle);
+  border-top: 1px solid var(--border);
+  border-bottom: 1px solid var(--border);
 }
 
 /* =============================================
    SECCIÓN NOSOTROS (HOME)
-   Bloque breve de identidad en la página principal
 ============================================= */
 #nosotros {
-  padding: 5rem 1.5rem;
-  background: #f0effe;
+  padding: 80px 32px;
+  background: var(--bg);
 }
 
-#nosotros .nosotros-texto {
-  max-width: 640px;
+/* Layout de 2 columnas para nosotros en home */
+.nosotros-inner {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 80px;
+  align-items: center;
+  max-width: 1200px;
   margin: 0 auto;
+}
+
+/* Texto de nosotros */
+.nosotros-texto {
+  font-size: 17px;
+  color: var(--mid-gray);
+  line-height: 1.8;
+  margin-bottom: 32px;
+}
+
+.nosotros-texto strong {
+  color: var(--black);
+}
+
+/* Placeholder visual de foto */
+.nosotros-visual {
+  background: #f5f5f5;
+  border-radius: 20px;
+  aspect-ratio: 4/3;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  overflow: hidden;
+}
+
+.nosotros-visual::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background-image: repeating-linear-gradient(
+    -45deg, transparent 0px, transparent 6px,
+    rgba(0, 0, 0, 0.04) 6px, rgba(0, 0, 0, 0.04) 12px
+  );
+}
+
+.nosotros-visual span {
+  font-size: 12px;
+  font-weight: 600;
+  color: #bbb;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  z-index: 1;
+}
+
+/* Bloque de texto centrado en versión sin imagen */
+#nosotros .nosotros-texto:not(.nosotros-inner .nosotros-texto) {
+  max-width: 640px;
+  margin: 0 auto 32px;
   text-align: center;
-  color: var(--texto-gris);
-  font-size: 1rem;
-  line-height: 1.9;
 }
 
 /* =============================================
    TARJETAS DE EQUIPO
-   Grid de personas con foto placeholder, nombre y cargo
 ============================================= */
 .team-grid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-  gap: 1.8rem;
+  gap: 24px;
   max-width: 1000px;
   margin: 0 auto;
 }
 
-/* Tarjeta individual de miembro del equipo */
+/* Tarjeta individual de miembro */
 .team-card {
-  background: var(--blanco);
+  background: white;
+  border: 1px solid var(--border);
   border-radius: 16px;
-  padding: 2rem 1.5rem;
+  padding: 32px 24px;
   text-align: center;
-  box-shadow: 0 2px 16px rgba(26, 26, 46, 0.07);
-  transition: transform 0.25s, box-shadow 0.25s;
+  transition: box-shadow 0.2s, transform 0.2s;
 }
 
 .team-card:hover {
-  transform: translateY(-5px);
-  box-shadow: 0 8px 28px rgba(108, 99, 255, 0.12);
+  box-shadow: 0 8px 28px rgba(0, 0, 0, 0.07);
+  transform: translateY(-2px);
 }
 
 /* Avatar circular con iniciales */
 .team-avatar {
-  width: 80px;
-  height: 80px;
+  width: 72px;
+  height: 72px;
   border-radius: 50%;
-  background: linear-gradient(135deg, var(--morado), #4facfe);
+  background: var(--black);
   display: flex;
   align-items: center;
   justify-content: center;
-  margin: 0 auto 1rem;
-  font-size: 1.5rem;
+  margin: 0 auto 16px;
+  font-size: 22px;
   font-weight: 800;
-  color: var(--blanco);
+  color: white;
 }
 
 .team-card h3 {
-  font-size: 1.05rem;
+  font-size: 16px;
   font-weight: 700;
-  color: var(--azul-oscuro);
-  margin-bottom: 0.2rem;
+  color: var(--black);
+  margin-bottom: 4px;
 }
 
-/* Cargo/rol en color morado */
+/* Cargo del miembro */
 .team-card .cargo {
-  font-size: 0.85rem;
-  color: var(--morado);
+  font-size: 13px;
+  color: var(--mid-gray);
   font-weight: 600;
-  margin-bottom: 0.8rem;
+  margin-bottom: 12px;
 }
 
 .team-card p {
-  font-size: 0.88rem;
-  color: var(--texto-gris);
+  font-size: 14px;
+  color: var(--mid-gray);
   line-height: 1.6;
 }
 
 /* =============================================
-   SECCIÓN HISTORIA DE LA EMPRESA
-   Timeline vertical para la página Nosotros
+   SECCIÓN HISTORIA — TIMELINE
 ============================================= */
 .historia-section {
-  padding: 5rem 1.5rem;
-  background: var(--gris-suave);
+  padding: 80px 32px;
+  background: var(--bg-subtle);
+  border-top: 1px solid var(--border);
 }
 
-/* Contenedor del timeline centrado */
+/* Contenedor del timeline */
 .timeline {
   max-width: 700px;
   margin: 0 auto;
   position: relative;
-  padding-left: 2rem;
+  padding-left: 32px;
 }
 
-/* Línea vertical izquierda del timeline */
+/* Línea vertical del timeline */
 .timeline::before {
   content: '';
   position: absolute;
   left: 0;
   top: 0;
   bottom: 0;
-  width: 3px;
-  background: linear-gradient(to bottom, var(--morado), #4facfe);
-  border-radius: 3px;
+  width: 2px;
+  background: var(--border);
+  border-radius: 2px;
 }
 
-/* Ítem individual del timeline */
+/* Ítem del timeline */
 .timeline-item {
   position: relative;
-  margin-bottom: 2.5rem;
-  padding-left: 1.5rem;
+  margin-bottom: 40px;
+  padding-left: 24px;
 }
 
-/* Punto circular en la línea del timeline */
+/* Punto circular en la línea */
 .timeline-item::before {
   content: '';
   position: absolute;
-  left: -2.4rem;
-  top: 0.4rem;
-  width: 14px;
-  height: 14px;
+  left: -38px;
+  top: 6px;
+  width: 12px;
+  height: 12px;
   border-radius: 50%;
-  background: var(--morado);
-  border: 3px solid var(--blanco);
-  box-shadow: 0 0 0 2px var(--morado);
+  background: var(--black);
+  border: 3px solid white;
+  box-shadow: 0 0 0 2px var(--black);
 }
 
 /* Año/fecha del evento */
 .timeline-year {
-  font-size: 0.8rem;
+  font-size: 11px;
   font-weight: 700;
-  color: var(--morado);
+  color: var(--mid-gray);
   text-transform: uppercase;
-  letter-spacing: 1px;
-  margin-bottom: 0.3rem;
+  letter-spacing: 0.08em;
+  margin-bottom: 6px;
 }
 
 .timeline-item h3 {
-  font-size: 1rem;
+  font-size: 16px;
   font-weight: 700;
-  color: var(--azul-oscuro);
-  margin-bottom: 0.4rem;
+  color: var(--black);
+  margin-bottom: 6px;
 }
 
 .timeline-item p {
-  font-size: 0.92rem;
-  color: var(--texto-gris);
+  font-size: 14px;
+  color: var(--mid-gray);
   line-height: 1.7;
 }
 
 /* =============================================
    FORMULARIO DE CONTACTO
-   Campos centrados con validación visual
 ============================================= */
 #contacto {
-  padding: 5rem 1.5rem;
-  background: var(--blanco);
+  padding: 80px 32px;
+  background: var(--bg);
+  border-top: 1px solid var(--border);
 }
 
 /* Contenedor del formulario */
+.contact-inner,
 .contact-form {
-  max-width: 580px;
+  max-width: 560px;
   margin: 0 auto;
-  display: flex;
-  flex-direction: column;
-  gap: 1.2rem;
 }
 
-/* Grupo de campo: etiqueta + input */
+.contact-form {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+/* Grupo de campo */
 .form-group {
   display: flex;
   flex-direction: column;
-  gap: 0.4rem;
+  gap: 8px;
 }
 
 .form-group label {
-  font-size: 0.9rem;
+  font-size: 14px;
   font-weight: 600;
-  color: var(--azul-oscuro);
+  color: var(--black);
 }
 
 .form-group input,
 .form-group textarea {
-  padding: 0.85rem 1rem;
-  border: 1.5px solid #ddd;
+  border: 1px solid var(--border);
   border-radius: 10px;
-  font-size: 0.95rem;
-  font-family: inherit;
-  color: var(--azul-oscuro);
-  transition: border-color 0.2s, box-shadow 0.2s;
+  padding: 12px 16px;
+  font-size: 15px;
+  font-family: var(--font);
   outline: none;
-  background: var(--gris-suave);
+  transition: border-color 0.2s;
+  background: var(--bg-subtle);
+  color: var(--black);
 }
 
 .form-group input:focus,
 .form-group textarea:focus {
-  border-color: var(--morado);
-  box-shadow: 0 0 0 3px rgba(108, 99, 255, 0.12);
-  background: var(--blanco);
-}
-
-/* Estado de error: borde rojo cuando el campo está vacío al enviar */
-.form-group input.error,
-.form-group textarea.error {
-  border-color: #e74c3c;
-  box-shadow: 0 0 0 3px rgba(231, 76, 60, 0.1);
-}
-
-/* Mensaje de error debajo del campo */
-.error-msg {
-  font-size: 0.8rem;
-  color: #e74c3c;
-  display: none;
-}
-
-.error-msg.visible {
-  display: block;
+  border-color: var(--black);
+  background: white;
 }
 
 .form-group textarea {
-  min-height: 140px;
   resize: vertical;
+  min-height: 120px;
 }
 
-/* Botón de envío del formulario */
+/* Estado de error */
+.form-group.error input,
+.form-group.error textarea,
+.form-group input.error,
+.form-group textarea.error {
+  border-color: #e55;
+}
+
+/* Mensaje de error */
+.error-msg {
+  font-size: 12px;
+  color: #e55;
+  display: none;
+}
+
+.error-msg.visible,
+.form-group.error .error-msg {
+  display: block;
+}
+
+/* Botón de envío */
 .btn-submit {
-  background: var(--morado);
-  color: var(--blanco);
+  background: var(--black);
+  color: white;
   border: none;
-  padding: 0.95rem;
-  border-radius: 50px;
-  font-size: 1rem;
-  font-weight: 700;
+  border-radius: 100px;
+  padding: 14px;
+  font-size: 16px;
+  font-weight: 600;
+  font-family: var(--font);
   cursor: pointer;
-  transition: background 0.25s, transform 0.2s, box-shadow 0.2s;
-  box-shadow: 0 4px 16px rgba(108, 99, 255, 0.35);
+  transition: opacity 0.2s;
 }
 
 .btn-submit:hover {
-  background: var(--morado-claro);
-  transform: translateY(-2px);
+  opacity: 0.75;
 }
 
-/* Mensaje de confirmación tras envío exitoso */
+/* Mensaje de éxito del formulario */
 .form-success {
   display: none;
   text-align: center;
-  padding: 1.5rem;
-  background: rgba(108, 99, 255, 0.08);
-  border: 1px solid var(--morado);
-  border-radius: 12px;
-  color: var(--morado);
-  font-weight: 600;
+  padding: 16px;
+  background: #f0faf0;
+  border-radius: 10px;
+  font-size: 15px;
+  font-weight: 500;
+  color: #1a7a1a;
+  border: 1px solid #b5e5b5;
 }
 
 /* =============================================
    FOOTER
-   Barra inferior con copyright y redes sociales
+   Barra inferior minimalista sobre fondo blanco
 ============================================= */
 footer {
-  background-color: var(--azul-oscuro);
-  color: var(--blanco);
-  padding: 2.5rem 1.5rem;
+  border-top: 1px solid var(--border);
+  padding: 40px 32px;
+  background: var(--bg);
 }
 
 .footer-inner {
-  max-width: 1100px;
+  max-width: 1200px;
   margin: 0 auto;
   display: flex;
-  flex-wrap: wrap;
   align-items: center;
   justify-content: space-between;
-  gap: 1.2rem;
+  flex-wrap: wrap;
+  gap: 20px;
 }
 
 .footer-logo {
-  font-size: 1.3rem;
+  font-size: 18px;
   font-weight: 800;
-  color: var(--blanco);
+  color: var(--black);
+  letter-spacing: -0.5px;
 }
 
 .footer-logo span {
-  color: var(--morado);
+  color: var(--black);
 }
 
 .footer-copy {
-  font-size: 0.85rem;
-  opacity: 0.6;
+  font-size: 13px;
+  color: var(--mid-gray);
 }
 
-/* Enlace discreto de acceso al panel de administración */
+/* Enlace discreto al panel admin */
 .footer-admin-link {
-  font-size: 0.72rem;
-  color: rgba(255,255,255,0.2);
+  font-size: 12px;
+  color: #ccc;
   text-decoration: none;
   transition: color 0.2s;
-  letter-spacing: 0.3px;
 }
 
 .footer-admin-link:hover {
-  color: rgba(255,255,255,0.5);
+  color: var(--mid-gray);
 }
 
-/* Íconos de redes sociales en el footer */
+/* Íconos de redes sociales */
 .social-links {
   display: flex;
-  gap: 1rem;
+  gap: 12px;
 }
 
 .social-links a {
+  width: 36px;
+  height: 36px;
+  border: 1px solid var(--border);
+  border-radius: 50%;
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 38px;
-  height: 38px;
-  border-radius: 50%;
-  background: rgba(255,255,255,0.08);
-  transition: background 0.2s, transform 0.2s;
+  transition: border-color 0.2s, background 0.2s;
 }
 
 .social-links a:hover {
-  background: var(--morado);
-  transform: translateY(-2px);
+  border-color: var(--black);
+  background: var(--black);
 }
 
 .social-links svg {
-  width: 18px;
-  height: 18px;
-  fill: var(--blanco);
+  width: 14px;
+  height: 14px;
+  stroke: var(--mid-gray);
+  fill: none;
+  stroke-width: 2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  transition: stroke 0.2s;
+}
+
+.social-links a:hover svg {
+  stroke: white;
 }
 
 /* =============================================
    SECCIÓN DE TESTIMONIOS
-   Grid de 2 columnas con tarjetas de clientes
 ============================================= */
 #testimonios-preview,
 .testimonios-section {
-  padding: 5rem 1.5rem;
-  background: var(--azul-oscuro);
-  color: var(--blanco);
+  padding: 80px 32px;
+  background: var(--bg-subtle);
+  border-top: 1px solid var(--border);
 }
 
-/* El encabezado de la sección de testimonios usa blanco */
+/* Encabezado de testimonios */
 #testimonios-preview .section-header h2,
 .testimonios-section .section-header h2 {
-  color: var(--blanco);
+  color: var(--black);
 }
 
 #testimonios-preview .section-header p,
 .testimonios-section .section-header p {
-  color: rgba(255,255,255,0.65);
+  color: var(--mid-gray);
 }
 
-/* Grid de 2 columnas para las tarjetas */
+/* Grid de 2 columnas */
 .testimonios-grid {
   display: grid;
-  grid-template-columns: repeat(2, 1fr);
-  gap: 1.8rem;
-  max-width: 1000px;
-  margin: 0 auto;
+  grid-template-columns: 1fr 1fr;
+  gap: 24px;
+  max-width: 1200px;
+  margin: 0 auto 40px;
 }
 
-/* Tarjeta individual de testimonio */
+/* Tarjeta de testimonio */
 .testimonio-card {
-  background: rgba(255,255,255,0.06);
-  border: 1px solid rgba(255,255,255,0.1);
+  background: white;
+  border: 1px solid var(--border);
   border-radius: 16px;
-  padding: 2rem;
-  transition: transform 0.25s, background 0.25s;
+  padding: 32px;
+  transition: box-shadow 0.2s;
 }
 
 .testimonio-card:hover {
-  transform: translateY(-4px);
-  background: rgba(108, 99, 255, 0.15);
+  box-shadow: 0 8px 28px rgba(0, 0, 0, 0.06);
 }
 
-/* Comillas decorativas de apertura */
+/* Comillas decorativas */
 .testimonio-card .comillas {
-  font-size: 3rem;
+  font-size: 48px;
   line-height: 1;
-  color: var(--morado);
-  font-family: Georgia, serif;
-  margin-bottom: 0.5rem;
+  color: var(--border);
+  font-weight: 800;
   display: block;
+  margin-bottom: 12px;
 }
 
 /* Texto del testimonio */
 .testimonio-card .texto {
-  font-size: 0.95rem;
-  line-height: 1.8;
-  color: rgba(255,255,255,0.85);
-  margin-bottom: 1.5rem;
+  font-size: 15px;
+  color: var(--black);
+  line-height: 1.65;
+  margin-bottom: 28px;
 }
 
-/* Fila inferior: avatar + nombre + estrellas */
+/* Fila autor */
 .testimonio-autor {
   display: flex;
   align-items: center;
-  gap: 0.9rem;
+  gap: 12px;
 }
 
-/* Avatar circular con iniciales */
+/* Avatar con iniciales */
 .testimonio-avatar {
-  width: 48px;
-  height: 48px;
+  width: 40px;
+  height: 40px;
+  background: var(--black);
   border-radius: 50%;
-  background: linear-gradient(135deg, var(--morado), #4facfe);
+  color: white;
+  font-size: 13px;
+  font-weight: 700;
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 1rem;
-  font-weight: 800;
-  color: var(--blanco);
   flex-shrink: 0;
 }
 
-/* Nombre y empresa del cliente */
 .testimonio-info {
   flex: 1;
 }
 
 .testimonio-info strong {
   display: block;
-  font-size: 0.95rem;
-  color: var(--blanco);
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--black);
 }
 
 .testimonio-info span {
-  font-size: 0.8rem;
-  color: rgba(255,255,255,0.5);
+  font-size: 13px;
+  color: var(--mid-gray);
 }
 
-/* Estrellas de calificación en amarillo */
+/* Estrellas de calificación */
 .estrellas {
-  color: #ffc107;
-  font-size: 0.9rem;
+  color: var(--black);
+  font-size: 14px;
   letter-spacing: 1px;
 }
 
-/* Botón centrado bajo el grid */
+/* CTA debajo del grid de testimonios */
 .testimonios-cta {
   text-align: center;
-  margin-top: 2.5rem;
+  margin-top: 0;
+  max-width: 1200px;
+  margin: 0 auto;
 }
 
 /* =============================================
-   RESPONSIVE — MÓVIL
-   Ajustes para pantallas menores a 768px
+   PRECIOS
 ============================================= */
-@media (max-width: 768px) {
+.precios-section {
+  padding: 80px 32px;
+  background: var(--bg);
+}
 
-  /* Menú de navegación se convierte en desplegable */
-  .nav-links {
-    display: none;
-    flex-direction: column;
-    gap: 0;
-    position: absolute;
-    top: 68px;
-    left: 0;
-    right: 0;
-    background: var(--azul-oscuro);
-    padding: 0.5rem 0 1rem;
-    box-shadow: 0 8px 20px rgba(0,0,0,0.3);
-  }
+.precios-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 24px;
+  max-width: 1000px;
+  margin: 0 auto;
+}
 
-  .nav-links.open {
-    display: flex;
-  }
+/* Tarjeta de precio */
+.precio-card {
+  background: white;
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  padding: 36px 28px;
+  text-align: center;
+  transition: box-shadow 0.2s, transform 0.2s;
+}
 
-  .nav-links a {
-    padding: 0.75rem 1.5rem;
-    display: block;
-    border-bottom: 1px solid rgba(255,255,255,0.06);
-  }
+.precio-card:hover {
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.07);
+  transform: translateY(-2px);
+}
 
-  /* Botón hamburguesa visible en móvil */
-  .menu-toggle {
-    display: flex;
-  }
+/* Plan destacado */
+.precio-card.destacado {
+  border-color: var(--black);
+  background: var(--black);
+  color: white;
+}
 
-  /* Las tarjetas se apilan verticalmente */
-  .cards-grid,
-  .team-grid,
-  .testimonios-grid {
-    grid-template-columns: 1fr;
-  }
+.precio-card.destacado .precio-nombre,
+.precio-card.destacado .precio-monto,
+.precio-card.destacado h3 {
+  color: white;
+}
 
-  /* Footer apilado y centrado en móvil */
-  .footer-inner {
-    flex-direction: column;
-    text-align: center;
-  }
+.precio-card.destacado p,
+.precio-card.destacado .precio-desc {
+  color: rgba(255, 255, 255, 0.65);
+}
 
-  /* Timeline ajustado para móvil */
-  .timeline {
-    padding-left: 1.5rem;
-  }
+.precio-card.destacado .precio-features li {
+  color: rgba(255, 255, 255, 0.85);
+}
 
-  /* Tarjetas de blog en columna única en móvil */
-  .blog-grid {
-    grid-template-columns: 1fr;
-  }
+.precio-card.destacado .precio-features li::before {
+  color: white;
+}
+
+/* Badge popular */
+.precio-badge {
+  display: inline-block;
+  background: white;
+  color: var(--black);
+  font-size: 11px;
+  font-weight: 700;
+  padding: 4px 12px;
+  border-radius: 100px;
+  margin-bottom: 16px;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+}
+
+.precio-nombre {
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--mid-gray);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  margin-bottom: 12px;
+}
+
+.precio-monto {
+  font-size: 48px;
+  font-weight: 800;
+  letter-spacing: -0.03em;
+  color: var(--black);
+  line-height: 1;
+  margin-bottom: 8px;
+}
+
+.precio-periodo {
+  font-size: 13px;
+  color: var(--mid-gray);
+  margin-bottom: 24px;
+}
+
+.precio-features {
+  list-style: none;
+  text-align: left;
+  margin-bottom: 28px;
+}
+
+.precio-features li {
+  font-size: 14px;
+  color: var(--mid-gray);
+  padding: 5px 0 5px 20px;
+  position: relative;
+}
+
+.precio-features li::before {
+  content: '✓';
+  position: absolute;
+  left: 0;
+  color: var(--black);
+  font-weight: 700;
+}
+
+.precio-card.destacado .btn-primary {
+  background: white;
+  color: var(--black);
+}
+
+.precio-card.destacado .btn-primary:hover {
+  opacity: 0.85;
 }
 
 /* =============================================
    BLOG — LISTADO DE ARTÍCULOS
-   Grid de tarjetas con imagen, título, fecha
-   y resumen de cada artículo
 ============================================= */
-
-/* Sección contenedora del listado del blog */
 .blog-section {
-  padding: 5rem 1.5rem;
-  background: var(--gris-suave);
+  padding: 80px 32px;
+  background: var(--bg-subtle);
+  border-top: 1px solid var(--border);
 }
 
-/* Grid responsive de tarjetas de artículos */
+/* Grid de tarjetas del blog */
 .blog-grid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-  gap: 2rem;
-  max-width: 1100px;
+  gap: 24px;
+  max-width: 1200px;
   margin: 0 auto;
 }
 
-/* Tarjeta individual de artículo del blog */
+/* Tarjeta de artículo */
 .blog-card {
-  background: var(--blanco);
+  background: white;
+  border: 1px solid var(--border);
   border-radius: 16px;
   overflow: hidden;
-  box-shadow: 0 2px 16px rgba(26, 26, 46, 0.07);
-  transition: transform 0.25s, box-shadow 0.25s;
+  transition: box-shadow 0.2s, transform 0.2s;
   display: flex;
   flex-direction: column;
 }
 
 .blog-card:hover {
-  transform: translateY(-6px);
-  box-shadow: 0 10px 32px rgba(108, 99, 255, 0.15);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.07);
+  transform: translateY(-2px);
 }
 
-/* Imagen placeholder con degradado de colores de marca */
+/* Imagen placeholder del artículo */
 .blog-card-img {
   width: 100%;
   height: 200px;
-  background: linear-gradient(135deg, var(--azul-oscuro), var(--morado));
+  background: linear-gradient(135deg, #1a1a1a 0%, #2d2d2d 100%);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -981,23 +1242,21 @@ footer {
   overflow: hidden;
 }
 
-/* Patrón decorativo sobre la imagen placeholder */
-.blog-card-img::after {
+.blog-card-img::before {
   content: '';
   position: absolute;
-  width: 200px;
-  height: 200px;
-  border-radius: 50%;
-  background: rgba(255,255,255,0.05);
-  bottom: -60px;
-  right: -40px;
+  inset: 0;
+  background-image: repeating-linear-gradient(
+    -45deg, transparent 0px, transparent 8px,
+    rgba(255, 255, 255, 0.025) 8px, rgba(255, 255, 255, 0.025) 16px
+  );
+  pointer-events: none;
 }
 
-/* Ícono SVG centrado en la imagen placeholder */
 .blog-card-img svg {
-  width: 48px;
-  height: 48px;
-  stroke: rgba(255,255,255,0.5);
+  width: 40px;
+  height: 40px;
+  stroke: rgba(255, 255, 255, 0.4);
   fill: none;
   stroke-width: 1.5;
   stroke-linecap: round;
@@ -1006,48 +1265,49 @@ footer {
   z-index: 1;
 }
 
-/* Contenido textual de la tarjeta */
+/* Contenido de la tarjeta */
 .blog-card-body {
-  padding: 1.5rem;
+  padding: 24px;
   display: flex;
   flex-direction: column;
   flex: 1;
 }
 
-/* Categoría / etiqueta del artículo */
-.blog-card-tag {
+/* Etiqueta de categoría */
+.blog-card-tag,
+.articulo-tag {
   display: inline-block;
-  background: rgba(108, 99, 255, 0.1);
-  color: var(--morado);
-  font-size: 0.75rem;
+  background: #f0f0f0;
+  color: var(--mid-gray);
+  font-size: 11px;
   font-weight: 700;
   text-transform: uppercase;
-  letter-spacing: 0.8px;
-  padding: 0.2rem 0.7rem;
-  border-radius: 50px;
-  margin-bottom: 0.8rem;
+  letter-spacing: 0.06em;
+  padding: 3px 10px;
+  border-radius: 100px;
+  margin-bottom: 12px;
   align-self: flex-start;
 }
 
-/* Fecha de publicación */
+/* Fecha */
 .blog-card-fecha {
-  font-size: 0.8rem;
-  color: var(--texto-gris);
-  margin-bottom: 0.5rem;
+  font-size: 12px;
+  color: var(--gray-text);
+  margin-bottom: 8px;
 }
 
 .blog-card-body h3 {
-  font-size: 1.05rem;
+  font-size: 16px;
   font-weight: 700;
-  color: var(--azul-oscuro);
+  color: var(--black);
   line-height: 1.4;
-  margin-bottom: 0.7rem;
+  margin-bottom: 10px;
 }
 
-/* Resumen de 2 líneas con recorte automático */
+/* Resumen recortado a 2 líneas */
 .blog-card-resumen {
-  font-size: 0.9rem;
-  color: var(--texto-gris);
+  font-size: 14px;
+  color: var(--mid-gray);
   line-height: 1.6;
   display: -webkit-box;
   -webkit-line-clamp: 2;
@@ -1055,69 +1315,48 @@ footer {
   -webkit-box-orient: vertical;
   overflow: hidden;
   flex: 1;
-  margin-bottom: 1.2rem;
+  margin-bottom: 16px;
 }
 
 /* =============================================
-   BLOG — PÁGINA DE ARTÍCULO INDIVIDUAL
-   Layout de lectura con ancho controlado
+   BLOG — ARTÍCULO INDIVIDUAL
 ============================================= */
-
-/* Contenedor principal del artículo */
 .articulo-container {
   max-width: 760px;
   margin: 0 auto;
-  padding: 4rem 1.5rem;
+  padding: 48px 32px;
 }
 
-/* Cabecera del artículo: categoría, título, meta */
+/* Cabecera del artículo */
 .articulo-header {
-  margin-bottom: 2.5rem;
-}
-
-.articulo-tag {
-  display: inline-block;
-  background: rgba(108, 99, 255, 0.1);
-  color: var(--morado);
-  font-size: 0.78rem;
-  font-weight: 700;
-  text-transform: uppercase;
-  letter-spacing: 0.8px;
-  padding: 0.25rem 0.8rem;
-  border-radius: 50px;
-  margin-bottom: 1rem;
+  margin-bottom: 32px;
 }
 
 .articulo-header h1 {
-  font-size: clamp(1.6rem, 4vw, 2.2rem);
+  font-size: clamp(28px, 4vw, 40px);
   font-weight: 800;
-  color: var(--azul-oscuro);
-  line-height: 1.3;
-  margin-bottom: 1rem;
+  color: var(--black);
+  letter-spacing: -0.03em;
+  line-height: 1.2;
+  margin-bottom: 16px;
 }
 
-/* Metadatos: fecha y tiempo de lectura */
+/* Metadatos del artículo */
 .articulo-meta {
   display: flex;
   align-items: center;
-  gap: 1.2rem;
-  font-size: 0.85rem;
-  color: var(--texto-gris);
-}
-
-.articulo-meta span {
-  display: flex;
-  align-items: center;
-  gap: 0.3rem;
+  gap: 20px;
+  font-size: 13px;
+  color: var(--mid-gray);
 }
 
 /* Imagen destacada del artículo */
 .articulo-imagen {
   width: 100%;
   height: 320px;
-  background: linear-gradient(135deg, var(--azul-oscuro), var(--morado));
+  background: linear-gradient(135deg, #1a1a1a 0%, #2d2d2d 100%);
   border-radius: 16px;
-  margin-bottom: 2.5rem;
+  margin-bottom: 40px;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -1125,71 +1364,74 @@ footer {
   overflow: hidden;
 }
 
-.articulo-imagen::after {
+.articulo-imagen::before {
   content: '';
   position: absolute;
-  width: 300px;
-  height: 300px;
-  border-radius: 50%;
-  background: rgba(255,255,255,0.04);
-  bottom: -80px;
-  right: -60px;
+  inset: 0;
+  background-image: repeating-linear-gradient(
+    -45deg, transparent 0px, transparent 8px,
+    rgba(255, 255, 255, 0.025) 8px, rgba(255, 255, 255, 0.025) 16px
+  );
 }
 
 .articulo-imagen svg {
-  width: 64px;
-  height: 64px;
-  stroke: rgba(255,255,255,0.4);
+  width: 56px;
+  height: 56px;
+  stroke: rgba(255, 255, 255, 0.35);
   fill: none;
   stroke-width: 1.2;
   stroke-linecap: round;
   stroke-linejoin: round;
+  position: relative;
+  z-index: 1;
 }
 
-/* Cuerpo del artículo: tipografía de lectura */
+/* Cuerpo del artículo */
 .articulo-body {
-  font-size: 1rem;
-  line-height: 1.85;
-  color: #333;
+  font-size: 17px;
+  line-height: 1.8;
+  color: var(--black);
 }
 
 .articulo-body h2 {
-  font-size: 1.4rem;
+  font-size: 24px;
   font-weight: 800;
-  color: var(--azul-oscuro);
-  margin: 2.5rem 0 1rem;
+  color: var(--black);
+  letter-spacing: -0.02em;
+  margin: 40px 0 16px;
 }
 
 .articulo-body h3 {
-  font-size: 1.1rem;
+  font-size: 18px;
   font-weight: 700;
-  color: var(--azul-oscuro);
-  margin: 2rem 0 0.8rem;
+  color: var(--black);
+  margin: 32px 0 12px;
 }
 
 .articulo-body p {
-  margin-bottom: 1.4rem;
+  margin-bottom: 20px;
+  color: #333;
 }
 
-/* Cita destacada dentro del artículo */
+/* Cita destacada */
 .articulo-body blockquote {
-  border-left: 4px solid var(--morado);
-  background: rgba(108, 99, 255, 0.05);
-  padding: 1rem 1.5rem;
+  border-left: 3px solid var(--black);
+  background: var(--bg-subtle);
+  padding: 16px 24px;
   border-radius: 0 12px 12px 0;
-  margin: 2rem 0;
+  margin: 32px 0;
   font-style: italic;
-  color: var(--azul-oscuro);
+  color: var(--black);
 }
 
-/* Lista con estilo de marca */
+/* Lista con estilo */
 .articulo-body ul {
-  padding-left: 1.2rem;
-  margin-bottom: 1.4rem;
+  padding-left: 20px;
+  margin-bottom: 20px;
 }
 
 .articulo-body ul li {
-  margin-bottom: 0.5rem;
+  margin-bottom: 8px;
   color: #333;
 }
 
@@ -1197,15 +1439,120 @@ footer {
 .btn-back {
   display: inline-flex;
   align-items: center;
-  gap: 0.5rem;
-  color: var(--morado);
+  gap: 6px;
+  color: var(--mid-gray);
   font-weight: 600;
-  font-size: 0.9rem;
+  font-size: 14px;
   text-decoration: none;
-  margin-bottom: 2rem;
-  transition: gap 0.2s;
+  margin-bottom: 32px;
+  transition: color 0.2s;
 }
 
 .btn-back:hover {
-  gap: 0.8rem;
+  color: var(--black);
+}
+
+/* =============================================
+   RESPONSIVE — MÓVIL
+   Ajustes para pantallas menores a 768px
+============================================= */
+@media (max-width: 768px) {
+
+  /* Menú desplegable en móvil */
+  .nav-links {
+    display: none;
+    flex-direction: column;
+    position: absolute;
+    top: 60px;
+    left: 0;
+    right: 0;
+    background: white;
+    border-bottom: 1px solid var(--border);
+    padding: 20px 32px;
+    gap: 20px;
+    z-index: 99;
+  }
+
+  .nav-links.open {
+    display: flex;
+  }
+
+  .nav-links a {
+    padding: 0;
+    border-bottom: none;
+  }
+
+  /* Botón hamburguesa visible en móvil */
+  .menu-toggle {
+    display: flex;
+  }
+
+  /* Ocultar enlace de sesión en móvil */
+  .btn-nav-outline,
+  .btn-sesion {
+    display: none;
+  }
+
+  /* Tarjetas en columna única */
+  .cards-grid,
+  .team-grid,
+  .testimonios-grid,
+  .precios-grid {
+    grid-template-columns: 1fr;
+  }
+
+  /* Layout nosotros en columna */
+  .nosotros-inner {
+    grid-template-columns: 1fr;
+    gap: 40px;
+  }
+
+  /* Footer apilado y centrado */
+  .footer-inner {
+    flex-direction: column;
+    text-align: center;
+  }
+
+  /* Timeline ajustado */
+  .timeline {
+    padding-left: 24px;
+  }
+
+  /* Blog en columna única */
+  .blog-grid {
+    grid-template-columns: 1fr;
+  }
+
+  /* Secciones con menos padding */
+  #servicios,
+  #nosotros,
+  #contacto,
+  #testimonios-preview,
+  .testimonios-section,
+  .blog-section,
+  .historia-section,
+  .precios-section {
+    padding: 60px 20px;
+  }
+
+  #inicio {
+    padding: 60px 20px 48px;
+  }
+
+  .video-section {
+    margin: 40px auto 60px;
+    padding: 0 20px;
+  }
+
+  .page-hero {
+    padding: 48px 20px 40px;
+  }
+
+  nav {
+    padding: 0 20px;
+  }
+
+  footer {
+    padding: 32px 20px;
+  }
 }

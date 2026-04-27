@@ -5,6 +5,11 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Servicios — NexoAI</title>
 
+  <!-- Fuente Plus Jakarta Sans -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+
   <!-- Los archivos CSS y JS están un nivel arriba (../), por eso el prefijo ../ -->
   <link rel="stylesheet" href="../css/styles.css" />
 </head>
@@ -16,7 +21,12 @@
   ============================================= -->
   <header>
     <nav>
-      <a href="../index.html" class="logo">Nexo<span>AI</span></a>
+      <a href="../index.html" class="logo">
+        <span class="logo-mark">
+          <svg viewBox="0 0 12 12"><path d="M2 2 L6 10 L10 2" stroke="white" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </span>
+        Nexo<span>AI</span>
+      </a>
 
       <ul class="nav-links" id="navLinks">
         <li><a href="../index.html">Inicio</a></li>
@@ -29,14 +39,15 @@
         <li><a href="../index.html#contacto">Contacto</a></li>
       </ul>
 
-      <!-- Botón de acceso al portal (cambia a "Mi cuenta" si hay sesión activa) -->
-      <a id="btnSesion" href="login.html" class="btn-sesion">Iniciar sesión</a>
-
-      <button class="menu-toggle" id="menuToggle" aria-label="Abrir menú">
-        <span></span>
-        <span></span>
-        <span></span>
-      </button>
+      <div class="nav-right">
+        <a id="btnSesion" href="login.html" class="btn-sesion">Iniciar sesión</a>
+        <a href="../index.html#contacto" class="btn-cta">Contáctanos</a>
+        <button class="menu-toggle" id="menuToggle" aria-label="Abrir menú">
+          <span></span>
+          <span></span>
+          <span></span>
+        </button>
+      </div>
     </nav>
   </header>
 
@@ -54,7 +65,7 @@
        SERVICIO 1 — DESARROLLO WEB
        Tarjeta expandida con características detalladas
   ============================================= -->
-  <section id="desarrollo-web" style="padding: 5rem 1.5rem; background: var(--gris-suave);">
+  <section id="desarrollo-web" style="padding: 80px 32px; background: var(--bg-subtle); border-top: 1px solid var(--border);">
     <div style="max-width: 1100px; margin: 0 auto;">
 
       <div class="section-header">
@@ -133,7 +144,7 @@
   <!-- =============================================
        SERVICIO 2 — AUTOMATIZACIÓN CON IA
   ============================================= -->
-  <section id="automatizacion-ia" style="padding: 5rem 1.5rem; background: #ffffff;">
+  <section id="automatizacion-ia" style="padding: 80px 32px; background: var(--bg); border-top: 1px solid var(--border);">
     <div style="max-width: 1100px; margin: 0 auto;">
 
       <div class="section-header">
@@ -210,7 +221,7 @@
   <!-- =============================================
        SERVICIO 3 — CONSULTORÍA TECNOLÓGICA
   ============================================= -->
-  <section id="consultoria" style="padding: 5rem 1.5rem; background: var(--gris-suave);">
+  <section id="consultoria" style="padding: 80px 32px; background: var(--bg-subtle); border-top: 1px solid var(--border);">
     <div style="max-width: 1100px; margin: 0 auto;">
 
       <div class="section-header">

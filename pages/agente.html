@@ -5,50 +5,43 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Agente IA — NexoAI</title>
 
+  <!-- Fuente Plus Jakarta Sans -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+
   <link rel="stylesheet" href="../css/styles.css" />
 
   <style>
-    /* =============================================
-       SECCIÓN HERO DEL CHAT
-    ============================================= */
+    /* Sección hero del chat — usa el page-hero del nuevo diseño */
     .chat-hero {
-      background: var(--azul-oscuro);
-      padding: 4rem 1.5rem 2rem;
+      background: var(--bg-subtle);
+      border-bottom: 1px solid var(--border);
+      padding: 64px 32px 56px;
       text-align: center;
     }
 
-    .chat-hero .hero-badge {
-      display: inline-block;
-      background: rgba(108, 99, 255, 0.15);
-      color: var(--morado);
-      border: 1px solid rgba(108, 99, 255, 0.3);
-      border-radius: 50px;
-      padding: 0.4rem 1.2rem;
-      font-size: 0.85rem;
-      letter-spacing: 0.05em;
-      margin-bottom: 1rem;
-    }
-
     .chat-hero h1 {
-      font-size: clamp(1.8rem, 4vw, 2.8rem);
-      color: #fff;
-      margin-bottom: 0.75rem;
+      font-size: clamp(32px, 4vw, 48px);
+      font-weight: 800;
+      letter-spacing: -0.03em;
+      color: var(--black);
+      margin-bottom: 12px;
     }
 
     .chat-hero p {
-      color: #b0b0b0;
-      font-size: 1rem;
+      color: var(--mid-gray);
+      font-size: 17px;
       max-width: 500px;
       margin: 0 auto;
+      line-height: 1.6;
     }
 
-    /* =============================================
-       CONTENEDOR PRINCIPAL DEL CHAT
-    ============================================= */
+    /* Contenedor principal del chat — fondo oscuro para contraste de burbujas */
     .chat-wrapper {
       background: #0f0f1e;
       min-height: calc(100vh - 380px);
-      padding: 2rem 1.5rem 4rem;
+      padding: 32px 24px 64px;
       display: flex;
       justify-content: center;
     }
@@ -257,7 +250,12 @@
   ============================================= -->
   <header>
     <nav>
-      <a href="../index.html" class="logo">Nexo<span>AI</span></a>
+      <a href="../index.html" class="logo">
+        <span class="logo-mark">
+          <svg viewBox="0 0 12 12"><path d="M2 2 L6 10 L10 2" stroke="white" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </span>
+        Nexo<span>AI</span>
+      </a>
 
       <ul class="nav-links" id="navLinks">
         <li><a href="../index.html">Inicio</a></li>
@@ -266,18 +264,19 @@
         <li><a href="blog.html">Blog</a></li>
         <li><a href="testimonios.html">Testimonios</a></li>
         <li><a href="precios.html">Precios</a></li>
-        <li><a href="agente.html" class="active">Agente IA</a></li>
+        <li><a href="agente.html">Agente IA</a></li>
         <li><a href="../index.html#contacto">Contacto</a></li>
       </ul>
 
-      <!-- Botón de acceso al portal (cambia a "Mi cuenta" si hay sesión activa) -->
-      <a id="btnSesion" href="login.html" class="btn-sesion">Iniciar sesión</a>
-
-      <button class="menu-toggle" id="menuToggle" aria-label="Abrir menú">
-        <span></span>
-        <span></span>
-        <span></span>
-      </button>
+      <div class="nav-right">
+        <a id="btnSesion" href="login.html" class="btn-sesion">Iniciar sesión</a>
+        <a href="../index.html#contacto" class="btn-cta">Contáctanos</a>
+        <button class="menu-toggle" id="menuToggle" aria-label="Abrir menú">
+          <span></span>
+          <span></span>
+          <span></span>
+        </button>
+      </div>
     </nav>
   </header>
 

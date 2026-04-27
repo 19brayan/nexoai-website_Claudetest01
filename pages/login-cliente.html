@@ -4,204 +4,160 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Acceso Clientes — NexoAI</title>
+  <!-- Fuente Plus Jakarta Sans -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+
   <link rel="stylesheet" href="../css/styles.css" />
   <style>
-    /* =============================================
-       ESTILOS DE LA PÁGINA DE LOGIN/REGISTRO
-       Usa los colores de marca NexoAI
-       ============================================= */
-
+    /* Nuevo diseño minimalista para el portal de clientes */
     body {
-      background: #1a1a2e;
-      color: #ffffff;
-      font-family: 'Inter', 'Segoe UI', sans-serif;
+      background: #fafafa;
+      color: #0e0e0e;
+      font-family: 'Plus Jakarta Sans', 'Helvetica Neue', Arial, sans-serif;
       min-height: 100vh;
       display: flex;
       flex-direction: column;
+      -webkit-font-smoothing: antialiased;
     }
 
-    /* Encabezado simple sin menú de navegación */
+    /* Encabezado simple — solo logo */
     .header-simple {
-      background: rgba(255, 255, 255, 0.05);
-      border-bottom: 1px solid rgba(108, 99, 255, 0.2);
-      padding: 1rem 2rem;
+      background: rgba(255, 255, 255, 0.92);
+      backdrop-filter: blur(12px);
+      border-bottom: 1px solid #e5e5e5;
+      padding: 0 32px;
+      height: 60px;
       display: flex;
       align-items: center;
       justify-content: center;
     }
 
     .header-simple .logo {
-      font-size: 1.6rem;
+      font-size: 20px;
       font-weight: 800;
-      color: #ffffff;
+      color: #0e0e0e;
       text-decoration: none;
       letter-spacing: -0.5px;
     }
 
-    .header-simple .logo span {
-      color: #6C63FF;
-    }
+    .header-simple .logo span { color: #0e0e0e; }
 
-    /* Contenedor central de las tarjetas de login/registro */
+    /* Contenedor central */
     .auth-container {
       flex: 1;
       display: flex;
       align-items: center;
       justify-content: center;
-      padding: 2rem 1rem;
+      padding: 40px 20px;
     }
 
-    /* Tarjeta principal con las pestañas */
+    /* Tarjeta con pestañas */
     .auth-card {
-      background: rgba(255, 255, 255, 0.06);
-      border: 1px solid rgba(108, 99, 255, 0.25);
+      background: #ffffff;
+      border: 1px solid #e5e5e5;
       border-radius: 16px;
       width: 100%;
       max-width: 460px;
       overflow: hidden;
     }
 
-    /* Pestañas para alternar entre Login y Registro */
+    /* Pestañas */
     .auth-tabs {
       display: flex;
-      border-bottom: 1px solid rgba(108, 99, 255, 0.25);
+      border-bottom: 1px solid #e5e5e5;
     }
 
     .auth-tab {
       flex: 1;
-      padding: 1rem;
+      padding: 16px;
       background: transparent;
       border: none;
-      color: rgba(255, 255, 255, 0.5);
-      font-size: 0.95rem;
+      color: #555;
+      font-size: 14px;
       font-weight: 600;
       cursor: pointer;
+      font-family: inherit;
       transition: all 0.2s;
     }
 
     .auth-tab.activa {
-      background: rgba(108, 99, 255, 0.15);
-      color: #6C63FF;
-      border-bottom: 2px solid #6C63FF;
+      background: #fafafa;
+      color: #0e0e0e;
+      border-bottom: 2px solid #0e0e0e;
     }
 
     .auth-tab:hover:not(.activa) {
-      background: rgba(255, 255, 255, 0.05);
-      color: rgba(255, 255, 255, 0.8);
+      background: #f5f5f5;
+      color: #0e0e0e;
     }
 
-    /* Contenido de cada pestaña */
-    .auth-panel {
-      padding: 2rem;
-      display: none;
-    }
+    /* Panel de contenido */
+    .auth-panel { padding: 32px; display: none; }
+    .auth-panel.activo { display: block; }
+    .auth-panel h2 { font-size: 22px; font-weight: 800; letter-spacing: -0.02em; margin: 0 0 6px 0; }
+    .auth-panel p.subtitulo { color: #555; font-size: 14px; margin: 0 0 28px 0; }
 
-    .auth-panel.activo {
-      display: block;
-    }
-
-    .auth-panel h2 {
-      font-size: 1.4rem;
-      font-weight: 700;
-      margin: 0 0 0.4rem 0;
-    }
-
-    .auth-panel p.subtitulo {
-      color: rgba(255, 255, 255, 0.55);
-      font-size: 0.9rem;
-      margin: 0 0 1.8rem 0;
-    }
-
-    /* Campos del formulario */
-    .form-grupo {
-      margin-bottom: 1.2rem;
-    }
-
-    .form-grupo label {
-      display: block;
-      font-size: 0.85rem;
-      font-weight: 600;
-      color: rgba(255, 255, 255, 0.75);
-      margin-bottom: 0.4rem;
-    }
+    /* Grupos de campo */
+    .form-grupo { margin-bottom: 16px; }
+    .form-grupo label { display: block; font-size: 13px; font-weight: 600; color: #0e0e0e; margin-bottom: 6px; }
 
     .form-grupo input {
       width: 100%;
-      background: rgba(255, 255, 255, 0.08);
-      border: 1px solid rgba(255, 255, 255, 0.15);
-      border-radius: 8px;
-      padding: 0.75rem 1rem;
-      color: #ffffff;
-      font-size: 0.95rem;
+      background: #fafafa;
+      border: 1px solid #e5e5e5;
+      border-radius: 10px;
+      padding: 12px 16px;
+      color: #0e0e0e;
+      font-size: 15px;
+      font-family: inherit;
       outline: none;
       transition: border-color 0.2s;
       box-sizing: border-box;
     }
 
-    .form-grupo input:focus {
-      border-color: #6C63FF;
-      background: rgba(108, 99, 255, 0.1);
-    }
+    .form-grupo input:focus { border-color: #0e0e0e; background: white; }
+    .form-grupo input::placeholder { color: #bbb; }
 
-    .form-grupo input::placeholder {
-      color: rgba(255, 255, 255, 0.3);
-    }
-
-    /* Botón de acción principal */
+    /* Botón principal */
     .btn-auth {
       width: 100%;
-      background: #6C63FF;
-      color: #ffffff;
+      background: #0e0e0e;
+      color: white;
       border: none;
-      border-radius: 8px;
-      padding: 0.85rem;
-      font-size: 1rem;
-      font-weight: 700;
+      border-radius: 100px;
+      padding: 14px;
+      font-size: 15px;
+      font-weight: 600;
+      font-family: inherit;
       cursor: pointer;
-      transition: background 0.2s, transform 0.1s;
-      margin-top: 0.5rem;
+      transition: opacity 0.2s;
+      margin-top: 8px;
     }
 
-    .btn-auth:hover {
-      background: #5a52e0;
-    }
+    .btn-auth:hover { opacity: 0.75; }
+    .btn-auth:active { opacity: 0.65; }
+    .btn-auth:disabled { opacity: 0.4; cursor: not-allowed; }
 
-    .btn-auth:active {
-      transform: scale(0.98);
-    }
-
-    .btn-auth:disabled {
-      opacity: 0.6;
-      cursor: not-allowed;
-    }
-
-    /* Mensajes de error y éxito */
+    /* Mensajes de feedback */
     .mensaje-auth {
       border-radius: 8px;
-      padding: 0.75rem 1rem;
-      font-size: 0.88rem;
-      margin-top: 1rem;
+      padding: 12px 16px;
+      font-size: 14px;
+      margin-top: 16px;
       display: none;
     }
 
-    .mensaje-auth.error {
-      background: rgba(255, 99, 99, 0.15);
-      border: 1px solid rgba(255, 99, 99, 0.4);
-      color: #ff8080;
-    }
+    .mensaje-auth.error { background: #fff0f0; border: 1px solid #fcc; color: #c00; }
+    .mensaje-auth.exito { background: #f0faf0; border: 1px solid #b5e5b5; color: #1a7a1a; }
 
-    .mensaje-auth.exito {
-      background: rgba(78, 205, 196, 0.15);
-      border: 1px solid rgba(78, 205, 196, 0.4);
-      color: #4ECDC4;
-    }
-
-    /* Separador visual */
+    /* Separador */
     .separador {
       text-align: center;
-      color: rgba(255, 255, 255, 0.3);
-      font-size: 0.8rem;
-      margin: 1.2rem 0;
+      color: #ccc;
+      font-size: 12px;
+      margin: 20px 0;
       position: relative;
     }
 
@@ -212,37 +168,30 @@
       top: 50%;
       width: 40%;
       height: 1px;
-      background: rgba(255, 255, 255, 0.1);
+      background: #e5e5e5;
     }
 
     .separador::before { left: 0; }
     .separador::after  { right: 0; }
 
-    /* Enlace para ir al chat del agente desde la página de login */
+    /* Enlace secundario */
     .link-agente {
       text-align: center;
-      margin-top: 1.5rem;
-      font-size: 0.85rem;
-      color: rgba(255, 255, 255, 0.5);
+      margin-top: 16px;
+      font-size: 13px;
+      color: #555;
     }
 
-    .link-agente a {
-      color: #6C63FF;
-      text-decoration: none;
-      font-weight: 600;
-    }
-
-    .link-agente a:hover {
-      text-decoration: underline;
-    }
+    .link-agente a { color: #0e0e0e; text-decoration: none; font-weight: 600; }
+    .link-agente a:hover { text-decoration: underline; }
 
     /* Footer */
     .footer-simple {
       text-align: center;
-      padding: 1.5rem;
-      color: rgba(255, 255, 255, 0.3);
-      font-size: 0.8rem;
-      border-top: 1px solid rgba(255, 255, 255, 0.07);
+      padding: 20px;
+      color: #bbb;
+      font-size: 12px;
+      border-top: 1px solid #e5e5e5;
     }
   </style>
 </head>

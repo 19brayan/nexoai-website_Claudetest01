@@ -17,48 +17,33 @@
     })();
   </script>
 
+  <!-- Fuente Plus Jakarta Sans -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+
   <style>
     /* =============================================
-       VARIABLES Y RESET
-       Paleta del panel admin: más oscura que el sitio
-       público para dar sensación de área privada
+       RESET Y BASE DEL PANEL ADMIN
     ============================================= */
-    :root {
-      --bg-principal:   #0d0d1a;   /* Fondo más oscuro que el sitio público */
-      --bg-tarjeta:     #13132a;   /* Fondo de tarjetas y tabla */
-      --bg-fila-hover:  #1a1a35;   /* Hover en filas de la tabla */
-      --morado:         #6C63FF;
-      --morado-claro:   #8f88ff;
-      --blanco:         #ffffff;
-      --gris-texto:     #a0a0c0;
-      --borde:          rgba(108, 99, 255, 0.2);
-      --rojo:           #e74c3c;
-      --rojo-hover:     #c0392b;
-      --verde:          #2ecc71;
-    }
-
-    *, *::before, *::after {
-      margin: 0;
-      padding: 0;
-      box-sizing: border-box;
-    }
+    *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
 
     body {
-      font-family: 'Segoe UI', Arial, sans-serif;
-      background-color: var(--bg-principal);
-      color: var(--blanco);
+      font-family: 'Plus Jakarta Sans', 'Helvetica Neue', Arial, sans-serif;
+      background: #fafafa;
+      color: #0e0e0e;
       min-height: 100vh;
       line-height: 1.6;
+      -webkit-font-smoothing: antialiased;
     }
 
     /* =============================================
        HEADER DEL PANEL ADMIN
-       Barra superior diferente al sitio público:
-       más compacta y con etiqueta "ADMIN"
     ============================================= */
     .admin-header {
-      background: var(--bg-tarjeta);
-      border-bottom: 1px solid var(--borde);
+      background: rgba(255, 255, 255, 0.92);
+      backdrop-filter: blur(12px);
+      border-bottom: 1px solid #e5e5e5;
       padding: 0 1.5rem;
       height: 60px;
       display: flex;
@@ -69,25 +54,22 @@
       z-index: 100;
     }
 
-    /* Logo con badge de admin */
     .admin-logo {
       display: flex;
       align-items: center;
       gap: 0.8rem;
       font-size: 1.2rem;
       font-weight: 800;
-      color: var(--blanco);
+      color: #0e0e0e;
       text-decoration: none;
+      letter-spacing: -0.5px;
     }
 
-    .admin-logo span {
-      color: var(--morado);
-    }
+    .admin-logo span { color: #0e0e0e; }
 
-    /* Etiqueta "ADMIN" en morado */
     .admin-badge {
-      background: var(--morado);
-      color: var(--blanco);
+      background: #0e0e0e;
+      color: #ffffff;
       font-size: 0.65rem;
       font-weight: 700;
       letter-spacing: 1.5px;
@@ -96,46 +78,34 @@
       border-radius: 4px;
     }
 
-    /* Enlace para volver al sitio público */
     .admin-header a.volver {
-      color: var(--gris-texto);
+      color: #9a9a9a;
       font-size: 0.85rem;
       text-decoration: none;
       transition: color 0.2s;
     }
 
-    .admin-header a.volver:hover {
-      color: var(--blanco);
-    }
+    .admin-header a.volver:hover { color: #0e0e0e; }
 
-    /* Grupo de botones en el header */
-    .header-acciones {
-      display: flex;
-      align-items: center;
-      gap: 1rem;
-    }
+    .header-acciones { display: flex; align-items: center; gap: 1rem; }
 
-    /* Botón de cerrar sesión */
     .btn-logout {
-      background: rgba(231, 76, 60, 0.15);
-      border: 1px solid var(--rojo);
-      color: var(--rojo);
+      background: transparent;
+      border: 1px solid #e5e5e5;
+      color: #555;
       padding: 0.35rem 0.9rem;
-      border-radius: 6px;
+      border-radius: 100px;
       font-size: 0.82rem;
       font-weight: 600;
+      font-family: inherit;
       cursor: pointer;
-      transition: background 0.2s;
+      transition: border-color 0.2s, color 0.2s;
     }
 
-    .btn-logout:hover {
-      background: var(--rojo);
-      color: var(--blanco);
-    }
+    .btn-logout:hover { border-color: #0e0e0e; color: #0e0e0e; }
 
     /* =============================================
        LAYOUT PRINCIPAL
-       Contenedor centrado con padding generoso
     ============================================= */
     .admin-main {
       max-width: 1200px;
@@ -143,22 +113,18 @@
       padding: 2rem 1.5rem;
     }
 
-    /* Título de sección con línea decorativa */
     .admin-titulo {
       font-size: 1.5rem;
       font-weight: 800;
       margin-bottom: 0.3rem;
+      letter-spacing: -0.02em;
+      color: #0e0e0e;
     }
 
-    .admin-subtitulo {
-      color: var(--gris-texto);
-      font-size: 0.9rem;
-      margin-bottom: 2rem;
-    }
+    .admin-subtitulo { color: #9a9a9a; font-size: 0.9rem; margin-bottom: 2rem; }
 
     /* =============================================
        TARJETAS DE ESTADÍSTICAS
-       Fila de 3 tarjetas con métricas clave
     ============================================= */
     .stats-grid {
       display: grid;
@@ -167,56 +133,45 @@
       margin-bottom: 2.5rem;
     }
 
-    /* Tarjeta individual de estadística */
     .stat-card {
-      background: var(--bg-tarjeta);
-      border: 1px solid var(--borde);
+      background: #ffffff;
+      border: 1px solid #e5e5e5;
       border-radius: 12px;
       padding: 1.5rem;
       position: relative;
       overflow: hidden;
     }
 
-    /* Acento de color en el borde izquierdo */
     .stat-card::before {
       content: '';
       position: absolute;
-      left: 0;
-      top: 0;
-      bottom: 0;
+      left: 0; top: 0; bottom: 0;
       width: 3px;
-      background: var(--morado);
+      background: #0e0e0e;
       border-radius: 3px 0 0 3px;
     }
 
-    /* Etiqueta pequeña sobre el número */
     .stat-label {
       font-size: 0.78rem;
       font-weight: 600;
       text-transform: uppercase;
       letter-spacing: 1px;
-      color: var(--gris-texto);
+      color: #9a9a9a;
       margin-bottom: 0.5rem;
     }
 
-    /* Número grande de la estadística */
     .stat-valor {
       font-size: 2.2rem;
       font-weight: 800;
-      color: var(--blanco);
+      color: #0e0e0e;
       line-height: 1;
       margin-bottom: 0.3rem;
     }
 
-    /* Texto secundario debajo del número */
-    .stat-detalle {
-      font-size: 0.82rem;
-      color: var(--gris-texto);
-    }
+    .stat-detalle { font-size: 0.82rem; color: #9a9a9a; }
 
     /* =============================================
-       BARRA DE ACCIONES
-       Título de la tabla y botón de actualizar
+       BARRA DE ACCIONES TABLA
     ============================================= */
     .tabla-header {
       display: flex;
@@ -227,151 +182,111 @@
       gap: 0.8rem;
     }
 
-    .tabla-titulo {
-      font-size: 1.1rem;
-      font-weight: 700;
-    }
+    .tabla-titulo { font-size: 1.1rem; font-weight: 700; color: #0e0e0e; }
 
-    /* Botón para recargar los datos de la tabla */
     .btn-actualizar {
-      background: rgba(108, 99, 255, 0.15);
-      border: 1px solid var(--morado);
-      color: var(--morado-claro);
+      background: transparent;
+      border: 1px solid #e5e5e5;
+      color: #555;
       padding: 0.5rem 1.2rem;
-      border-radius: 8px;
+      border-radius: 100px;
       font-size: 0.88rem;
       font-weight: 600;
+      font-family: inherit;
       cursor: pointer;
-      transition: background 0.2s, transform 0.15s;
+      transition: border-color 0.2s, color 0.2s;
     }
 
-    .btn-actualizar:hover {
-      background: rgba(108, 99, 255, 0.3);
-      transform: translateY(-1px);
-    }
+    .btn-actualizar:hover { border-color: #0e0e0e; color: #0e0e0e; }
 
     /* =============================================
        TABLA DE MENSAJES
-       Responsive con scroll horizontal en móvil
     ============================================= */
     .tabla-contenedor {
-      background: var(--bg-tarjeta);
-      border: 1px solid var(--borde);
+      background: #ffffff;
+      border: 1px solid #e5e5e5;
       border-radius: 12px;
       overflow: hidden;
-      overflow-x: auto; /* Scroll horizontal en pantallas pequeñas */
+      overflow-x: auto;
     }
 
     table {
       width: 100%;
       border-collapse: collapse;
-      min-width: 700px; /* Evita que la tabla se comprima demasiado */
+      min-width: 700px;
     }
 
-    /* Encabezados de la tabla */
     thead th {
-      background: rgba(108, 99, 255, 0.1);
-      color: var(--gris-texto);
+      background: #fafafa;
+      color: #9a9a9a;
       font-size: 0.75rem;
       font-weight: 700;
       text-transform: uppercase;
       letter-spacing: 0.8px;
       padding: 0.9rem 1rem;
       text-align: left;
-      border-bottom: 1px solid var(--borde);
+      border-bottom: 1px solid #e5e5e5;
     }
 
-    /* Filas de datos */
     tbody td {
       padding: 0.9rem 1rem;
       font-size: 0.9rem;
-      color: var(--blanco);
-      border-bottom: 1px solid rgba(255,255,255,0.04);
+      color: #0e0e0e;
+      border-bottom: 1px solid #f5f5f5;
       vertical-align: middle;
     }
 
-    tbody tr:last-child td {
-      border-bottom: none;
-    }
+    tbody tr:last-child td { border-bottom: none; }
+    tbody tr:hover td { background: #fafafa; }
 
-    tbody tr:hover td {
-      background: var(--bg-fila-hover);
-    }
+    .col-id { color: #555; font-weight: 700; font-size: 0.85rem; }
 
-    /* Columna ID con estilo de badge */
-    .col-id {
-      color: var(--morado-claro);
-      font-weight: 700;
-      font-size: 0.85rem;
-    }
-
-    /* Columna mensaje con truncado para no romper el layout */
     .col-mensaje {
       max-width: 250px;
       overflow: hidden;
       text-overflow: ellipsis;
       white-space: nowrap;
-      color: var(--gris-texto);
+      color: #555;
     }
 
-    /* Columna fecha con formato compacto */
-    .col-fecha {
-      color: var(--gris-texto);
-      font-size: 0.82rem;
-      white-space: nowrap;
-    }
+    .col-fecha { color: #9a9a9a; font-size: 0.82rem; white-space: nowrap; }
 
-    /* Botón rojo de eliminar */
     .btn-eliminar {
-      background: rgba(231, 76, 60, 0.15);
-      border: 1px solid var(--rojo);
-      color: var(--rojo);
+      background: transparent;
+      border: 1px solid #fcc;
+      color: #c00;
       padding: 0.35rem 0.8rem;
-      border-radius: 6px;
+      border-radius: 100px;
       font-size: 0.8rem;
       font-weight: 600;
+      font-family: inherit;
       cursor: pointer;
-      transition: background 0.2s, transform 0.15s;
+      transition: background 0.2s;
       white-space: nowrap;
     }
 
-    .btn-eliminar:hover {
-      background: var(--rojo);
-      color: var(--blanco);
-      transform: translateY(-1px);
-    }
+    .btn-eliminar:hover { background: #fff0f0; }
 
-    /* =============================================
-       ESTADO VACÍO
-       Mensaje cuando no hay mensajes en la BD
-    ============================================= */
     .tabla-vacia {
       text-align: center;
       padding: 3rem;
-      color: var(--gris-texto);
+      color: #9a9a9a;
     }
 
-    .tabla-vacia p {
-      font-size: 0.95rem;
-      margin-top: 0.5rem;
-    }
+    .tabla-vacia p { font-size: 0.95rem; margin-top: 0.5rem; }
 
-    /* =============================================
-       INDICADOR DE CARGA
-       Aparece mientras se consulta la API
-    ============================================= */
     .cargando {
       text-align: center;
       padding: 2rem;
-      color: var(--gris-texto);
+      color: #9a9a9a;
       font-size: 0.9rem;
     }
 
-    /* Badge de origen en la tabla */
+    /* Badges de origen */
     .badge-origen {
       display: inline-block;
       padding: 0.2rem 0.6rem;
-      border-radius: 20px;
+      border-radius: 100px;
       font-size: 0.75rem;
       font-weight: 700;
       letter-spacing: 0.5px;
@@ -379,61 +294,42 @@
     }
 
     .badge-formulario {
-      background: rgba(46, 204, 113, 0.12);
-      color: var(--verde);
-      border: 1px solid rgba(46, 204, 113, 0.3);
+      background: #f0faf0;
+      color: #1a7a1a;
+      border: 1px solid #b5e5b5;
     }
 
     .badge-agente {
-      background: rgba(108, 99, 255, 0.15);
-      color: var(--morado-claro);
-      border: 1px solid rgba(108, 99, 255, 0.4);
+      background: #f0f0f0;
+      color: #555;
+      border: 1px solid #e5e5e5;
     }
 
-    /* Fila de origen agente: cursor pointer para indicar que es clickeable */
-    tr.fila-agente:hover td {
-      background: rgba(108, 99, 255, 0.08);
-      cursor: pointer;
-    }
+    tr.fila-agente:hover td { cursor: pointer; }
 
-    /* Botones de filtro sobre la tabla */
-    .filtros {
-      display: flex;
-      gap: 0.5rem;
-      flex-wrap: wrap;
-    }
+    /* Botones de filtro */
+    .filtros { display: flex; gap: 0.5rem; flex-wrap: wrap; }
 
     .btn-filtro {
       background: transparent;
-      border: 1px solid var(--borde);
-      color: var(--gris-texto);
+      border: 1px solid #e5e5e5;
+      color: #9a9a9a;
       padding: 0.35rem 0.9rem;
-      border-radius: 20px;
+      border-radius: 100px;
       font-size: 0.82rem;
       font-weight: 600;
+      font-family: inherit;
       cursor: pointer;
       transition: all 0.2s;
     }
 
-    .btn-filtro:hover {
-      border-color: var(--morado);
-      color: var(--morado-claro);
-    }
-
-    .btn-filtro.activo {
-      background: var(--morado);
-      border-color: var(--morado);
-      color: var(--blanco);
-    }
+    .btn-filtro:hover { border-color: #0e0e0e; color: #0e0e0e; }
+    .btn-filtro.activo { background: #0e0e0e; border-color: #0e0e0e; color: #ffffff; }
 
     /* =============================================
        SECCIÓN ANALYTICS
     ============================================= */
-    .analytics-titulo {
-      font-size: 1.1rem;
-      font-weight: 700;
-      margin-bottom: 1rem;
-    }
+    .analytics-titulo { font-size: 1.1rem; font-weight: 700; margin-bottom: 1rem; color: #0e0e0e; }
 
     .analytics-grid {
       display: grid;
@@ -443,8 +339,8 @@
     }
 
     .analytics-card {
-      background: var(--bg-tarjeta);
-      border: 1px solid var(--borde);
+      background: #ffffff;
+      border: 1px solid #e5e5e5;
       border-radius: 12px;
       padding: 1.2rem 1.4rem;
       position: relative;
@@ -459,7 +355,7 @@
       border-radius: 3px 0 0 3px;
     }
 
-    .analytics-card.color-morado::before { background: #6C63FF; }
+    .analytics-card.color-morado::before { background: #0e0e0e; }
     .analytics-card.color-verde::before  { background: #2ecc71; }
     .analytics-card.color-rojo::before   { background: #FF6B6B; }
     .analytics-card.color-agua::before   { background: #4ECDC4; }
@@ -469,27 +365,24 @@
       font-weight: 700;
       text-transform: uppercase;
       letter-spacing: 1px;
-      color: var(--gris-texto);
+      color: #9a9a9a;
       margin-bottom: 0.4rem;
     }
 
     .analytics-valor {
       font-size: 1.9rem;
       font-weight: 800;
-      color: var(--blanco);
+      color: #0e0e0e;
       line-height: 1;
       margin-bottom: 0.25rem;
     }
 
-    .analytics-detalle {
-      font-size: 0.8rem;
-      color: var(--gris-texto);
-    }
+    .analytics-detalle { font-size: 0.8rem; color: #9a9a9a; }
 
     /* Barra de desglose por agente */
     .agentes-barra-wrap {
-      background: var(--bg-tarjeta);
-      border: 1px solid var(--borde);
+      background: #ffffff;
+      border: 1px solid #e5e5e5;
       border-radius: 12px;
       padding: 1.2rem 1.4rem;
       margin-bottom: 2.5rem;
@@ -500,7 +393,7 @@
       font-weight: 700;
       text-transform: uppercase;
       letter-spacing: 1px;
-      color: var(--gris-texto);
+      color: #9a9a9a;
       margin-bottom: 1rem;
     }
 
@@ -513,39 +406,22 @@
       margin-bottom: 0.75rem;
     }
 
-    .agentes-barra-segmento {
-      border-radius: 10px;
-      transition: width 0.5s ease;
-    }
+    .agentes-barra-segmento { border-radius: 10px; transition: width 0.5s ease; }
 
-    .agentes-leyenda {
-      display: flex;
-      gap: 1.2rem;
-      flex-wrap: wrap;
-    }
+    .agentes-leyenda { display: flex; gap: 1.2rem; flex-wrap: wrap; }
 
     .agentes-leyenda-item {
       display: flex;
       align-items: center;
       gap: 0.4rem;
       font-size: 0.82rem;
-      color: var(--gris-texto);
+      color: #555;
     }
 
-    .agentes-leyenda-dot {
-      width: 8px;
-      height: 8px;
-      border-radius: 50%;
-      flex-shrink: 0;
-    }
+    .agentes-leyenda-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
 
-    @media (max-width: 768px) {
-      .analytics-grid { grid-template-columns: repeat(2, 1fr); }
-    }
-
-    @media (max-width: 480px) {
-      .analytics-grid { grid-template-columns: 1fr; }
-    }
+    @media (max-width: 768px) { .analytics-grid { grid-template-columns: repeat(2, 1fr); } }
+    @media (max-width: 480px) { .analytics-grid { grid-template-columns: 1fr; } }
 
     /* =============================================
        MODAL DE CONVERSACIÓN
@@ -554,20 +430,18 @@
       display: none;
       position: fixed;
       inset: 0;
-      background: rgba(0,0,0,0.7);
+      background: rgba(0, 0, 0, 0.4);
       z-index: 200;
       align-items: center;
       justify-content: center;
       padding: 1rem;
     }
 
-    .modal-overlay.visible {
-      display: flex;
-    }
+    .modal-overlay.visible { display: flex; }
 
     .modal {
-      background: var(--bg-tarjeta);
-      border: 1px solid var(--borde);
+      background: #ffffff;
+      border: 1px solid #e5e5e5;
       border-radius: 16px;
       width: 100%;
       max-width: 620px;
@@ -578,28 +452,25 @@
 
     .modal-header {
       padding: 1.2rem 1.5rem;
-      border-bottom: 1px solid var(--borde);
+      border-bottom: 1px solid #e5e5e5;
       display: flex;
       align-items: center;
       justify-content: space-between;
     }
 
-    .modal-header h3 {
-      font-size: 1rem;
-      font-weight: 700;
-    }
+    .modal-header h3 { font-size: 1rem; font-weight: 700; color: #0e0e0e; }
 
     .modal-cerrar {
       background: none;
       border: none;
-      color: var(--gris-texto);
+      color: #9a9a9a;
       font-size: 1.4rem;
       cursor: pointer;
       line-height: 1;
       padding: 0.2rem;
     }
 
-    .modal-cerrar:hover { color: var(--blanco); }
+    .modal-cerrar:hover { color: #0e0e0e; }
 
     .modal-body {
       overflow-y: auto;
@@ -609,7 +480,6 @@
       gap: 0.75rem;
     }
 
-    /* Burbujas dentro del modal */
     .modal-burbuja {
       max-width: 80%;
       padding: 0.7rem 1rem;
@@ -621,43 +491,28 @@
 
     .modal-burbuja.user {
       align-self: flex-end;
-      background: #6C63FF;
-      color: #fff;
+      background: #0e0e0e;
+      color: #ffffff;
       border-bottom-right-radius: 4px;
     }
 
     .modal-burbuja.assistant {
       align-self: flex-start;
-      background: #1a1a2e;
-      color: #e0e0e0;
-      border: 1px solid rgba(108,99,255,0.2);
+      background: #fafafa;
+      color: #0e0e0e;
+      border: 1px solid #e5e5e5;
       border-bottom-left-radius: 4px;
     }
 
-    .modal-fecha {
-      font-size: 0.78rem;
-      color: var(--gris-texto);
-      text-align: center;
-      padding: 0.3rem 0 0.5rem;
-    }
+    .modal-fecha { font-size: 0.78rem; color: #9a9a9a; text-align: center; padding: 0.3rem 0 0.5rem; }
 
     /* =============================================
-       RESPONSIVE — MÓVIL
-       Ajustes para pantallas menores a 768px
+       RESPONSIVE MÓVIL
     ============================================= */
     @media (max-width: 768px) {
-      /* Las tarjetas de stats se apilan en 1 columna */
-      .stats-grid {
-        grid-template-columns: 1fr;
-      }
-
-      .stat-valor {
-        font-size: 1.8rem;
-      }
-
-      .admin-main {
-        padding: 1.2rem 1rem;
-      }
+      .stats-grid { grid-template-columns: 1fr; }
+      .stat-valor { font-size: 1.8rem; }
+      .admin-main { padding: 1.2rem 1rem; }
     }
   </style>
 </head>

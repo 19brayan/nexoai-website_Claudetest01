@@ -5,215 +5,138 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Crear cuenta — NexoAI</title>
 
-  <style>
-    /* =============================================
-       VARIABLES Y RESET
-       Paleta oscura idéntica a login.html
-    ============================================= */
-    :root {
-      --bg-principal: #0d0d1a;
-      --bg-tarjeta:   #13132a;
-      --morado:       #6C63FF;
-      --morado-claro: #8f88ff;
-      --blanco:       #ffffff;
-      --gris-texto:   #a0a0c0;
-      --borde:        rgba(108, 99, 255, 0.25);
-      --rojo:         #e74c3c;
-      --verde:        #2ecc71;
-    }
+  <!-- Fuente Plus Jakarta Sans -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
 
-    *, *::before, *::after {
-      margin: 0;
-      padding: 0;
-      box-sizing: border-box;
-    }
+  <style>
+    /* Nuevo diseño minimalista para el registro */
+    *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
 
     body {
-      font-family: 'Segoe UI', Arial, sans-serif;
-      background-color: var(--bg-principal);
-      color: var(--blanco);
+      font-family: 'Plus Jakarta Sans', 'Helvetica Neue', Arial, sans-serif;
+      background: #fafafa;
+      color: #0e0e0e;
       min-height: 100vh;
       display: flex;
       align-items: center;
       justify-content: center;
-      padding: 1.5rem;
+      padding: 24px;
+      -webkit-font-smoothing: antialiased;
     }
 
-    /* =============================================
-       TARJETA DE REGISTRO
-       Mismo estilo visual que login.html
-    ============================================= */
+    /* Tarjeta de registro */
     .login-card {
-      background: var(--bg-tarjeta);
-      border: 1px solid var(--borde);
+      background: #ffffff;
+      border: 1px solid #e5e5e5;
       border-radius: 16px;
-      padding: 2.5rem 2rem;
+      padding: 40px 32px;
       width: 100%;
       max-width: 400px;
-      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.4);
     }
 
-    /* Logo de NexoAI centrado en la parte superior */
+    /* Logo */
     .login-logo {
       text-align: center;
-      margin-bottom: 0.5rem;
-      font-size: 1.6rem;
+      margin-bottom: 6px;
+      font-size: 22px;
       font-weight: 800;
-      color: var(--blanco);
+      letter-spacing: -0.5px;
+      color: #0e0e0e;
     }
 
-    .login-logo span {
-      color: var(--morado);
-    }
+    .login-logo span { color: #0e0e0e; }
 
-    /* Badge de portal de clientes */
-    .login-badge {
-      text-align: center;
-      margin-bottom: 2rem;
-    }
+    /* Badge */
+    .login-badge { text-align: center; margin-bottom: 28px; }
 
     .login-badge span {
       display: inline-block;
-      background: rgba(108, 99, 255, 0.15);
-      border: 1px solid var(--borde);
-      color: var(--morado-claro);
-      font-size: 0.72rem;
+      background: #f0f0f0;
+      color: #555;
+      font-size: 11px;
       font-weight: 700;
-      letter-spacing: 1.5px;
+      letter-spacing: 0.08em;
       text-transform: uppercase;
-      padding: 0.25rem 0.8rem;
-      border-radius: 50px;
+      padding: 4px 12px;
+      border-radius: 100px;
     }
 
-    /* Título y subtítulo del formulario */
-    .login-titulo {
-      font-size: 1.2rem;
-      font-weight: 700;
-      margin-bottom: 0.3rem;
-    }
+    /* Título y subtítulo */
+    .login-titulo { font-size: 20px; font-weight: 800; margin-bottom: 4px; letter-spacing: -0.02em; }
+    .login-subtitulo { font-size: 14px; color: #555; margin-bottom: 28px; }
 
-    .login-subtitulo {
-      font-size: 0.85rem;
-      color: var(--gris-texto);
-      margin-bottom: 1.8rem;
-    }
-
-    /* Grupos de campo: etiqueta + input */
-    .form-group {
-      display: flex;
-      flex-direction: column;
-      gap: 0.4rem;
-      margin-bottom: 1.1rem;
-    }
-
-    .form-group label {
-      font-size: 0.82rem;
-      font-weight: 600;
-      color: var(--gris-texto);
-      text-transform: uppercase;
-      letter-spacing: 0.5px;
-    }
+    /* Grupos de campo */
+    .form-group { display: flex; flex-direction: column; gap: 6px; margin-bottom: 16px; }
+    .form-group label { font-size: 13px; font-weight: 600; color: #0e0e0e; }
 
     .form-group input {
-      background: rgba(255, 255, 255, 0.05);
-      border: 1.5px solid rgba(255, 255, 255, 0.1);
-      border-radius: 8px;
-      padding: 0.8rem 1rem;
-      font-size: 0.95rem;
+      background: #fafafa;
+      border: 1px solid #e5e5e5;
+      border-radius: 10px;
+      padding: 12px 16px;
+      font-size: 15px;
       font-family: inherit;
-      color: var(--blanco);
+      color: #0e0e0e;
       outline: none;
-      transition: border-color 0.2s, box-shadow 0.2s;
+      transition: border-color 0.2s;
     }
 
-    .form-group input:focus {
-      border-color: var(--morado);
-      box-shadow: 0 0 0 3px rgba(108, 99, 255, 0.15);
-    }
+    .form-group input:focus { border-color: #0e0e0e; background: white; }
+    .form-group input::placeholder { color: #bbb; }
 
-    .form-group input::placeholder {
-      color: rgba(255, 255, 255, 0.25);
-    }
-
-    /* Mensaje de error en rojo (oculto por defecto) */
+    /* Mensajes */
     .error-msg {
       display: none;
-      background: rgba(231, 76, 60, 0.1);
-      border: 1px solid var(--rojo);
-      color: var(--rojo);
+      background: #fff0f0;
+      border: 1px solid #fcc;
+      color: #c00;
       border-radius: 8px;
-      padding: 0.7rem 1rem;
-      font-size: 0.85rem;
-      font-weight: 500;
-      margin-bottom: 1rem;
+      padding: 12px 16px;
+      font-size: 14px;
+      margin-bottom: 16px;
       text-align: center;
     }
 
-    .error-msg.visible {
-      display: block;
-    }
+    .error-msg.visible { display: block; }
 
-    /* Mensaje de éxito en verde (oculto por defecto) */
     .exito-msg {
       display: none;
-      background: rgba(46, 204, 113, 0.1);
-      border: 1px solid var(--verde);
-      color: var(--verde);
+      background: #f0faf0;
+      border: 1px solid #b5e5b5;
+      color: #1a7a1a;
       border-radius: 8px;
-      padding: 0.7rem 1rem;
-      font-size: 0.85rem;
-      font-weight: 500;
-      margin-bottom: 1rem;
+      padding: 12px 16px;
+      font-size: 14px;
+      margin-bottom: 16px;
       text-align: center;
     }
 
-    .exito-msg.visible {
-      display: block;
-    }
+    .exito-msg.visible { display: block; }
 
-    /* Botón principal de registro */
+    /* Botón principal */
     .btn-login {
       width: 100%;
-      background: var(--morado);
-      color: var(--blanco);
+      background: #0e0e0e;
+      color: white;
       border: none;
-      border-radius: 8px;
-      padding: 0.9rem;
-      font-size: 1rem;
-      font-weight: 700;
+      border-radius: 100px;
+      padding: 14px;
+      font-size: 15px;
+      font-weight: 600;
       font-family: inherit;
       cursor: pointer;
-      transition: background 0.2s, transform 0.15s, box-shadow 0.2s;
-      box-shadow: 0 4px 20px rgba(108, 99, 255, 0.35);
+      transition: opacity 0.2s;
     }
 
-    .btn-login:hover {
-      background: var(--morado-claro);
-      transform: translateY(-1px);
-    }
+    .btn-login:hover { opacity: 0.75; }
+    .btn-login:disabled { opacity: 0.4; cursor: not-allowed; }
 
-    .btn-login:disabled {
-      opacity: 0.6;
-      cursor: not-allowed;
-      transform: none;
-    }
-
-    /* Footer con enlace a login */
-    .login-footer {
-      text-align: center;
-      margin-top: 1.5rem;
-      font-size: 0.82rem;
-      color: var(--gris-texto);
-    }
-
-    .login-footer a {
-      color: var(--morado-claro);
-      text-decoration: none;
-    }
-
-    .login-footer a:hover {
-      text-decoration: underline;
-    }
+    /* Footer de links */
+    .login-footer { text-align: center; margin-top: 20px; font-size: 13px; color: #555; }
+    .login-footer a { color: #0e0e0e; text-decoration: none; font-weight: 600; }
+    .login-footer a:hover { text-decoration: underline; }
   </style>
 </head>
 

@@ -7,6 +7,11 @@
 
   <!-- CSS global; ../ sube un nivel desde blog/ a la raíz del proyecto -->
   <link rel="stylesheet" href="../css/styles.css" />
+
+  <!-- Fuente Plus Jakarta Sans -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
 </head>
 
 <body>
@@ -16,7 +21,12 @@
   ============================================= -->
   <header>
     <nav>
-      <a href="../index.html" class="logo">Nexo<span>AI</span></a>
+      <a href="../index.html" class="logo">
+        <span class="logo-mark">
+          <svg viewBox="0 0 12 12"><path d="M2 2 L6 10 L10 2" stroke="white" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </span>
+        Nexo<span>AI</span>
+      </a>
 
       <ul class="nav-links" id="navLinks">
         <li><a href="../index.html">Inicio</a></li>
@@ -25,14 +35,19 @@
         <li><a href="../pages/blog.html">Blog</a></li>
         <li><a href="../pages/testimonios.html">Testimonios</a></li>
         <li><a href="../pages/precios.html">Precios</a></li>
+        <li><a href="../pages/agente.html">Agente IA</a></li>
         <li><a href="../index.html#contacto">Contacto</a></li>
       </ul>
 
-      <button class="menu-toggle" id="menuToggle" aria-label="Abrir menú">
-        <span></span>
-        <span></span>
-        <span></span>
-      </button>
+      <div class="nav-right">
+        <a id="btnSesion" href="../pages/login.html" class="btn-sesion">Iniciar sesión</a>
+        <a href="../index.html#contacto" class="btn-cta">Contáctanos</a>
+        <button class="menu-toggle" id="menuToggle" aria-label="Abrir menú">
+          <span></span>
+          <span></span>
+          <span></span>
+        </button>
+      </div>
     </nav>
   </header>
 
@@ -56,8 +71,8 @@
         </div>
       </div>
 
-      <!-- Imagen destacada (placeholder con degradado) -->
-      <div class="articulo-imagen" style="background: linear-gradient(135deg, #16213e, #4facfe);">
+      <!-- Imagen destacada del artículo (placeholder) -->
+      <div class="articulo-imagen">
         <svg viewBox="0 0 24 24">
           <polyline points="16 18 22 12 16 6"/>
           <polyline points="8 6 2 12 8 18"/>

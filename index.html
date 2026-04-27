@@ -5,6 +5,11 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>NexoAI — Soluciones de Software con IA</title>
 
+  <!-- Fuente Plus Jakarta Sans desde Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+
   <!-- Hoja de estilos global compartida por todas las páginas -->
   <link rel="stylesheet" href="css/styles.css" />
 </head>
@@ -16,10 +21,15 @@
   ============================================= -->
   <header>
     <nav>
-      <!-- Logo en texto; clic lleva al inicio -->
-      <a href="index.html" class="logo">Nexo<span>AI</span></a>
+      <!-- Logo con cuadrado negro y texto -->
+      <a href="index.html" class="logo">
+        <span class="logo-mark">
+          <svg viewBox="0 0 12 12"><path d="M2 2 L6 10 L10 2" stroke="white" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </span>
+        Nexo<span>AI</span>
+      </a>
 
-      <!-- Menú principal: Inicio es ancla, el resto son páginas -->
+      <!-- Menú principal -->
       <ul class="nav-links" id="navLinks">
         <li><a href="index.html">Inicio</a></li>
         <li><a href="pages/servicios.html">Servicios</a></li>
@@ -31,15 +41,16 @@
         <li><a href="#contacto">Contacto</a></li>
       </ul>
 
-      <!-- Botón de acceso al portal (cambia a "Mi cuenta" si hay sesión activa) -->
-      <a id="btnSesion" href="pages/login.html" class="btn-sesion">Iniciar sesión</a>
-
-      <!-- Botón hamburguesa visible solo en móvil -->
-      <button class="menu-toggle" id="menuToggle" aria-label="Abrir menú">
-        <span></span>
-        <span></span>
-        <span></span>
-      </button>
+      <!-- Botón de acceso al portal -->
+      <div class="nav-right">
+        <a id="btnSesion" href="pages/login.html" class="btn-sesion">Iniciar sesión</a>
+        <a href="#contacto" class="btn-cta">Contáctanos</a>
+        <button class="menu-toggle" id="menuToggle" aria-label="Abrir menú">
+          <span></span>
+          <span></span>
+          <span></span>
+        </button>
+      </div>
     </nav>
   </header>
 
@@ -47,22 +58,49 @@
        HERO — Presentación principal de la empresa
   ============================================= -->
   <section id="inicio">
-    <div class="hero-content">
-      <span class="hero-badge">✦ Software + Inteligencia Artificial</span>
-      <h1>Construimos el futuro con <em>Inteligencia Artificial</em></h1>
-      <p>Soluciones de software a medida, potenciadas por IA</p>
-      <a href="#contacto" class="btn-primary">Contáctanos</a>
+    <div class="hero-badge">
+      <span class="hero-badge-dot">
+        <svg viewBox="0 0 10 10"><circle cx="5" cy="5" r="3" fill="white"/></svg>
+      </span>
+      Software + Inteligencia Artificial
     </div>
+
+    <h1>
+      <span class="line-dark">Construimos el futuro</span>
+      <span class="line-gray">con Inteligencia</span>
+      <span class="line-gray">Artificial.</span>
+    </h1>
+
+    <p class="hero-sub">
+      Soluciones de software a medida, potenciadas por IA. Automatizamos tus procesos,
+      reducimos costos y aceleramos tu crecimiento — de punta a punta.
+    </p>
+
+    <a href="#contacto" class="btn-hero">Contáctanos</a>
   </section>
 
   <!-- =============================================
+       VIDEO DEMO — Placeholder para demo del producto
+  ============================================= -->
+  <div class="video-section">
+    <div class="video-wrapper">
+      <div class="video-inner">
+        <div class="video-play">
+          <svg viewBox="0 0 24 24"><polygon points="5,3 19,12 5,21" fill="white"/></svg>
+        </div>
+        <span class="video-label">demo — product walkthrough</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- =============================================
        SERVICIOS — Vista rápida de los 3 servicios
-       (Ver detalle completo en pages/servicios.html)
   ============================================= -->
   <section id="servicios">
-    <div class="section-header">
-      <h2>Nuestros Servicios</h2>
-      <p>Impulsamos tu negocio con tecnología de vanguardia y soluciones personalizadas.</p>
+    <div class="section-header-block" style="max-width:1200px; margin:0 auto 56px;">
+      <span class="section-label">Servicios</span>
+      <h2 class="section-title">Tecnología que impulsa<br>tu negocio.</h2>
+      <p class="section-sub">Impulsamos tu empresa con tecnología de vanguardia y soluciones personalizadas.</p>
     </div>
 
     <div class="cards-grid">
@@ -70,7 +108,6 @@
       <!-- Tarjeta 1: Desarrollo Web -->
       <div class="card">
         <div class="card-icon">
-          <!-- Ícono de monitor/pantalla -->
           <svg viewBox="0 0 24 24">
             <rect x="2" y="3" width="20" height="14" rx="2"/>
             <line x1="8" y1="21" x2="16" y2="21"/>
@@ -85,17 +122,12 @@
       <!-- Tarjeta 2: Automatización con IA -->
       <div class="card">
         <div class="card-icon">
-          <!-- Ícono de nodo / inteligencia artificial -->
           <svg viewBox="0 0 24 24">
             <circle cx="12" cy="12" r="3"/>
             <line x1="12" y1="2" x2="12" y2="9"/>
             <line x1="12" y1="15" x2="12" y2="22"/>
             <line x1="2" y1="12" x2="9" y2="12"/>
             <line x1="15" y1="12" x2="22" y2="12"/>
-            <line x1="4.22" y1="4.22" x2="9.17" y2="9.17"/>
-            <line x1="14.83" y1="14.83" x2="19.78" y2="19.78"/>
-            <line x1="19.78" y1="4.22" x2="14.83" y2="9.17"/>
-            <line x1="9.17" y1="14.83" x2="4.22" y2="19.78"/>
           </svg>
         </div>
         <h3>Automatización con IA</h3>
@@ -106,7 +138,6 @@
       <!-- Tarjeta 3: Consultoría Tecnológica -->
       <div class="card">
         <div class="card-icon">
-          <!-- Ícono de gráfico / análisis -->
           <svg viewBox="0 0 24 24">
             <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/>
           </svg>
@@ -121,78 +152,39 @@
 
   <!-- =============================================
        NOSOTROS — Bloque breve de identidad
-       (Ver historia y equipo en pages/nosotros.html)
   ============================================= -->
-  <section id="nosotros">
-    <div class="section-header">
-      <h2>¿Quiénes somos?</h2>
-      <p>Un equipo apasionado por la tecnología y la innovación.</p>
+  <section id="nosotros" style="padding: 80px 32px;">
+    <div class="nosotros-inner">
+      <div>
+        <span class="section-label">Nosotros</span>
+        <h2 class="section-title">¿Quiénes somos?</h2>
+        <p class="nosotros-texto">
+          En <strong>NexoAI</strong> creemos que la inteligencia artificial es el puente entre
+          los desafíos de hoy y las oportunidades del mañana. Trabajamos junto a nuestros
+          clientes para diseñar soluciones de software personalizadas que combinan tecnología
+          de punta con un enfoque humano y estratégico.
+        </p>
+        <a href="pages/nosotros.html" class="btn-hero" style="font-size:15px; padding: 12px 28px;">Conoce al equipo</a>
+      </div>
+      <div class="nosotros-visual">
+        <span>team photo</span>
+      </div>
     </div>
-    <p class="nosotros-texto">
-      En <strong>NexoAI</strong> creemos que la inteligencia artificial es el puente entre los desafíos de hoy
-      y las oportunidades del mañana. Trabajamos junto a nuestros clientes para diseñar soluciones de software
-      personalizadas que combinan tecnología de punta con un enfoque humano y estratégico.
-    </p>
-    <div style="text-align:center; margin-top: 2rem;">
-      <a href="pages/nosotros.html" class="btn-secondary">Conoce al equipo</a>
-    </div>
-  </section>
-
-  <!-- =============================================
-       CONTACTO — Formulario para recibir consultas
-  ============================================= -->
-  <section id="contacto">
-    <div class="section-header">
-      <h2>Contáctanos</h2>
-      <p>Cuéntanos tu proyecto y te respondemos a la brevedad.</p>
-    </div>
-
-    <form class="contact-form" id="contactForm" novalidate>
-
-      <!-- Campo: nombre completo -->
-      <div class="form-group">
-        <label for="nombre">Nombre completo</label>
-        <input type="text" id="nombre" name="nombre" placeholder="Ej. María González" required />
-        <span class="error-msg">Este campo es obligatorio.</span>
-      </div>
-
-      <!-- Campo: correo electrónico -->
-      <div class="form-group">
-        <label for="email">Correo electrónico</label>
-        <input type="email" id="email" name="email" placeholder="tucorreo@ejemplo.com" required />
-        <span class="error-msg">Este campo es obligatorio.</span>
-      </div>
-
-      <!-- Campo: mensaje libre -->
-      <div class="form-group">
-        <label for="mensaje">Mensaje</label>
-        <textarea id="mensaje" name="mensaje" placeholder="Describe brevemente tu proyecto o consulta..." required></textarea>
-        <span class="error-msg">Este campo es obligatorio.</span>
-      </div>
-
-      <button type="submit" class="btn-submit">Enviar mensaje</button>
-
-      <!-- Confirmación que aparece tras el envío exitoso -->
-      <div class="form-success" id="formSuccess">
-        ¡Gracias por contactarnos! Te responderemos pronto.
-      </div>
-
-    </form>
   </section>
 
   <!-- =============================================
        TESTIMONIOS PREVIEW — Muestra los 2 mejores
-       testimonios con enlace a la página completa
   ============================================= -->
   <section id="testimonios-preview">
-    <div class="section-header">
-      <h2>Lo que dicen nuestros clientes</h2>
-      <p>Empresas que confiaron en NexoAI y transformaron su negocio.</p>
+    <div class="section-header-block" style="max-width:1200px; margin:0 auto 56px;">
+      <span class="section-label">Testimonios</span>
+      <h2 class="section-title">Lo que dicen<br>nuestros clientes.</h2>
+      <p class="section-sub">Empresas que confiaron en NexoAI y transformaron su negocio.</p>
     </div>
 
     <div class="testimonios-grid">
 
-      <!-- Testimonio destacado 1 -->
+      <!-- Testimonio 1 -->
       <div class="testimonio-card">
         <span class="comillas">"</span>
         <p class="texto">
@@ -209,7 +201,7 @@
         </div>
       </div>
 
-      <!-- Testimonio destacado 2 -->
+      <!-- Testimonio 2 -->
       <div class="testimonio-card">
         <span class="comillas">"</span>
         <p class="texto">
@@ -228,9 +220,54 @@
 
     </div>
 
-    <!-- Botón que lleva a la página completa de testimonios -->
-    <div class="testimonios-cta">
-      <a href="pages/testimonios.html" class="btn-primary">Ver todos los testimonios</a>
+    <!-- Botón hacia la página completa de testimonios -->
+    <div class="testimonios-cta" style="text-align:center; margin-top:40px;">
+      <a href="pages/testimonios.html" class="btn-hero" style="font-size:15px; padding: 12px 28px;">Ver todos los testimonios</a>
+    </div>
+  </section>
+
+  <!-- =============================================
+       CONTACTO — Formulario para recibir consultas
+  ============================================= -->
+  <section id="contacto">
+    <div class="contact-inner">
+      <div style="text-align:center; margin-bottom: 48px;">
+        <span class="section-label">Contacto</span>
+        <h2 class="section-title">Hablemos de<br>tu proyecto.</h2>
+        <p class="section-sub" style="margin: 0 auto;">Cuéntanos tu proyecto y te respondemos a la brevedad.</p>
+      </div>
+
+      <form class="contact-form" id="contactForm" novalidate>
+
+        <!-- Campo: nombre completo -->
+        <div class="form-group">
+          <label for="nombre">Nombre completo</label>
+          <input type="text" id="nombre" name="nombre" placeholder="Ej. María González" required />
+          <span class="error-msg">Este campo es obligatorio.</span>
+        </div>
+
+        <!-- Campo: correo electrónico -->
+        <div class="form-group">
+          <label for="email">Correo electrónico</label>
+          <input type="email" id="email" name="email" placeholder="tucorreo@ejemplo.com" required />
+          <span class="error-msg">Este campo es obligatorio.</span>
+        </div>
+
+        <!-- Campo: mensaje -->
+        <div class="form-group">
+          <label for="mensaje">Mensaje</label>
+          <textarea id="mensaje" name="mensaje" placeholder="Describe brevemente tu proyecto o consulta..." required></textarea>
+          <span class="error-msg">Este campo es obligatorio.</span>
+        </div>
+
+        <button type="submit" class="btn-submit">Enviar mensaje</button>
+
+        <!-- Confirmación tras envío exitoso -->
+        <div class="form-success" id="formSuccess">
+          ¡Gracias por contactarnos! Te responderemos pronto.
+        </div>
+
+      </form>
     </div>
   </section>
 
@@ -245,9 +282,9 @@
       <p class="footer-copy">© 2026 NexoAI. Todos los derechos reservados.</p>
 
       <!-- Enlace discreto al panel de administración -->
-      <a href="pages/login.html" class="footer-admin-link">🔒 Acceso Administrador</a>
+      <a href="pages/login.html" class="footer-admin-link">🔒 Admin</a>
 
-      <!-- Íconos de LinkedIn, Twitter/X e Instagram -->
+      <!-- Íconos de redes sociales -->
       <div class="social-links">
 
         <a href="#" aria-label="LinkedIn">
@@ -258,7 +295,7 @@
           </svg>
         </a>
 
-        <a href="#" aria-label="Twitter">
+        <a href="#" aria-label="Twitter/X">
           <svg viewBox="0 0 24 24">
             <path d="M4 4l16 16M4 20L20 4"/>
           </svg>
@@ -268,7 +305,7 @@
           <svg viewBox="0 0 24 24">
             <rect x="2" y="2" width="20" height="20" rx="5" ry="5"/>
             <circle cx="12" cy="12" r="4"/>
-            <circle cx="17.5" cy="6.5" r="1" fill="white" stroke="none"/>
+            <circle cx="17.5" cy="6.5" r="1.2" fill="currentColor" stroke="none"/>
           </svg>
         </a>
 
